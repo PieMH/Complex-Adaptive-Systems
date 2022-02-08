@@ -1,5 +1,6 @@
 # Default ignored directories
 .idea/
+out/
 
 # Compiled class file
 *.class
