@@ -4,7 +4,7 @@ This is a simple computational model for Complex Adaptive Systems (CAS).
 
 CAS are typically living [Complex Systems](https://en.wikipedia.org/wiki/Complex_system#:~:text=Complex%20systems%20are%20systems%20whose%20behavior%20is%20intrinsically,or%20between%20a%20given%20system%20and%20its%20environment.).
 
-If you understand italian you can read [Thesis.pdf]() where I explain the theory behind this work.
+If you understand italian you can read [Thesis.pdf](https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/Thesis.pdf) where I explain the theory behind this work.
 
 The system we modelled is a CASS (A social CAS) that simulate an [ant colony](https://en.wikipedia.org/wiki/Ant).
 
