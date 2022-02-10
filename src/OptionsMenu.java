@@ -14,14 +14,9 @@ public class OptionsMenu {
 	private JTextField textMeetingDistance;		// TO BE DELETED
 	private JTextField textNStartingPlayers;	// number of starting players iff checkBoxRandom is true
 	private JCheckBox checkBoxRandom;			// check if number of starting player is random or fixed from the above variable
-	private JLabel lblNStartingPlayers;
-	private JLabel lblMeetingdistance; 
-	private JButton btnApply;
 	private JTextField textWidth;
 	private JTextField textHeight;
-	private JLabel lblHeight; 
-	private JLabel lblWidth;
-	private Game gioco;
+	private Game game;
 	private GUI gui;
     public static int meetingDistance = 5;	// let's make it final? and move it from here
     public static boolean random = false;	// maybe redundant
@@ -55,13 +50,13 @@ public class OptionsMenu {
 		gui = new GUI(this);
 
 		if (meetingDistance == 1) {		// NO, WE NEED A CHECKBOX OR SIMILAR FOR THIS
-    		gioco = new GameOfLife(gui);
+    		game = new GameOfLife(gui);
     	}
     	else {
-    		gioco = new SocialGameSystem(gui);
+    		game = new SocialGameSystem(gui);
     	}
-		gui.setGioco(gioco);
-    	gioco.startGame();
+		gui.setGame(game);
+    	game.startGame();
 	}
 	
 	/**
@@ -77,7 +72,7 @@ public class OptionsMenu {
 		frame.setVisible(false);
 
 		// to change in a checkBox or similar from here
-		lblMeetingdistance = new JLabel("Meeting distance :");
+		JLabel lblMeetingdistance = new JLabel("Meeting distance :");
 		lblMeetingdistance.setBounds(101, 84, 136, 16);
 		frame.getContentPane().add(lblMeetingdistance);
 		
@@ -86,8 +81,8 @@ public class OptionsMenu {
 		frame.getContentPane().add(textMeetingDistance);
 		textMeetingDistance.setColumns(10);
 		// to here
-		
-		lblNStartingPlayers = new JLabel("Players initially alive :");
+
+		JLabel lblNStartingPlayers = new JLabel("Players initially alive :");
 		lblNStartingPlayers.setBounds(101, 112, 136, 16);
 		frame.getContentPane().add(lblNStartingPlayers);
 		
@@ -113,8 +108,8 @@ public class OptionsMenu {
 		});
 		checkBoxRandom.setBounds(6, 108, 83, 23);
 		frame.getContentPane().add(checkBoxRandom);
-		
-		btnApply = new JButton("Apply");
+
+		JButton btnApply = new JButton("Apply");
 		btnApply.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -140,8 +135,8 @@ public class OptionsMenu {
 		});
 		btnApply.setBounds(101, 152, 117, 29);
 		frame.getContentPane().add(btnApply);
-		
-		lblWidth = new JLabel("Width :");
+
+		JLabel lblWidth = new JLabel("Width :");
 		lblWidth.setBounds(101, 28, 61, 16);
 		frame.getContentPane().add(lblWidth);
 		
@@ -150,7 +145,7 @@ public class OptionsMenu {
 		frame.getContentPane().add(textWidth);
 		textWidth.setColumns(10);
 
-		lblHeight = new JLabel("Height :");
+		JLabel lblHeight = new JLabel("Height :");
 		lblHeight.setBounds(101, 56, 61, 16);
 		frame.getContentPane().add(lblHeight);
 
