@@ -16,6 +16,16 @@ import java.io.Serial;
 import javax.swing.JSlider;
 import javax.swing.JLabel;
 
+/**
+ * This is the class responsible for managing the GUI for the simulation.
+ * It is instantiated by OptionsMenu and thus is strongly dependent by it.
+ * Runs as a separate thread from OptionsMenu and the Games it is displaying on the frame.
+ * <p>
+ * The panel has two zones. The most important is the centre where there is a rectangular frame, where the simulation is shown.
+ * The bottom holds many control buttons and a slider.
+ * <p>
+ * <b>Notes:</b> maintain the proportions of width and height as 2:1 respectively.
+ */
 public class GUI {
 
     static int WIDTH = 100;
@@ -27,7 +37,7 @@ public class GUI {
     private JSlider slider;
     boolean[][] currentFrame = new boolean[HEIGHT][WIDTH];
     boolean[][] nextFrame = new boolean[HEIGHT][WIDTH];
-    boolean play = false;
+    boolean play = false;   // state of the simulation
     private final OptionsMenu optionsMenu;
     private Game game;
     private Giocatore focusedPlayer;
@@ -208,7 +218,7 @@ public class GUI {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
 
-                if(OptionsMenu.meetingDistance == 1) {
+                if(!OptionsMenu.fullSim) {
                     paintOneColorPixel(g);
                 }
                 else {
@@ -348,7 +358,7 @@ public class GUI {
 
             @Override
             public void mouseMoved(MouseEvent e) {
-                if(!play && OptionsMenu.meetingDistance > 1) {
+                if(!play && OptionsMenu.fullSim) {
                     int x = e.getX() * WIDTH / innerPanel.getWidth();
                     int y = e.getY() * HEIGHT / innerPanel.getHeight();
                     callRepaint(y, x);
