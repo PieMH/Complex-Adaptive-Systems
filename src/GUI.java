@@ -12,30 +12,28 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseMotionAdapter;
+import java.io.Serial;
 import javax.swing.JSlider;
 import javax.swing.JLabel;
 
 public class GUI {
 
-    static int WIDTH = 80;
-    static int HEIGHT = 40;
+    static int WIDTH = 100;
+    static int HEIGHT = 50;
     static int DIMENSION = WIDTH * HEIGHT;
     private JFrame frame;
     private JPanel innerPanel;
     private JPanel outerPanel;
-    private JButton btnOptions;
+    private JSlider slider;
     boolean[][] currentFrame = new boolean[HEIGHT][WIDTH];
     boolean[][] nextFrame = new boolean[HEIGHT][WIDTH];
     boolean play = false;
-    private OptionsMenu optionsMenu;
-    private JSlider slider;
-    private Game gioco;
-    private JLabel lblGameSpeed;
+    private final OptionsMenu optionsMenu;
+    private Game game;
     private Giocatore focusedPlayer;
     private boolean displayAcquaintance = false;
     private boolean showLife = false;
     private boolean showWellness = false;
-    private JButton btnReset;
 
     /**
      * Creates the application.
@@ -46,12 +44,11 @@ public class GUI {
     }
 
     /**
-     * Serve a far interfacciare più facilmente le classi GUI e TheGame
-     * @param gioco: un istanza della classe TheGame
+     * Connects this class with the interface Game
+     * @param game: instance of Game interface
      */
-
-    void setGioco(Game gioco) {
-        this.gioco = gioco;
+    void setGame(Game game) {
+        this.game = game;
     }
 
 
@@ -60,7 +57,6 @@ public class GUI {
      */
     JFrame getFrame() {
         return frame;
-
     }
 
     public void resetFrames() {
@@ -80,26 +76,24 @@ public class GUI {
      */
     private void initialize() {
 
-        frame = new JFrame();
+        frame = new JFrame("Complex Adaptive Systems");
         frame.getContentPane().setBackground(Color.WHITE);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setMinimumSize(new Dimension(780, 522));
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
-        btnReset = new JButton("Reset");
-
+        JButton btnReset = new JButton("Reset");
         btnReset.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 currentFrame = new boolean[HEIGHT][WIDTH];
-                gioco.resetMap();
+                game.resetMap();
                 innerPanel.repaint();
             }
         });
 
         JButton btnPlay = new JButton("Play");
-
         btnPlay.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -117,7 +111,7 @@ public class GUI {
         outerPanel = new JPanel(new GridBagLayout());
         outerPanel.setBackground(Color.WHITE);
 
-        btnOptions = new JButton("Options");
+        JButton btnOptions = new JButton("Options");
         btnOptions.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -127,16 +121,6 @@ public class GUI {
             }
         });
 
-        slider = new JSlider(10, 200, 100);
-
-        slider.addChangeListener(e -> {
-            if(!slider.getValueIsAdjusting()) {
-                gioco.getTimer().setDelay(slider.getValue() + 1);
-            }
-        });
-
-        lblGameSpeed = new JLabel("Game speed :");
-
         JButton btnShowLife = new JButton("Show Life");
         btnShowLife.addMouseListener(new MouseAdapter() {
             @Override
@@ -145,19 +129,31 @@ public class GUI {
                 innerPanel.repaint();
             }
         });
-        
+
         JButton btnShowWellness = new JButton("Show wellness");
         btnShowWellness.addMouseListener(new MouseAdapter() {
         	@Override
         	public void mouseClicked(MouseEvent e) {
         		showWellness = !showWellness;
-//        		System.out.println(showWellness);
         		innerPanel.repaint();
         	}
         });
 
-        //************************************************************************************************************************************************************************/
+        JLabel labelStepDelay = new JLabel("Step delay in ms:");
 
+        slider = new JSlider(10, 200, 100);
+        slider.setMinorTickSpacing(10);
+        slider.setMajorTickSpacing(30);
+        slider.setPaintTicks(true);
+        slider.setPaintLabels(true);
+        slider.addChangeListener(e -> {
+            if(!slider.getValueIsAdjusting()) {
+                game.getTimer().setDelay(slider.getValue() + 1);
+            }
+        });
+
+        //************************************************************************************************************/
+        // Create layout
         GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
         groupLayout.setHorizontalGroup(
         	groupLayout.createParallelGroup(Alignment.LEADING)
@@ -177,7 +173,7 @@ public class GUI {
         					.addPreferredGap(ComponentPlacement.RELATED)
         					.addComponent(btnShowWellness, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
         					.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        					.addComponent(lblGameSpeed)
+        					.addComponent(labelStepDelay)
         					.addPreferredGap(ComponentPlacement.RELATED)
         					.addComponent(slider, GroupLayout.PREFERRED_SIZE, 184, GroupLayout.PREFERRED_SIZE)))
         			.addContainerGap())
@@ -195,15 +191,17 @@ public class GUI {
         					.addComponent(btnOptions)
         					.addComponent(btnShowLife)
         					.addComponent(btnShowWellness)
-        					.addComponent(lblGameSpeed))
+        					.addComponent(labelStepDelay))
         				.addComponent(slider, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
         			.addContainerGap())
         );
-        //************************************************************************************************************************************************************************/
 
         frame.getContentPane().setLayout(groupLayout);
 
+        //************************************************************************************************************/
+
         innerPanel = new JPanel() {
+            @Serial
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -245,7 +243,7 @@ public class GUI {
                     for(int j = 0; j < GUI.WIDTH; j++) {
                         if(showLife) {
                             if(currentFrame[i][j]) {
-                                g.setColor(new Color(0, 128, 0, ((gioco.getCurrentAlive().get(SocialGameSystem.key(i, j)).getLife()) * 255 / 100)));
+                                g.setColor(new Color(0, 128, 0, ((game.getCurrentAlive().get(SocialGameSystem.key(i, j)).getLife()) * 255 / 100)));
                                 g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                             }
                             else {
@@ -256,7 +254,7 @@ public class GUI {
 
                         else if (showWellness) {
                             if(currentFrame[i][j]) {
-                            	g.setColor(new Color(148, 0, 211, ((int)(Double.min(Double.max(((gioco.getCurrentAlive().get(SocialGameSystem.key(i, j)).getWellness())), 0), 100))) * 255 / 100));
+                            	g.setColor(new Color(148, 0, 211, ((int)(Double.min(Double.max(((game.getCurrentAlive().get(SocialGameSystem.key(i, j)).getWellness())), 0), 100))) * 255 / 100));
                             	g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                             }
                             else {
@@ -266,7 +264,7 @@ public class GUI {
                         }
 
                         else {
-                            if(currentFrame[i][j]) {
+                            if(currentFrame[i][j]) {    // For Game of Life
                                 g.setColor(Color.BLUE);
                                 g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                             }
@@ -283,7 +281,7 @@ public class GUI {
                 for(int i = 0; i < GUI.HEIGHT; i++) {
                     for(int j = 0; j < GUI.WIDTH; j++) {
                         if(currentFrame[i][j]) {
-                            g.setColor(gioco.getCurrentAlive().get(SocialGameSystem.key(i, j)).carattere.getMyColor());
+                            g.setColor(game.getCurrentAlive().get(SocialGameSystem.key(i, j)).carattere.getMyColor());
                             g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         }
                         else {
@@ -313,14 +311,14 @@ public class GUI {
                         int y = focusedPlayer.acquaintances[i].y_position;
 
                         if(currentFrame[y][x]) {
-                            g.setColor(gioco.getCurrentAlive().get(SocialGameSystem.key(y, x)).carattere.getMyColor());
+                            g.setColor(game.getCurrentAlive().get(SocialGameSystem.key(y, x)).carattere.getMyColor());
                             g.fillRect(x * innerPanel.getWidth() / GUI.WIDTH , y * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         }
                     }
                 }
                 int x = focusedPlayer.x_position;
                 int y = focusedPlayer.y_position;
-                g.setColor(gioco.getCurrentAlive().get(SocialGameSystem.key(y, x)).carattere.getMyColor());
+                g.setColor(game.getCurrentAlive().get(SocialGameSystem.key(y, x)).carattere.getMyColor());
                 g.fillRect(x * innerPanel.getWidth() / GUI.WIDTH , y * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
             }
 
@@ -336,7 +334,6 @@ public class GUI {
         };
 
         innerPanel.addMouseMotionListener(new MouseMotionAdapter() {
-
             @Override
             public void mouseDragged(MouseEvent e) {
                 if(SwingUtilities.isLeftMouseButton(e)) {
@@ -344,7 +341,7 @@ public class GUI {
                     int y = e.getY() * HEIGHT / innerPanel.getHeight();
                     if(!currentFrame[y][x])
                         currentFrame[y][x] = true;
-                    gioco.setMap(y, x);
+                    game.setMap(y, x);
                     innerPanel.repaint();
                 }
             }
@@ -359,7 +356,7 @@ public class GUI {
             }
 
             void callRepaint(int y, int x) {
-                focusedPlayer = gioco.getCurrentAlive().get(SocialGameSystem.key(y, x));
+                focusedPlayer = game.getCurrentAlive().get(SocialGameSystem.key(y, x));
                 innerPanel.repaint();
             }
         });
@@ -374,7 +371,7 @@ public class GUI {
                     currentFrame[y][x] = !currentFrame[y][x];
                     if(!currentFrame[y][x])
                         focusedPlayer = null;
-                    gioco.setMap(y, x);
+                    game.setMap(y, x);
                     innerPanel.repaint();
                 }
             }
