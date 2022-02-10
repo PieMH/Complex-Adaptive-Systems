@@ -10,10 +10,10 @@ import java.awt.event.MouseEvent;
 
 public class OptionsMenu {
 
-	private JFrame frame;
-	private JTextField textMeetingDistance;
-	private JTextField textNStartingPlayers;
-	private JCheckBox chckbxRandom;
+	private JFrame frame;	// the GUI frame
+	private JTextField textMeetingDistance;		// TO BE DELETED
+	private JTextField textNStartingPlayers;	// number of starting players iff checkBoxRandom is true
+	private JCheckBox checkBoxRandom;			// check if number of starting player is random or fixed from the above variable
 	private JLabel lblNStartingPlayers;
 	private JLabel lblMeetingdistance; 
 	private JButton btnApply;
@@ -23,10 +23,11 @@ public class OptionsMenu {
 	private JLabel lblWidth;
 	private Game gioco;
 	private GUI gui;
-    public static int meetingDistance = 5;
-    public static boolean random = false;
+    public static int meetingDistance = 5;	// let's make it final? and move it from here
+    public static boolean random = false;	// maybe redundant
 
 	/**
+	 * Constructor.
 	 * Create the application.
 	 */
 	public OptionsMenu() {
@@ -43,14 +44,17 @@ public class OptionsMenu {
 	public void setGUI(GUI gui) {
 		this.gui = gui;
 	}
-	
-	public void createGuiAndGame() {
-		if(gui != null) {
+
+	/**
+	 * Instantiate the GUI and the Game. Then runs the GUI and the Game as two different threads.
+	 */
+	protected void createGuiAndGame() {
+		if (gui != null) {
 			gui.getFrame().dispose();
 		}
 		gui = new GUI(this);
-		
-		if(meetingDistance == 1) {
+
+		if (meetingDistance == 1) {		// NO, WE NEED A CHECKBOX OR SIMILAR FOR THIS
     		gioco = new GameOfLife(gui);
     	}
     	else {
@@ -71,7 +75,8 @@ public class OptionsMenu {
 		frame.getContentPane().setLayout(null);
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(false);
-		
+
+		// to change in a checkBox or similar from here
 		lblMeetingdistance = new JLabel("Meeting distance :");
 		lblMeetingdistance.setBounds(101, 84, 136, 16);
 		frame.getContentPane().add(lblMeetingdistance);
@@ -80,6 +85,7 @@ public class OptionsMenu {
 		textMeetingDistance.setBounds(249, 79, 50, 26);
 		frame.getContentPane().add(textMeetingDistance);
 		textMeetingDistance.setColumns(10);
+		// to here
 		
 		lblNStartingPlayers = new JLabel("Players initially alive :");
 		lblNStartingPlayers.setBounds(101, 112, 136, 16);
@@ -89,11 +95,12 @@ public class OptionsMenu {
 		textNStartingPlayers.setBounds(249, 107, 50, 26);
 		frame.getContentPane().add(textNStartingPlayers);
 		textNStartingPlayers.setColumns(10);
+		textNStartingPlayers.setEnabled(false);
 		
-		chckbxRandom = new JCheckBox("Random");
-		chckbxRandom.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        chckbxRandom.addChangeListener(e -> {
-			if(chckbxRandom.isSelected()) {
+		checkBoxRandom = new JCheckBox("Random", false);
+		checkBoxRandom.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
+        checkBoxRandom.addChangeListener(e -> {
+			if(checkBoxRandom.isSelected()) {
 				textNStartingPlayers.setEnabled(true);
 				random = true;
 				SocialGameSystem.random = true;
@@ -104,9 +111,8 @@ public class OptionsMenu {
 				SocialGameSystem.random = false;
 			}
 		});
-      
-		chckbxRandom.setBounds(6, 108, 83, 23);
-		frame.getContentPane().add(chckbxRandom);
+		checkBoxRandom.setBounds(6, 108, 83, 23);
+		frame.getContentPane().add(checkBoxRandom);
 		
 		btnApply = new JButton("Apply");
 		btnApply.addMouseListener(new MouseAdapter() {
@@ -139,15 +145,15 @@ public class OptionsMenu {
 		lblWidth.setBounds(101, 28, 61, 16);
 		frame.getContentPane().add(lblWidth);
 		
-		lblHeight = new JLabel("Height :");
-		lblHeight.setBounds(101, 56, 61, 16);
-		frame.getContentPane().add(lblHeight);
-		
 		textWidth = new JTextField();
 		textWidth.setBounds(249, 23, 50, 26);
 		frame.getContentPane().add(textWidth);
 		textWidth.setColumns(10);
-		
+
+		lblHeight = new JLabel("Height :");
+		lblHeight.setBounds(101, 56, 61, 16);
+		frame.getContentPane().add(lblHeight);
+
 		textHeight = new JTextField();
 		textHeight.setBounds(249, 51, 50, 26);
 		frame.getContentPane().add(textHeight);

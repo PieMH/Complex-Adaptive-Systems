@@ -12,6 +12,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseMotionAdapter;
+import java.io.Serial;
 import javax.swing.JSlider;
 import javax.swing.JLabel;
 
@@ -30,7 +31,7 @@ public class GUI {
     private OptionsMenu optionsMenu;
     private JSlider slider;
     private Game gioco;
-    private JLabel lblGameSpeed;
+    private JLabel labelStepDelay;
     private Giocatore focusedPlayer;
     private boolean displayAcquaintance = false;
     private boolean showLife = false;
@@ -60,7 +61,6 @@ public class GUI {
      */
     JFrame getFrame() {
         return frame;
-
     }
 
     public void resetFrames() {
@@ -80,7 +80,7 @@ public class GUI {
      */
     private void initialize() {
 
-        frame = new JFrame();
+        frame = new JFrame("Complex Adaptive Systems");
         frame.getContentPane().setBackground(Color.WHITE);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setMinimumSize(new Dimension(780, 522));
@@ -88,7 +88,6 @@ public class GUI {
         frame.setVisible(true);
 
         btnReset = new JButton("Reset");
-
         btnReset.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -99,7 +98,6 @@ public class GUI {
         });
 
         JButton btnPlay = new JButton("Play");
-
         btnPlay.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -127,16 +125,6 @@ public class GUI {
             }
         });
 
-        slider = new JSlider(10, 200, 100);
-
-        slider.addChangeListener(e -> {
-            if(!slider.getValueIsAdjusting()) {
-                gioco.getTimer().setDelay(slider.getValue() + 1);
-            }
-        });
-
-        lblGameSpeed = new JLabel("Game speed :");
-
         JButton btnShowLife = new JButton("Show Life");
         btnShowLife.addMouseListener(new MouseAdapter() {
             @Override
@@ -145,19 +133,31 @@ public class GUI {
                 innerPanel.repaint();
             }
         });
-        
+
         JButton btnShowWellness = new JButton("Show wellness");
         btnShowWellness.addMouseListener(new MouseAdapter() {
         	@Override
         	public void mouseClicked(MouseEvent e) {
         		showWellness = !showWellness;
-//        		System.out.println(showWellness);
         		innerPanel.repaint();
         	}
         });
 
-        //************************************************************************************************************************************************************************/
+        labelStepDelay = new JLabel("Step delay in ms:");
 
+        slider = new JSlider(10, 200, 100);
+        slider.setMinorTickSpacing(10);
+        slider.setMajorTickSpacing(30);
+        slider.setPaintTicks(true);
+        slider.setPaintLabels(true);
+        slider.addChangeListener(e -> {
+            if(!slider.getValueIsAdjusting()) {
+                gioco.getTimer().setDelay(slider.getValue() + 1);
+            }
+        });
+
+        //************************************************************************************************************/
+        // Create layout
         GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
         groupLayout.setHorizontalGroup(
         	groupLayout.createParallelGroup(Alignment.LEADING)
@@ -177,7 +177,7 @@ public class GUI {
         					.addPreferredGap(ComponentPlacement.RELATED)
         					.addComponent(btnShowWellness, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
         					.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        					.addComponent(lblGameSpeed)
+        					.addComponent(labelStepDelay)
         					.addPreferredGap(ComponentPlacement.RELATED)
         					.addComponent(slider, GroupLayout.PREFERRED_SIZE, 184, GroupLayout.PREFERRED_SIZE)))
         			.addContainerGap())
@@ -195,15 +195,17 @@ public class GUI {
         					.addComponent(btnOptions)
         					.addComponent(btnShowLife)
         					.addComponent(btnShowWellness)
-        					.addComponent(lblGameSpeed))
+        					.addComponent(labelStepDelay))
         				.addComponent(slider, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
         			.addContainerGap())
         );
-        //************************************************************************************************************************************************************************/
 
         frame.getContentPane().setLayout(groupLayout);
 
+        //************************************************************************************************************/
+
         innerPanel = new JPanel() {
+            @Serial
             private static final long serialVersionUID = 1L;
 
             @Override
@@ -266,7 +268,7 @@ public class GUI {
                         }
 
                         else {
-                            if(currentFrame[i][j]) {
+                            if(currentFrame[i][j]) {    // For Game of Life
                                 g.setColor(Color.BLUE);
                                 g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                             }
@@ -336,7 +338,6 @@ public class GUI {
         };
 
         innerPanel.addMouseMotionListener(new MouseMotionAdapter() {
-
             @Override
             public void mouseDragged(MouseEvent e) {
                 if(SwingUtilities.isLeftMouseButton(e)) {
