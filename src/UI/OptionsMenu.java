@@ -15,7 +15,7 @@ import java.util.Objects;
  * In reality an instance of this class runs on a thread that is the father of all successive threads.
  * <p>
  * In particular from the thread associated with this class are created and forked the two main
- * threads that run the UI.GUI and a Interfaces.Game Interface instance.
+ * threads that run the UI.GUI and an Interfaces.Game Interface instance.
  */
 public class OptionsMenu {
 
@@ -30,7 +30,7 @@ public class OptionsMenu {
     protected static CAS CAS_type = CAS.SocialGameSystem;   // control which CAS to simulate
 
 	/**
-	 * Constructor. Called ONLY by the Launcher.Launcher
+	 * Constructor called ONLY by the Launcher.Launcher
 	 */
 	public OptionsMenu() {
 		initialize();
@@ -41,11 +41,6 @@ public class OptionsMenu {
 	 */
 	public JFrame getFrame() {
 		return frame;
-	}
-
-	// Method never used
-	public void setGUI(GUI gui) {
-		this.gui = gui;
 	}
 
 	/**
@@ -92,31 +87,18 @@ public class OptionsMenu {
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(false);
 
-		/*
-		// to change in a checkBox or similar from here
-		JLabel lblMeetingdistance = new JLabel("Meeting distance :");
-		lblMeetingdistance.setBounds(101, 84, 136, 16);
-		frame.getContentPane().add(lblMeetingdistance);
-		
-		textMeetingDistance = new JTextField();
-		textMeetingDistance.setBounds(249, 79, 50, 26);
-		frame.getContentPane().add(textMeetingDistance);
-		textMeetingDistance.setColumns(10);
-		// to here
-		*/
-
-		JButton gameType = new JButton("Social Interfaces.Game System");
+		JButton gameType = new JButton("Social Game System");
 		gameType.setBounds(100, 79, 198, 26);
 		gameType.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
                 if (Objects.equals(gameType.getText(), "Ant Simulator")) {
-                    gameType.setText("Social Interfaces.Game System");
+                    gameType.setText("Social Game System");
                 }
-				else if (Objects.equals(gameType.getText(), "Social Interfaces.Game System")) {
-					gameType.setText("Interfaces.Game Of Life");
+				else if (Objects.equals(gameType.getText(), "Social Game System")) {
+					gameType.setText("Game Of Life");
 				}
-				else if (Objects.equals(gameType.getText(), "Interfaces.Game Of Life")) {
+				else if (Objects.equals(gameType.getText(), "Game Of Life")) {
 					gameType.setText("Ant Simulator");
 				}
 			}
@@ -176,10 +158,10 @@ public class OptionsMenu {
                     if (Objects.equals(gameType.getText(), "Ant Simulator")) {
                         CAS_type = CAS.GameOfLIfe;
                     }
-                    else if (Objects.equals(gameType.getText(), "Social Interfaces.Game System")) {
+                    else if (Objects.equals(gameType.getText(), "Social Game System")) {
                         CAS_type = CAS.SocialGameSystem;    // FOR NOW
                     }
-                    else if (Objects.equals(gameType.getText(), "Interfaces.Game Of Life")){
+                    else if (Objects.equals(gameType.getText(), "Game Of Life")){
                         CAS_type = CAS.SocialGameSystem;
                     }
                     createGuiAndGame();

@@ -18,37 +18,23 @@ public class AntSimulator implements Game {
 
     @Override
     public void startGame() {
-
-    }
-
-    @Override
-    public Map<Integer, Giocatore> getCurrentAlive() {
-        return null;
     }
 
     @Override
     public void setRandom(boolean random) {
-
     }
 
     @Override
     public void setStartingRandomAgents(int number) {
-
     }
 
     @Override
     public void setMap(int y, int x) {
-
     }
 
     @Override
     public Timer getTimer() {
         return null;
-    }
-
-    @Override
-    public int getDelay() {
-        return 0;
     }
 
     @Override

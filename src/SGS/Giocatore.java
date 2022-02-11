@@ -18,7 +18,7 @@ public class Giocatore {
     public Personality carattere;                                         // il carattere di una persona è una classe che implementa l'interfaccia SGS.Personality
     public int x_position, y_position;                                    // posizione che il giocatore occupa nell'arena
     // SCEGLIERE LA COMBINAZIONE DI CARATTERI DA VISUALIZZARE
-    static String[] personalita = {"SGS.Personalita1", "SGS.Personalita2", "SGS.Personalita3", "SGS.Personalita4"};  //array delle personalità
+    static String[] personalityType = {"SGS.Personalita1", "SGS.Personalita2", "SGS.Personalita3", "SGS.Personalita4"};  // array delle personalità
 
     /**
      * Costruttore primario
@@ -34,11 +34,11 @@ public class Giocatore {
         this.wellness = 75;
         son_counter = 2;
 
-        //Viene scelta la personalità in modo randomico
+        // Viene scelta la personalità in modo stocastico
         Random random = new Random();
         Class<? extends Personality> P;
         try {
-            P = Class.forName(personalita[random.nextInt(personalita.length)]).asSubclass(Personality.class);
+            P = Class.forName(personalityType[random.nextInt(personalityType.length)]).asSubclass(Personality.class);
             Constructor<? extends Personality> costruttore = P.getConstructor(int.class, int.class, Giocatore.class);
             carattere = costruttore.newInstance(y_position, x_position, this);
         } catch (Exception e) {
@@ -50,8 +50,8 @@ public class Giocatore {
      * Costruttore invocato per creare un figlio
      * @param carattere: carattere di this che si riproduce
      * @param wellness: wellness di this che viene trasmessa al figlio
-     * @param i: indice di riga nell'arena
-     * @param j: indice di colonna nell'arena
+     * @param i indice di riga nell'arena
+     * @param j indice di colonna nell'arena
      */
     private Giocatore(Personality carattere, double wellness, int i, int j) throws NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -81,7 +81,7 @@ public class Giocatore {
 
     /**
      * Imposta la vita al valore passato in input
-     * @param i: se minore di 1 viene considerato dead il personaggio, se maggiore di 100 viene impostato a 100
+     * @param i se minore di 1 viene considerato dead il personaggio, se maggiore di 100 viene impostato a 100
      */
     private void setLife(int i) {
         this.life = Integer.max(Integer.min(100, i), 0);
@@ -114,14 +114,20 @@ public class Giocatore {
      * @param i vita da incrementare
      * @return vita incrementata del giocatore
      */
-    int increaseLife(int i){ this.life+=i; return this.life;}
+    int increaseLife(int i) {
+        this.life += i;
+        return this.life;
+    }
 
     /**
      *
      * @param i vita da decrementare
      * @return vita decrementata del giocatore
      */
-    int decreaseLife(int i){ this.life-=i; return this.life;}
+    int decreaseLife(int i) {
+        this.life -= i;
+        return this.life;
+    }
 
     /**
      * @return il valore della vita del personaggio
@@ -139,16 +145,16 @@ public class Giocatore {
     }
 
     /**
-     * incrementa il wellness del giocatore di i
-     * @param i: intero
+     * incrementa il wellness del giocatore della quantità i
+     * @param i intero
      */
     public void increaseWellness(double i){
         this.wellness += i;
     }
 
     /**
-     * diminuisce il wellness del giocatore di i
-     * @param i: intero
+     * diminuisce il wellness del giocatore della quantità i
+     * @param i intero
      */
     void decreaseWellness(double i){
         this.wellness -= i;
@@ -163,8 +169,8 @@ public class Giocatore {
 
     /**
      * Imposta il messaggio ricevuto
-     * @param message: messaggio che ho ricevuto
-     * @param acquaintance: il giocatore che mi invia il messaggio
+     * @param message messaggio che ho ricevuto
+     * @param acquaintance il giocatore che mi invia il messaggio
      */
     void setMessageReceived(int message, Giocatore acquaintance) {
         int index = 0;
@@ -176,7 +182,7 @@ public class Giocatore {
 
     /**
      * Ritorna il messaggio ricevuto
-     * @param index: indice dell'array dove ho ricevuto i messaggi
+     * @param index indice dell'array dove ho ricevuto i messaggi
      * @return messaggio ricevuto (accedo al messaggio ricevuto)
      */
     int getMessageReceived(int index) {
@@ -184,10 +190,10 @@ public class Giocatore {
     }
 
     /**
-     * Metodo per riprodursi (che sarà invocato se )
+     * Metodo per riprodursi (che sarà invocato se ...)
      * @return l'oggetto figlio alla classe TheGame
-     * @param i: indice di riga nell'arena
-     * @param j: indice di colonna nell'arena
+     * @param i indice di riga nell'arena
+     * @param j indice di colonna nell'arena
      */
     Giocatore haveChildren(int i, int j) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         this.wellness += 10; //fare figli è il tuo scopo di vita, il tuo benessere aumenta
@@ -229,8 +235,7 @@ public class Giocatore {
     }
 
     /**
-     *
-     * @param s: nome della personalità
+     * @param s nome della personalità
      * @return
      * quante persone di quella personalità conosce
      */
@@ -247,7 +252,7 @@ public class Giocatore {
     /**
      * Inserisce in un posto vuoto (null o dead) dell'array dei conoscenti sia del giocatore da incontrare che
      * di quello che si sta incontrando. (Relazione biunivoca, io conosco te, tu conosci me)
-     * @param gamerToMeet: giocatore da inserire nella rete dei conoscenti
+     * @param gamerToMeet giocatore da inserire nella rete dei conoscenti
      */
     void encounter(Giocatore gamerToMeet) {
         //se il giocatore passato è me stesso torna falso
@@ -257,7 +262,7 @@ public class Giocatore {
             return;
         }
         int posLiberaMe = -1;
-        //scorro tutto l'array per vedere se lo conosco o meno
+        // scorro tutto l'array per vedere se lo conosco o meno
         for (int i = 1; i < acquaintances.length; i++) { //escludo 0, la prima posizione, perchè è il giocatore stesso
             //se lo conosce esce direttamente, quindi sono sicuro che alla fine del ciclo non conosce il giocatore
             if (gamerToMeet == acquaintances[i]) {
@@ -282,7 +287,7 @@ public class Giocatore {
 
     /**
      * devo verificare anche se il giocatore da incontrare ha una posizione libera
-     * @param gamerToMeetVerify: giocatore da incontrare
+     * @param gamerToMeetVerify giocatore da incontrare
      */
     private int encounterAux(Giocatore gamerToMeetVerify) {
         //la stessa verifica deve essere svolta per il giocatore da conoscere
@@ -290,11 +295,6 @@ public class Giocatore {
         for (int i = 1; i < acquaintances.length; i++) { //escludo 0, la prima posizione, perchè è il giocatore stesso
             if ((gamerToMeetVerify.acquaintances[i] == null || (gamerToMeetVerify.acquaintances[i] != null &&
                     gamerToMeetVerify.acquaintances[i].getLife() < 1))) {
-/*
-                if (this == gamerToMeetVerify.acquaintances[i]) {
-                    break;
-                }
-*/
                 poslibera = i;
                 break;
             }
@@ -304,12 +304,8 @@ public class Giocatore {
 
     /**
      * Metodo di stampa del giocatore nella console
-     * @return stringa formattata formata dalla coppia (x,y) posizione del giocatore nell'arena e la sua vita
+     * @return stringa formattata formata dalla coppia (x, y) posizione del giocatore nell'arena e la sua vita
      */
-/*    @Override
-    public String toString() {
-        return String.format("%d,%d|%5.1f", y_position, x_position, this.wellness);
-    }*/
     public String toString() {
         StringBuilder pos = new StringBuilder("(pos ");
         pos.append(this.y_position);

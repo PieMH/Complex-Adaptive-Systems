@@ -12,7 +12,7 @@ import java.util.*;
  * Classe di gestione dell'algoritmo di gioco evolutivo SGS.SocialGameSystem
  */
 public class SocialGameSystem implements Game {
-    private Map<Integer, Giocatore> currentAlive;  // dizionario di giocatori vivi momentaneo
+    private static Map<Integer, Giocatore> currentAlive;  // dizionario di giocatori vivi momentaneo
     private int born;                              // n° giocatori nati nel ciclo corrente
     private int dead;                              // n° giocatori morti nel ciclo corrente
     static boolean random = false;                 // variabile di differenziazione dello spawn iniziale dei giocatori nell'arena
@@ -48,7 +48,7 @@ public class SocialGameSystem implements Game {
         // for the stats
         n_iterations = 0;
         Class<? extends Personality> P;
-        for (String s : Giocatore.personalita) {
+        for (String s : Giocatore.personalityType) {
             try {
                 P = Class.forName(s).asSubclass(Personality.class);
                 Field totalnati = P.getDeclaredField("totalborn");
@@ -130,7 +130,6 @@ public class SocialGameSystem implements Game {
         }
     }
 
-
     /**
      * @param scelta scelta di funzione di scorrimento della matrice del pannello della gui
      */
@@ -147,7 +146,6 @@ public class SocialGameSystem implements Game {
             }
         }
     }
-
 
     /**
      * Imposta la currentAlive casualmente generando posizioni casuali nella matrice,
@@ -174,7 +172,6 @@ public class SocialGameSystem implements Game {
             }
         }
     }
-
 
     /**
      * Setta currentAlive in posizione i, j in base ai valori true o false della currentFrame della gui
@@ -205,7 +202,6 @@ public class SocialGameSystem implements Game {
         }
     }
 
-
     /**
      * Aggiorna il nextFrame della gui rispetto alla situazione attuale della currentAlive
      * @param i indice di riga
@@ -214,7 +210,6 @@ public class SocialGameSystem implements Game {
     private void updateFrame(int i, int j) {
         gui.nextFrame[i][j] = (currentAlive.containsKey(key(i, j)));
     }
-
 
     /**
      * metodo che gestisce l'algoritmo di incontri
@@ -239,7 +234,6 @@ public class SocialGameSystem implements Game {
             gio.encounter(amico);
         }
     }
-
 
     /**
      * Algoritmo di evoluzione di gioco invocato su tutti e soli i giocatori vivi di currentAlive, passi evolutivi:
@@ -350,7 +344,7 @@ public class SocialGameSystem implements Game {
             System.out.println(".\n");
             // PERSONALITA'
             Class<? extends Personality> P;
-            for (String s : Giocatore.personalita) {
+            for (String s : Giocatore.personalityType) {
                 try {
                     P = Class.forName(s).asSubclass(Personality.class);
                     System.out.print(s.toUpperCase() + "-> ");
@@ -445,7 +439,7 @@ public class SocialGameSystem implements Game {
         food.sprecato = 0;
         food.morti_di_fame = 0;
         Class<? extends Personality> P;
-        for (String s : Giocatore.personalita) {
+        for (String s : Giocatore.personalityType) {
             try {
                 P = Class.forName(s).asSubclass(Personality.class);
                 Field nato = P.getDeclaredField("born");
@@ -469,6 +463,10 @@ public class SocialGameSystem implements Game {
         dead += 1;
     }
 
+    static public Map<Integer, Giocatore> getCurrentAlive() {
+        return currentAlive;
+    }
+
     // overriding methods of Interfaces.Game Interface
 
     @Override
@@ -484,15 +482,5 @@ public class SocialGameSystem implements Game {
     @Override
 	public Timer getTimer() {
 		return t;
-	}
-
-	@Override
-	public int getDelay() {
-		return delay;
-	}
-
-	@Override
-	public Map<Integer, Giocatore> getCurrentAlive() {
-		return currentAlive;
 	}
 }

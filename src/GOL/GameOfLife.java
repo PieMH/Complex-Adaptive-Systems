@@ -2,12 +2,10 @@ package GOL;
 
 import UI.GUI;
 import Interfaces.Game;
-import SGS.Giocatore;
 
 import javax.swing.Timer;
 
 import java.awt.event.ActionListener;
-import java.util.Map;
 import java.util.Random;
 
 public class GameOfLife implements Game {
@@ -111,17 +109,7 @@ public class GameOfLife implements Game {
 	}
 
 	@Override
-	public int getDelay() {
-		return delay;
-	}
-
-	@Override
 	public void resetMap() {
 		reset = true;
-	}
-
-	@Override
-	public Map<Integer, Giocatore> getCurrentAlive() {
-		return null;
 	}
 }
