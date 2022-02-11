@@ -1,10 +1,11 @@
 import java.awt.EventQueue;
 
+/**
+ * The launcher for this application.
+ * It instantiates OptionsMenu which then instantiates the GUI and a Game
+ */
 public class Launcher {
 
-    /**
-     * Launch the application.
-     */
     public static void main(String[] args) {
         EventQueue.invokeLater( () -> {
             try {

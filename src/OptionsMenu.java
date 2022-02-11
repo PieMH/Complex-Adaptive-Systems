@@ -2,11 +2,18 @@ import javax.swing.*;
 import java.awt.ComponentOrientation;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Objects;
 
+/**
+ * The Class responsible for managing the Menu of the Options.
+ * In reality an instance of this class runs on a thread that is the father of all successive threads.
+ * <p>
+ * In particular from the thread associated with this class are created and forked the two main
+ * threads that run the GUI and a Game Interface instance.
+ */
 public class OptionsMenu {
 
 	private JFrame frame;	// the GUI frame
-//	private JTextField textMeetingDistance;		// TO BE DELETED
 	private JTextField textNStartingPlayers;	// number of starting players iff checkBoxRandom is true
 	private JCheckBox checkBoxRandom;			// check if number of starting player is random or fixed from the above variable
 	private JTextField textWidth;
@@ -15,11 +22,11 @@ public class OptionsMenu {
 	private GUI gui;
     public static int meetingDistance = 5;	// let's make it final? and move it from here
     public static boolean random = false;	// maybe redundant
-	protected static boolean fullSim = true;
+	protected enum CAS {AntSimulator, SocialGameSystem, GameOfLIfe};    // The enum that specifies all the CAS modelled
+    protected static CAS CAS_type = CAS.AntSimulator;   // control which CAS to simulate
 
 	/**
-	 * Constructor.
-	 * Create the application.
+	 * Constructor. Called ONLY by the Launcher
 	 */
 	public OptionsMenu() {
 		initialize();
@@ -31,13 +38,23 @@ public class OptionsMenu {
 	public JFrame getFrame() {
 		return frame;
 	}
-	
+
+	@ToDo (problem = "Method never used")
 	public void setGUI(GUI gui) {
 		this.gui = gui;
 	}
 
 	/**
-	 * Instantiate the GUI and the Game. Then runs the GUI and the Game as two different threads.
+	 * Connects this class with the interface Game
+	 * @param game: instance of Game interface
+	 */
+	private void setGame(Game game) {
+		this.game = game;
+	}
+
+	/**
+	 * Instantiate the GUI and one of three possible instancies of Game interface.
+     * Then runs the GUI and the Game as two different threads.
 	 */
 	protected void createGuiAndGame() {
 		if (gui != null) {
@@ -45,12 +62,16 @@ public class OptionsMenu {
 		}
 		gui = new GUI(this);
 
-		if (fullSim) {
+        if (CAS_type == CAS.AntSimulator) {
+            CAS_type = CAS.SocialGameSystem;
+        }
+        else if (CAS_type == CAS.SocialGameSystem) {
     		game = new SocialGameSystem(gui);
     	}
-    	else {
+    	else if (CAS_type == CAS.GameOfLIfe){
     		game = new GameOfLife(gui);
     	}
+		this.setGame(game);
 		gui.setGame(game);
     	game.startGame();
 	}
@@ -80,36 +101,28 @@ public class OptionsMenu {
 		// to here
 		*/
 
-		JButton gameType = new JButton("Game Of Life");
+		JButton gameType = new JButton("Social Game System");
 		gameType.setBounds(100, 79, 198, 26);
 		gameType.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(!fullSim) {
-					fullSim = true;
+                if (Objects.equals(gameType.getText(), "Ant Simulator")) {
+                    gameType.setText("Social Game System");
+                }
+				else if (Objects.equals(gameType.getText(), "Social Game System")) {
 					gameType.setText("Game Of Life");
 				}
-				else {
-					fullSim = false;
+				else if (Objects.equals(gameType.getText(), "Game Of Life")) {
 					gameType.setText("Ant Simulator");
 				}
 			}
 		});
 		frame.getContentPane().add(gameType);
 
-		checkBoxRandom = new JCheckBox("Random", false);
+		checkBoxRandom = new JCheckBox("Random");
 		checkBoxRandom.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
         checkBoxRandom.addChangeListener(e -> {
-			if(checkBoxRandom.isSelected()) {
-				textNStartingPlayers.setEnabled(true);
-				random = true;
-				SocialGameSystem.random = true;
-			}
-			else {
-				textNStartingPlayers.setEnabled(false);
-				random = false;
-				SocialGameSystem.random = false;
-			}
+            textNStartingPlayers.setEnabled(checkBoxRandom.isSelected());
 		});
 		checkBoxRandom.setBounds(6, 109, 83, 23);
 		frame.getContentPane().add(checkBoxRandom);
@@ -125,50 +138,55 @@ public class OptionsMenu {
 		textNStartingPlayers.setEnabled(false);
 
 
-		JButton btnApply = new JButton("Apply");
-		btnApply.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				if(SwingUtilities.isLeftMouseButton(e)) {
-					if(!textWidth.getText().isEmpty()) {
-						GUI.WIDTH = Integer.parseInt(textWidth.getText());
-					}
-					if(!textHeight.getText().isEmpty()) {
-						GUI.HEIGHT = Integer.parseInt(textHeight.getText());
-						
-					}
-				/*	if(!textMeetingDistance.getText().isEmpty()) {
-						meetingDistance = Integer.parseInt(textMeetingDistance.getText());
-						SocialGameSystem.meeting_distance = Integer.parseInt(textMeetingDistance.getText());
-					}*/
-					if(!textNStartingPlayers.getText().isEmpty()) {
-						SocialGameSystem.n_starting_players = Integer.parseInt(textNStartingPlayers.getText());
-					}
-					SocialGameSystem.meeting_distance = meetingDistance;
-					createGuiAndGame();
-					frame.setVisible(false);
-				}
-			}
-		});
-		btnApply.setBounds(101, 152, 117, 29);
-		frame.getContentPane().add(btnApply);
-
 		JLabel lblWidth = new JLabel("Set Grid Width:");
-		lblWidth.setBounds(101, 28, 61, 16);
+		lblWidth.setBounds(101, 28, 120, 16);
 		frame.getContentPane().add(lblWidth);
-		
+
 		textWidth = new JTextField();
 		textWidth.setBounds(249, 23, 50, 26);
 		frame.getContentPane().add(textWidth);
 		textWidth.setColumns(10);
 
 		JLabel lblHeight = new JLabel("Set Grid Height:");
-		lblHeight.setBounds(101, 56, 61, 16);
+		lblHeight.setBounds(101, 56, 120, 16);
 		frame.getContentPane().add(lblHeight);
 
 		textHeight = new JTextField();
 		textHeight.setBounds(249, 51, 50, 26);
 		frame.getContentPane().add(textHeight);
 		textHeight.setColumns(10);
+
+		JButton btnApply = new JButton("Apply");
+		btnApply.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (SwingUtilities.isLeftMouseButton(e)) {
+					if (!textWidth.getText().isEmpty()) {
+						GUI.WIDTH = Integer.parseInt(textWidth.getText());
+					}
+					if (!textHeight.getText().isEmpty()) {
+						GUI.HEIGHT = Integer.parseInt(textHeight.getText());
+					}
+					if (!textNStartingPlayers.getText().isEmpty()) {
+						game.setStartingRandomAgents(Integer.parseInt(textNStartingPlayers.getText()));
+					}
+					// get text from gameType button and set CAS_type accordingly, remember that the button shows the NEXT CAS type not the current one
+                    if (Objects.equals(gameType.getText(), "Ant Simulator")) {
+                        CAS_type = CAS.GameOfLIfe;
+                    }
+                    else if (Objects.equals(gameType.getText(), "Social Game System")) {
+                        CAS_type = CAS.SocialGameSystem;    // FOR NOW
+                    }
+                    else if (Objects.equals(gameType.getText(), "Game Of Life")){
+                        CAS_type = CAS.SocialGameSystem;
+                    }
+                    createGuiAndGame();
+                    game.setRandom(checkBoxRandom.isSelected());  // to be executed after "createGuiandGame" if you want to enable random from the very start for every game
+					frame.setVisible(false);
+				}
+			}
+		});
+		btnApply.setBounds(101, 152, 117, 29);
+		frame.getContentPane().add(btnApply);
 	}
 }

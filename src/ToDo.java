@@ -5,19 +5,17 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Target({TYPE, FIELD, METHOD, PARAMETER, CONSTRUCTOR, LOCAL_VARIABLE, PACKAGE, TYPE_PARAMETER, TYPE_USE})
 @Retention(SOURCE)
 @ToDo(
-        aggiornatoDa = "Pietro versione 2.0 il 18/05"
+        updatedBy = "Pietro on 11/02/2022 version 2.1"
 )
 public @interface ToDo {
-    update daAggiornare() default update.TO_ADD_THINGS;
-    enum update {ALGORITHM, DATA_STRUCTURE, TO_ADD_THINGS}
+    String toUpdate() default "Describe what to update";
 
-    String aggiornatoDa() default "Aggiornato da ? versione ? il ?/?";
+    String updatedBy() default "<user> on dd/mm/aaaa version <n.n>";
 
-    problem problema() default problem.TO_DISCUSS;
-    enum problem {TO_DISCUSS, OBSOLETE, BUG, TEMPORARY}
+    String problem() default "Describe the problem";
 
-    priority priorita() default priority.MEDIUM;
-    enum priority {HIGH, MEDIUM, LOW}
+    priorityLevel priority() default priorityLevel.MEDIUM;
+    enum priorityLevel {HIGH, MEDIUM, LOW}
 
-    String altra_comunicazione() default "Scrivere il commento per questo metodo";
+    String other() default "Write a comment here";
 }

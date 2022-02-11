@@ -5,7 +5,11 @@ public interface Game {
 
 	void startGame();
 
-	Map<Integer, Giocatore> getCurrentAlive();
+	Map<Integer, Giocatore> getCurrentAlive();  // NON MI CONVINCE
+
+	void setRandom(boolean random);
+
+	void setStartingRandomAgents(int number);
 
 	void setMap(int y, int x);
 

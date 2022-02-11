@@ -46,7 +46,9 @@ public class GUI {
     private boolean showWellness = false;
 
     /**
-     * Creates the application.
+     * Creates the GUI for the simulation.
+     * Called ONLY by Options Menu which is instantiated firstly.
+     * @param optionsMenu the instantiation of OptionsMenu class who is the father of all threads of the simulator
      */
     GUI(OptionsMenu optionsMenu) {
         this.optionsMenu = optionsMenu;
@@ -86,12 +88,23 @@ public class GUI {
      */
     private void initialize() {
 
-        frame = new JFrame("Complex Adaptive Systems");
+        frame = new JFrame();
         frame.getContentPane().setBackground(Color.WHITE);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setMinimumSize(new Dimension(780, 522));
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+        // keep title updated
+        if (OptionsMenu.CAS_type == OptionsMenu.CAS.AntSimulator) {
+            frame.setTitle("Ant Simulator");
+        }
+        else if (OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
+            frame.setTitle("Social Game System");
+        }
+        else if (OptionsMenu.CAS_type == OptionsMenu.CAS.GameOfLIfe) {
+            frame.setTitle("Game Of Life");
+        }
 
         JButton btnReset = new JButton("Reset");
         btnReset.addMouseListener(new MouseAdapter() {
@@ -139,7 +152,11 @@ public class GUI {
                 innerPanel.repaint();
             }
         });
+        if (OptionsMenu.CAS_type != OptionsMenu.CAS.SocialGameSystem) {
+            btnShowLife.setVisible(false);
+        }
 
+        // problem calling repaint on Game of Life
         JButton btnShowWellness = new JButton("Show wellness");
         btnShowWellness.addMouseListener(new MouseAdapter() {
         	@Override
@@ -148,6 +165,9 @@ public class GUI {
         		innerPanel.repaint();
         	}
         });
+        if (OptionsMenu.CAS_type != OptionsMenu.CAS.SocialGameSystem) {
+            btnShowWellness.setVisible(false);
+        }
 
         JLabel labelStepDelay = new JLabel("Step delay in ms:");
 
@@ -218,7 +238,7 @@ public class GUI {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
 
-                if(!OptionsMenu.fullSim) {
+                if(OptionsMenu.CAS_type != OptionsMenu.CAS.SocialGameSystem) {
                     paintOneColorPixel(g);
                 }
                 else {
@@ -351,14 +371,16 @@ public class GUI {
                     int y = e.getY() * HEIGHT / innerPanel.getHeight();
                     if(!currentFrame[y][x])
                         currentFrame[y][x] = true;
-                    game.setMap(y, x);
+                    if (OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
+                        game.setMap(y, x);
+                    }
                     innerPanel.repaint();
                 }
             }
 
             @Override
             public void mouseMoved(MouseEvent e) {
-                if(!play && OptionsMenu.fullSim) {
+                if(!play && OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
                     int x = e.getX() * WIDTH / innerPanel.getWidth();
                     int y = e.getY() * HEIGHT / innerPanel.getHeight();
                     callRepaint(y, x);
@@ -366,11 +388,12 @@ public class GUI {
             }
 
             void callRepaint(int y, int x) {
-                focusedPlayer = game.getCurrentAlive().get(SocialGameSystem.key(y, x));
+                if (OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
+                    focusedPlayer = game.getCurrentAlive().get(SocialGameSystem.key(y, x));
+                }
                 innerPanel.repaint();
             }
         });
-
 
         innerPanel.addMouseListener(new MouseAdapter() {
             @Override
