@@ -1,8 +1,12 @@
+package Launcher;
+
+import UI.OptionsMenu;
+
 import java.awt.EventQueue;
 
 /**
  * The launcher for this application.
- * It instantiates OptionsMenu which then instantiates the GUI and a Game
+ * It instantiates UI.OptionsMenu which then instantiates the UI.GUI and an Interfaces.Game
  */
 public class Launcher {
 

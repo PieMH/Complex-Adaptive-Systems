@@ -1,3 +1,9 @@
+package GOL;
+
+import UI.GUI;
+import Interfaces.Game;
+import SGS.Giocatore;
+
 import javax.swing.Timer;
 
 import java.awt.event.ActionListener;
@@ -7,19 +13,18 @@ import java.util.Random;
 public class GameOfLife implements Game {
 	
     public static int delay = 100;
-	private GUI gui;
+	private final GUI gui;
 	private Timer t;
-	static boolean random = false;	// if there is random spawn of agents in the Game
+	static boolean random = false;	// if there is random spawn of agents in the Interfaces.Game
 	static int random_starting_players = 2000;	// if random is true this is the amount of agents spawned
 	private boolean reset = true;	// notifies if the button reset is pressed, if random is true is needed to recreate random agents
-	private final Object lock = new Object();	// lock per i thread gioco/GUI nella modifica contemporanea allo scorrimento sul dizionario
+	private final Object lock = new Object();	// lock per i thread gioco/UI.GUI nella modifica contemporanea allo scorrimento sul dizionario
 
 	public GameOfLife(GUI gui) {
 		resetMap();
 		this.gui = gui;
 	}
 
-	@ToDo ( toUpdate = "Add the possibility to randomly generate n living beings if n is given by the user through Options Menu")
 	public void startGame() {
 		ActionListener taskPerformer = e -> {
 			if(gui.play) {
@@ -85,7 +90,7 @@ public class GameOfLife implements Game {
 		}
 	}
 
-	// overriding methods of Game Interface
+	// overriding methods of Interfaces.Game Interface
 
 	@Override
 	public void setRandom(boolean r) {

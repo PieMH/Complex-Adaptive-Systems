@@ -1,13 +1,17 @@
+package SGS;
+
+import Interfaces.Game;
+import UI.GUI;
+
 import java.awt.event.ActionListener;
 import javax.swing.Timer;
 import java.lang.reflect.*;
 import java.util.*;
 
 /**
- * Classe di gestione dell'algoritmo di gioco evolutivo SocialGameSystem
+ * Classe di gestione dell'algoritmo di gioco evolutivo SGS.SocialGameSystem
  */
-@ToDo (updatedBy = "Pietro on 22/02/2022 version 3.3.6")
-class SocialGameSystem implements Game {
+public class SocialGameSystem implements Game {
     private Map<Integer, Giocatore> currentAlive;  // dizionario di giocatori vivi momentaneo
     private int born;                              // n° giocatori nati nel ciclo corrente
     private int dead;                              // n° giocatori morti nel ciclo corrente
@@ -16,25 +20,25 @@ class SocialGameSystem implements Game {
     static final int random_starting_players = 3;  // distanza d'incontri tra giocatori
     private boolean reset;                         // booleana per segnalare se resettare la map o no
     private Random random_seed;                    // seme di generazione di numeri random
-    private GUI gui;                               // istanza d'interfaccia grafica di dialogo
+    private final GUI gui;                         // istanza d'interfaccia grafica di dialogo
     private int n_iterations = 0;                  // contatore del numero di cicli
-    private final Object lock = new Object();      // lock per i thread gioco/GUI nella modifica contemporanea allo scorrimento sul dizionario
+    private final Object lock = new Object();      // lock per i thread gioco/UI.GUI nella modifica contemporanea allo scorrimento sul dizionario
     private static int delay = 100;                // ritardo di repaint del current frame
-	private Food food;                             // istanza della classe Food, determina il fattore ambientale del gioco
+	private Food food;                             // istanza della classe SGS.Food, determina il fattore ambientale del gioco
 	private Timer t;
 
     /**
-     * Costruttore della classe SocialGameSystem, chiama la resetMap per istanziare il currentAlive nullo
+     * Costruttore della classe SGS.SocialGameSystem, chiama la resetMap per istanziare il currentAlive nullo
      * @param gui istanza dell'interfaccia grafica del gioco
      */
-    SocialGameSystem(GUI gui) {
+    public SocialGameSystem(GUI gui) {
         resetMap();
         this.gui = gui;
     }
 
     /**
      * Metodo invocato alla chiamata al costruttore o al click del tasto Reset su gui.
-     * Resetta la map CurrentAlive a tutta null, istanzia un nuovo oggetto {@code Food} 
+     * Resetta la map CurrentAlive a tutta null, istanzia un nuovo oggetto {@code SGS.Food}
      * e resetta alcune statistiche di gioco
      */
     public void resetMap() {
@@ -301,7 +305,7 @@ class SocialGameSystem implements Game {
      * @param j indice di colonna
      */
 /*    private void printArena(int i, int j) {
-        System.out.print(currentAlive.get(key(i, j)) + ((j == GUI.WIDTH - 1) ? "\n" : "\t"));
+        System.out.print(currentAlive.get(key(i, j)) + ((j == UI.GUI.WIDTH - 1) ? "\n" : "\t"));
     }*/
     private void printArena(int i, int j) {
         Giocatore gio = currentAlive.get(key(i, j));
@@ -391,10 +395,9 @@ class SocialGameSystem implements Game {
      * @param x indice di riga
      * @return la chiave univoca associata alla coppia di coordinate y, x
      */
-    static Integer key(int y, int x) {
+    public static Integer key(int y, int x) {
         return (y * GUI.WIDTH) + x;
     }
-
 
     /**
      * Funzione inversa della key
@@ -466,7 +469,7 @@ class SocialGameSystem implements Game {
         dead += 1;
     }
 
-    // overriding methods of Game Interface
+    // overriding methods of Interfaces.Game Interface
 
     @Override
     public void setRandom(boolean r) {

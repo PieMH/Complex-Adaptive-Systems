@@ -1,30 +1,31 @@
+package SGS;
+
 import java.awt.Color;
 
-public class Personalita3 implements Personality {
+public class Personalita2 implements Personality {
 
     //Caratteristiche personalità :
-    // Abbastanza promisqua
-    // Se ci sono suoi simili è sempre negativa
-    // Mangia poco ed è attento ai suoi consumi, gli concerne l'abiente cercando di non peggiorarlo ma nemmeno fa tanto per migliorarlo
-
+    // Molto promisqua
+    // Se ci sono suoi simili è negativa, altrimenti è positiva
+    // Mangia tanto e spreca anche cibo, Consumatore sfrenato disprezza l'ambiente e le persone intorno a se'
 
     private int x_position, y_position; // posizione che occupa nell'arena
     private Giocatore giocatore;
-    private Color colore = new Color(255, 255, 0);
+    private Color colore = new Color(0, 0, 255);
     static int born, dead;
     static int totalborn, totaldead;
     private int meet_counter;
-    public final String personality = "Personalita3";
+    public final String personality = "SGS.Personalita2";
 
     /**
      * Costruttore primario
-     * serve a richiamare il costruttore di Giocatore dato che deve istanziare
+     * serve a richiamare il costruttore di SGS.Giocatore dato che deve istanziare
      * la posizione nell'arena del carattere associato al giocatore
      *
      * @param x : indice di riga
      * @param y : indice di colonna
      */
-    public Personalita3(int y, int x, Giocatore giocatore) {
+    public Personalita2(int y, int x, Giocatore giocatore) {
         this.x_position = x;
         this.y_position = y;
         this.giocatore = giocatore;
@@ -37,6 +38,7 @@ public class Personalita3 implements Personality {
         return this.colore;
     }
 
+
     @Override
     public String getMyPersonality(){ return this.personality;}
 
@@ -44,13 +46,13 @@ public class Personalita3 implements Personality {
     @Override
     //il messaggio che mando al mondo di default
     public int getMyMessage(){
-        return 3;
+        return 2;
     }
 
     //dopo quanti incontri (sempre >1) posso fare figli
     @Override
     public int getMyPromiscuity(){
-        return 3;
+        return 2;
     }
 
     /**
@@ -61,7 +63,7 @@ public class Personalita3 implements Personality {
     @Override
     public int react(int mess, int indPers, int mode) {
         if (mode == 0) {
-            if (giocatore.numPersonality("Personalita3") > 4) {
+            if (giocatore.numPersonality("SGS.Personalita2") > 4) {
                 //comportamento positivo
                 switch (mess) {
                     //Riceve un abbraccio da un suo simile
@@ -71,7 +73,7 @@ public class Personalita3 implements Personality {
                     }
                     //Ringiovanisce grazie ad dieta che gli hanno consigliato
                     case 2: {
-                        giocatore.increaseWellness(1.5);
+                        giocatore.increaseWellness(0.5);
                         return 1;
                     }
                     //Scopre la sua ragazza con un altro
@@ -82,7 +84,7 @@ public class Personalita3 implements Personality {
 
                     //Reputa il messaggio come una ruffianata, gli piace e manda segnali  positivi
                     case 4: {
-                        giocatore.increaseWellness(1);
+                        giocatore.increaseWellness(2);
                         return 6;
                     }
 
@@ -94,7 +96,7 @@ public class Personalita3 implements Personality {
 
                     //Il giocatore con personalità "" reputa il messaggio 6 come una scocciatura, ma gli piace essere adulato cerca di liberarsene
                     case 6: {
-                        giocatore.increaseWellness(1);
+                        giocatore.increaseWellness(2);
                         return 3;
                     }
                 }
@@ -103,7 +105,7 @@ public class Personalita3 implements Personality {
                 switch (mess) {
                     //Il giocatore con personalità "" reputa il messaggio 1 come un insulto debilitante rivolto alla sua persona, si deprime.
                     case 1: {
-                        giocatore.increaseWellness(2.5);
+                        giocatore.decreaseWellness(2);
                         return 1;
                     }
                     //Il giocatore con personalità "" reputa il messaggio 2 come una presa in giro, risponde con un'offesa grave perchè è molto permaloso
@@ -112,21 +114,21 @@ public class Personalita3 implements Personality {
                         return 1;
                     }
                     case 3: {
-                        giocatore.increaseWellness(1);
-                        return 3;
-                    }
-                    case 4: {
-                        giocatore.increaseWellness(1);
+                        giocatore.decreaseWellness(1);
                         return 2;
                     }
+                    case 4: {
+                        giocatore.decreaseWellness(1);
+                        return 6;
+                    }
                     case 5: {
-                        giocatore.increaseWellness(1);
-                        giocatore.acquaintances[indPers].increaseWellness(2);
-                        return 3;
+                        giocatore.increaseWellness(2);
+                        giocatore.acquaintances[indPers].decreaseWellness(1);
+                        return 4;
                     }
                     case 6: {
-                        giocatore.increaseWellness(1);
-                        return 5;
+                        giocatore.decreaseWellness(1);
+                        return 3;
                     }
                 }
             }
@@ -135,19 +137,19 @@ public class Personalita3 implements Personality {
             Personality acquaintance = giocatore.acquaintances[indPers].carattere;
             if (acquaintance instanceof Personalita1) {
                 giocatore.increaseWellness(0.5);
-                return 1;
+                return -1;
             }
             else if (acquaintance instanceof Personalita2) {
                 giocatore.decreaseWellness(0.5);
-                return 1;
+                return -1;
             }
             else if (acquaintance instanceof Personalita3) {
-                giocatore.decreaseWellness(0.2);
+                giocatore.increaseWellness(0.2);
                 return -1;
             }
             else if (acquaintance instanceof Personalita4) {
                 giocatore.decreaseWellness(0.2);
-                return 1;
+                return -1;
             }
         }
         //In caso di errore invia 0, come se non avesse parlato
@@ -157,13 +159,13 @@ public class Personalita3 implements Personality {
 
     @Override
     public int eat() {
-        return 1;
+        return 2;
     }
 
 
     @Override
     public int produceOrWaste() {
-        return 0;
+        return -1;
     }
 
     @Override

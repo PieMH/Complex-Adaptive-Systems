@@ -1,3 +1,9 @@
+package UI;
+
+import Interfaces.Game;
+import SGS.Giocatore;
+import SGS.SocialGameSystem;
+
 import javax.swing.JFrame;
 import java.awt.Graphics;
 import java.awt.Color;
@@ -17,38 +23,39 @@ import javax.swing.JSlider;
 import javax.swing.JLabel;
 
 /**
- * This is the class responsible for managing the GUI for the simulation.
- * It is instantiated by OptionsMenu and thus is strongly dependent by it.
- * Runs as a separate thread from OptionsMenu and the Games it is displaying on the frame.
+ * This is the class responsible for managing the UI.GUI for the simulation.
+ * It is instantiated by UI.OptionsMenu and thus is strongly dependent by it.
+ * Runs as a separate thread from UI.OptionsMenu and the Games it is displaying on the frame.
  * <p>
- * The panel has two zones. The most important is the centre where there is a rectangular frame, where the simulation is shown.
+ * There are two panel, inner and outer. The most important is the centre where there is a rectangular frame, where the simulation is shown.
  * The bottom holds many control buttons and a slider.
  * <p>
  * <b>Notes:</b> maintain the proportions of width and height as 2:1 respectively.
  */
 public class GUI {
 
-    static int WIDTH = 100;
-    static int HEIGHT = 50;
-    static int DIMENSION = WIDTH * HEIGHT;
+    public static int WIDTH = 100;
+    public static int HEIGHT = 50;
+    public static int DIMENSION = WIDTH * HEIGHT;
     private JFrame frame;
     private JPanel innerPanel;
     private JPanel outerPanel;
     private JSlider slider;
-    boolean[][] currentFrame = new boolean[HEIGHT][WIDTH];
-    boolean[][] nextFrame = new boolean[HEIGHT][WIDTH];
-    boolean play = false;   // state of the simulation
+    public boolean[][] currentFrame = new boolean[HEIGHT][WIDTH];
+    public boolean[][] nextFrame = new boolean[HEIGHT][WIDTH];
+    public boolean play = false;   // state of the simulation
     private final OptionsMenu optionsMenu;
     private Game game;
+    // SGS.SocialGameSystem logic not here!
     private Giocatore focusedPlayer;
     private boolean displayAcquaintance = false;
     private boolean showLife = false;
     private boolean showWellness = false;
 
     /**
-     * Creates the GUI for the simulation.
+     * Creates the UI.GUI for the simulation.
      * Called ONLY by Options Menu which is instantiated firstly.
-     * @param optionsMenu the instantiation of OptionsMenu class who is the father of all threads of the simulator
+     * @param optionsMenu the instantiation of UI.OptionsMenu class who is the father of all threads of the simulator
      */
     GUI(OptionsMenu optionsMenu) {
         this.optionsMenu = optionsMenu;
@@ -56,21 +63,21 @@ public class GUI {
     }
 
     /**
-     * Connects this class with the interface Game
-     * @param game: instance of Game interface
+     * Connects this class with the interface Interfaces.Game
+     * @param game: instance of Interfaces.Game interface
      */
     void setGame(Game game) {
         this.game = game;
     }
 
-
     /**
      * Returns the main frame.
      */
-    JFrame getFrame() {
+    public JFrame getFrame() {
         return frame;
     }
 
+    // Never used
     public void resetFrames() {
         currentFrame = new boolean[HEIGHT][WIDTH];
     }
@@ -78,22 +85,23 @@ public class GUI {
     /**
      * Returns the panel.
      */
-    JPanel getPanel() {
+    public JPanel getPanel() {
         return innerPanel;
     }
-
 
     /**
      * Initializes the contents of the frame and the frame itself.
      */
     private void initialize() {
-
         frame = new JFrame();
         frame.getContentPane().setBackground(Color.WHITE);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setMinimumSize(new Dimension(780, 522));
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+        outerPanel = new JPanel(new GridBagLayout());
+        outerPanel.setBackground(Color.WHITE);
 
         // keep title updated
         if (OptionsMenu.CAS_type == OptionsMenu.CAS.AntSimulator) {
@@ -105,16 +113,6 @@ public class GUI {
         else if (OptionsMenu.CAS_type == OptionsMenu.CAS.GameOfLIfe) {
             frame.setTitle("Game Of Life");
         }
-
-        JButton btnReset = new JButton("Reset");
-        btnReset.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                currentFrame = new boolean[HEIGHT][WIDTH];
-                game.resetMap();
-                innerPanel.repaint();
-            }
-        });
 
         JButton btnPlay = new JButton("Play");
         btnPlay.addMouseListener(new MouseAdapter() {
@@ -131,8 +129,15 @@ public class GUI {
             }
         });
 
-        outerPanel = new JPanel(new GridBagLayout());
-        outerPanel.setBackground(Color.WHITE);
+        JButton btnReset = new JButton("Reset");
+        btnReset.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                currentFrame = new boolean[HEIGHT][WIDTH];
+                game.resetMap();
+                innerPanel.repaint();
+            }
+        });
 
         JButton btnOptions = new JButton("Options");
         btnOptions.addMouseListener(new MouseAdapter() {
@@ -152,11 +157,7 @@ public class GUI {
                 innerPanel.repaint();
             }
         });
-        if (OptionsMenu.CAS_type != OptionsMenu.CAS.SocialGameSystem) {
-            btnShowLife.setVisible(false);
-        }
 
-        // problem calling repaint on Game of Life
         JButton btnShowWellness = new JButton("Show wellness");
         btnShowWellness.addMouseListener(new MouseAdapter() {
         	@Override
@@ -165,7 +166,9 @@ public class GUI {
         		innerPanel.repaint();
         	}
         });
+
         if (OptionsMenu.CAS_type != OptionsMenu.CAS.SocialGameSystem) {
+            btnShowLife.setVisible(false);
             btnShowWellness.setVisible(false);
         }
 
@@ -227,7 +230,6 @@ public class GUI {
         );
 
         frame.getContentPane().setLayout(groupLayout);
-
         //************************************************************************************************************/
 
         innerPanel = new JPanel() {
@@ -294,7 +296,7 @@ public class GUI {
                         }
 
                         else {
-                            if(currentFrame[i][j]) {    // For Game of Life
+                            if(currentFrame[i][j]) {    // For Interfaces.Game of Life
                                 g.setColor(Color.BLUE);
                                 g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                             }

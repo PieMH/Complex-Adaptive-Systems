@@ -1,3 +1,4 @@
+package SGS;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -6,7 +7,7 @@ import java.util.Random;
 public class Giocatore {
 
     private final int NUMERO_CONOSCENTI = 20;                      // numero dei conoscenti
-    Giocatore[] acquaintances = new Giocatore[NUMERO_CONOSCENTI];  // creazione array dei conoscenti
+    public Giocatore[] acquaintances = new Giocatore[NUMERO_CONOSCENTI];  // creazione array dei conoscenti
     private int life;                                              // vita
     private double wellness;                                       // benessere, specifica come hai vissuto la tua vita
     // gli stadi della fertilità sono invertiti perchè la vita parte da 100 e arriva a 0.
@@ -14,11 +15,10 @@ public class Giocatore {
     final static int MENOPAUSA = 80;
     int son_counter;                                               // regolatore numero figli all'anno
     int[] messageReceived = new int[NUMERO_CONOSCENTI];            // i messaggi che ho ricevuto da coloro che mi conoscono
-    Personality carattere;                                         // il carattere di una persona è una classe che implementa l'interfaccia Personality
-    int x_position, y_position;                                    // posizione che il giocatore occupa nell'arena
+    public Personality carattere;                                         // il carattere di una persona è una classe che implementa l'interfaccia SGS.Personality
+    public int x_position, y_position;                                    // posizione che il giocatore occupa nell'arena
     // SCEGLIERE LA COMBINAZIONE DI CARATTERI DA VISUALIZZARE
-    static String[] personalita = {"Personalita1", "Personalita2", "Personalita3", "Personalita4"};  //array delle personalità
-
+    static String[] personalita = {"SGS.Personalita1", "SGS.Personalita2", "SGS.Personalita3", "SGS.Personalita4"};  //array delle personalità
 
     /**
      * Costruttore primario
@@ -45,7 +45,6 @@ public class Giocatore {
             e.printStackTrace();
         }
     }
-
 
     /**
      * Costruttore invocato per creare un figlio
@@ -80,7 +79,6 @@ public class Giocatore {
         this.carattere = costruttore.newInstance(x_position, y_position, this);
     }
 
-
     /**
      * Imposta la vita al valore passato in input
      * @param i: se minore di 1 viene considerato dead il personaggio, se maggiore di 100 viene impostato a 100
@@ -89,15 +87,13 @@ public class Giocatore {
         this.life = Integer.max(Integer.min(100, i), 0);
     }
 
-
     /**
      *
      * @return numero messaggi
      */
-    int getNumeroMessaggi(){
+    public int getNumeroMessaggi(){
         return this.NUMERO_CONOSCENTI;
     }
-
 
     /**
      * Uccide un personaggio
@@ -106,14 +102,12 @@ public class Giocatore {
         setLife(0);
     }
 
-
     /**
      * Diminuisce la vita di 1 al personaggio
      */
     void reduceLife(){
         this.life -= 1;
     }
-
 
     /**
      *
@@ -122,7 +116,6 @@ public class Giocatore {
      */
     int increaseLife(int i){ this.life+=i; return this.life;}
 
-
     /**
      *
      * @param i vita da decrementare
@@ -130,14 +123,12 @@ public class Giocatore {
      */
     int decreaseLife(int i){ this.life-=i; return this.life;}
 
-
     /**
      * @return il valore della vita del personaggio
      */
-    int getLife() {
+    public int getLife() {
         return life;
     }
-
 
     /**
      * Imposta il wellness
@@ -147,15 +138,13 @@ public class Giocatore {
         this.wellness = i;
     }
 
-
     /**
      * incrementa il wellness del giocatore di i
      * @param i: intero
      */
-    void increaseWellness(double i){
+    public void increaseWellness(double i){
         this.wellness += i;
     }
-
 
     /**
      * diminuisce il wellness del giocatore di i
@@ -165,14 +154,12 @@ public class Giocatore {
         this.wellness -= i;
     }
 
-
     /**
      * @return il wellness del giocatore
      */
-    double getWellness() {
+    public double getWellness() {
         return wellness;
     }
-
 
     /**
      * Imposta il messaggio ricevuto
@@ -187,7 +174,6 @@ public class Giocatore {
         this.messageReceived[index] = message;
     }
 
-
     /**
      * Ritorna il messaggio ricevuto
      * @param index: indice dell'array dove ho ricevuto i messaggi
@@ -196,7 +182,6 @@ public class Giocatore {
     int getMessageReceived(int index) {
         return messageReceived[index];
     }
-
 
     /**
      * Metodo per riprodursi (che sarà invocato se )
@@ -208,7 +193,6 @@ public class Giocatore {
         this.wellness += 10; //fare figli è il tuo scopo di vita, il tuo benessere aumenta
         return new Giocatore(this.carattere, this.wellness, i, j);
     }
-
 
     /**
      * requisiti per avere un figlio: son_counter minore di 1, vita compresa tra pubertà e MENOPAUSA,
@@ -225,14 +209,12 @@ public class Giocatore {
         return false;
     }
 
-
     /**
      * Comunica il suo messaggio, che varia a seconda della personalità, a tutti i suoi conoscenti (vivi)
      */
     void communicate() {
         carattere.act(this);
     }
-
 
     /**
      * USARE SOLO PER TEST: fa una stampa dell'array dei messaggi ricevuti
@@ -245,7 +227,6 @@ public class Giocatore {
         }
         System.out.println();
     }
-
 
     /**
      *
@@ -262,7 +243,6 @@ public class Giocatore {
         }
         return contatore;
     }
-
 
     /**
      * Inserisce in un posto vuoto (null o dead) dell'array dei conoscenti sia del giocatore da incontrare che
@@ -300,7 +280,6 @@ public class Giocatore {
         carattere.setMeetCounter();
     }
 
-    
     /**
      * devo verificare anche se il giocatore da incontrare ha una posizione libera
      * @param gamerToMeetVerify: giocatore da incontrare
@@ -322,7 +301,6 @@ public class Giocatore {
         }
         return poslibera;
     }
-
 
     /**
      * Metodo di stampa del giocatore nella console
@@ -362,5 +340,4 @@ public class Giocatore {
         pos.append(message);
         return pos.toString();
     }
-
 }

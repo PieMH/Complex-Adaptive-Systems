@@ -1,3 +1,5 @@
+package SGS;
+
 import java.awt.Color;
 
 public interface Personality{

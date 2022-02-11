@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Launcher" type="Application" factoryName="Application" nameIsGenerated="true">
-    <option name="MAIN_CLASS_NAME" value="Launcher" />
+  <configuration default="false" name="Launcher.Launcher" type="Application" factoryName="Application" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="Launcher.Launcher" />
     <module name="CAS" />
     <method v="2">
       <option name="Make" enabled="true" />

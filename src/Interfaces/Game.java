@@ -1,3 +1,7 @@
+package Interfaces;
+
+import SGS.Giocatore;
+
 import java.util.Map;
 import javax.swing.Timer;
 

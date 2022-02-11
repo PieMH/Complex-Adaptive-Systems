@@ -1,3 +1,9 @@
+package UI;
+
+import Interfaces.Game;
+import GOL.*;
+import SGS.SocialGameSystem;
+
 import javax.swing.*;
 import java.awt.ComponentOrientation;
 import java.awt.event.MouseAdapter;
@@ -9,7 +15,7 @@ import java.util.Objects;
  * In reality an instance of this class runs on a thread that is the father of all successive threads.
  * <p>
  * In particular from the thread associated with this class are created and forked the two main
- * threads that run the GUI and a Game Interface instance.
+ * threads that run the UI.GUI and a Interfaces.Game Interface instance.
  */
 public class OptionsMenu {
 
@@ -20,13 +26,11 @@ public class OptionsMenu {
 	private JTextField textHeight;
 	private Game game;
 	private GUI gui;
-    public static int meetingDistance = 5;	// let's make it final? and move it from here
-    public static boolean random = false;	// maybe redundant
-	protected enum CAS {AntSimulator, SocialGameSystem, GameOfLIfe};    // The enum that specifies all the CAS modelled
-    protected static CAS CAS_type = CAS.AntSimulator;   // control which CAS to simulate
+	protected enum CAS {AntSimulator, SocialGameSystem, GameOfLIfe}    // The enum that specifies all the CAS modelled
+    protected static CAS CAS_type = CAS.SocialGameSystem;   // control which CAS to simulate
 
 	/**
-	 * Constructor. Called ONLY by the Launcher
+	 * Constructor. Called ONLY by the Launcher.Launcher
 	 */
 	public OptionsMenu() {
 		initialize();
@@ -39,24 +43,24 @@ public class OptionsMenu {
 		return frame;
 	}
 
-	@ToDo (problem = "Method never used")
+	// Method never used
 	public void setGUI(GUI gui) {
 		this.gui = gui;
 	}
 
 	/**
-	 * Connects this class with the interface Game
-	 * @param game: instance of Game interface
+	 * Connects this class with the interface Interfaces.Game
+	 * @param game: instance of Interfaces.Game interface
 	 */
 	private void setGame(Game game) {
 		this.game = game;
 	}
 
 	/**
-	 * Instantiate the GUI and one of three possible instancies of Game interface.
-     * Then runs the GUI and the Game as two different threads.
+	 * Instantiate the UI.GUI and one of three possible instances of Interfaces.Game interface.
+     * Then runs the UI.GUI and the Interfaces.Game as two different threads.
 	 */
-	protected void createGuiAndGame() {
+	public void createGuiAndGame() {
 		if (gui != null) {
 			gui.getFrame().dispose();
 		}
@@ -101,18 +105,18 @@ public class OptionsMenu {
 		// to here
 		*/
 
-		JButton gameType = new JButton("Social Game System");
+		JButton gameType = new JButton("Social Interfaces.Game System");
 		gameType.setBounds(100, 79, 198, 26);
 		gameType.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
                 if (Objects.equals(gameType.getText(), "Ant Simulator")) {
-                    gameType.setText("Social Game System");
+                    gameType.setText("Social Interfaces.Game System");
                 }
-				else if (Objects.equals(gameType.getText(), "Social Game System")) {
-					gameType.setText("Game Of Life");
+				else if (Objects.equals(gameType.getText(), "Social Interfaces.Game System")) {
+					gameType.setText("Interfaces.Game Of Life");
 				}
-				else if (Objects.equals(gameType.getText(), "Game Of Life")) {
+				else if (Objects.equals(gameType.getText(), "Interfaces.Game Of Life")) {
 					gameType.setText("Ant Simulator");
 				}
 			}
@@ -121,9 +125,7 @@ public class OptionsMenu {
 
 		checkBoxRandom = new JCheckBox("Random");
 		checkBoxRandom.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
-        checkBoxRandom.addChangeListener(e -> {
-            textNStartingPlayers.setEnabled(checkBoxRandom.isSelected());
-		});
+        checkBoxRandom.addChangeListener(e -> textNStartingPlayers.setEnabled(checkBoxRandom.isSelected()));
 		checkBoxRandom.setBounds(6, 109, 83, 23);
 		frame.getContentPane().add(checkBoxRandom);
 
@@ -174,10 +176,10 @@ public class OptionsMenu {
                     if (Objects.equals(gameType.getText(), "Ant Simulator")) {
                         CAS_type = CAS.GameOfLIfe;
                     }
-                    else if (Objects.equals(gameType.getText(), "Social Game System")) {
+                    else if (Objects.equals(gameType.getText(), "Social Interfaces.Game System")) {
                         CAS_type = CAS.SocialGameSystem;    // FOR NOW
                     }
-                    else if (Objects.equals(gameType.getText(), "Game Of Life")){
+                    else if (Objects.equals(gameType.getText(), "Interfaces.Game Of Life")){
                         CAS_type = CAS.SocialGameSystem;
                     }
                     createGuiAndGame();

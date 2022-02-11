@@ -1,3 +1,5 @@
+package SGS;
+
 import java.awt.Color;
 
 // 6 messaggi per 6 personalità
@@ -17,11 +19,11 @@ public class Personalita4 implements Personality {
     static int born, dead;
     static int totalborn, totaldead;
     private int meet_counter;
-    public final String personality = "Personalita4";
+    public final String personality = "SGS.Personalita4";
 
     /**
      * Costruttore primario
-     * serve a richiamare il costruttore di Giocatore dato che deve istanziare
+     * serve a richiamare il costruttore di SGS.Giocatore dato che deve istanziare
      * la posizione nell'arena del carattere associato al giocatore
      *
      * @param x : indice di riga
@@ -66,7 +68,7 @@ public class Personalita4 implements Personality {
     @Override
     public int react(int mess, int indPers, int mode) {
         if (mode == 0) {
-            if (giocatore.numPersonality("Personalita4") > 4) {
+            if (giocatore.numPersonality("SGS.Personalita4") > 4) {
                 //comportamento positivo
                 switch (mess) {
                     //Riceve un abbraccio da un suo simile
