@@ -2,17 +2,17 @@ package SGS;
 
 import java.awt.Color;
 
+/**
+ * Abbastanza promiscua
+ * Se ci sono suoi simili è sempre negativa
+ * Mangia poco ed è attento ai suoi consumi, gli concerne l'ambiente cercando di non peggiorarlo ma nemmeno fa tanto per migliorarlo
+ */
 public class Personalita3 implements Personality {
 
-    //Caratteristiche personalità :
-    // Abbastanza promisqua
-    // Se ci sono suoi simili è sempre negativa
-    // Mangia poco ed è attento ai suoi consumi, gli concerne l'abiente cercando di non peggiorarlo ma nemmeno fa tanto per migliorarlo
-
-
-    private int x_position, y_position; // posizione che occupa nell'arena
-    private Giocatore giocatore;
-    private Color colore = new Color(255, 255, 0);
+    private final int x_position;   // posizione che occupa nell'arena
+    private final int y_position;
+    private final Giocatore giocatore;
+    private final Color colore = new Color(255, 200, 0);
     static int born, dead;
     static int totalborn, totaldead;
     private int meet_counter;
@@ -22,9 +22,8 @@ public class Personalita3 implements Personality {
      * Costruttore primario
      * serve a richiamare il costruttore di SGS.Giocatore dato che deve istanziare
      * la posizione nell'arena del carattere associato al giocatore
-     *
-     * @param x : indice di riga
-     * @param y : indice di colonna
+     * @param x indice di riga
+     * @param y indice di colonna
      */
     public Personalita3(int y, int x, Giocatore giocatore) {
         this.x_position = x;
@@ -33,7 +32,6 @@ public class Personalita3 implements Personality {
         meet_counter = MEET;
     }
 
-
     @Override
     public Color getMyColor() {
         return this.colore;
@@ -41,7 +39,6 @@ public class Personalita3 implements Personality {
 
     @Override
     public String getMyPersonality(){ return this.personality;}
-
 
     @Override
     //il messaggio che mando al mondo di default
@@ -56,7 +53,7 @@ public class Personalita3 implements Personality {
     }
 
     /**
-     * Reagisce al messaggio ricevuto che a seconda della personalità influenza salute, benessere e alri fattori da decidere in seguito
+     * Reagisce al messaggio ricevuto che a seconda della personalità influenza salute, benessere e altri fattori da decidere in seguito
      * @param mess, indPers: il messaggio e l'indice della persona che l'ha inviato
      * @return il messaggio da inviare
      */
@@ -82,13 +79,13 @@ public class Personalita3 implements Personality {
                         return 2;
                     }
 
-                    //Reputa il messaggio come una ruffianata, gli piace e manda segnali  positivi
+                    //Reputa il messaggio come una ruffianata, gli piace e manda segnali positivi
                     case 4: {
                         giocatore.increaseWellness(1);
                         return 6;
                     }
 
-                    //Tranquille chiacchere tra amici
+                    //Tranquille chiacchiere tra amici
                     case 5: {
                         giocatore.increaseWellness(1);
                         return 5;
@@ -156,12 +153,10 @@ public class Personalita3 implements Personality {
         return 0;
     }
 
-
     @Override
     public int eat() {
         return 1;
     }
-
 
     @Override
     public int produceOrWaste() {
@@ -180,18 +175,15 @@ public class Personalita3 implements Personality {
         totaldead++;
     }
 
-
     @Override
     public void decreaseMeetCounter() {
         meet_counter--;
     }
 
-
     @Override
     public int getMeetCounter() {
         return meet_counter;
     }
-
 
     @Override
     public void setMeetCounter() {

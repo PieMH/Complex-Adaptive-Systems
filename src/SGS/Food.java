@@ -3,7 +3,6 @@ package SGS;
 import UI.GUI;
 
 class Food {
-    private SocialGameSystem game;
     int riserve;
     int mangiato;
     int prodotto;
@@ -12,8 +11,7 @@ class Food {
     int creato;
     int morti_di_fame;
 
-    Food(SocialGameSystem game) {
-        this.game = game;
+    Food() {
         riserve = GUI.DIMENSION;
     }
 
@@ -40,7 +38,7 @@ class Food {
 
 
     void cresci() {
-        int quanto = ((GUI.HEIGHT * GUI.WIDTH) - game.getCurrentAlive().size()) >> 2;   // 1° VARIANTE: più sono i giocatori minore è la crescita
+        int quanto = ((GUI.HEIGHT * GUI.WIDTH) - SocialGameSystem.getCurrentAlive().size()) >> 2;   // 1° VARIANTE: più sono i giocatori minore è la crescita
 //        int quanto = -(riserve - UI.GUI.DIMENSION * 2) >> 4;  // 2° VARIANTE: più sono le riserve in gioco minore è la crescita
         // shift a destra di n == dividere per 2^n
         riserve += quanto;

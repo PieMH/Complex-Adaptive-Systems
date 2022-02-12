@@ -40,14 +40,13 @@ public class GUI {
     private JFrame frame;
     private JPanel innerPanel;
     private JPanel outerPanel;
-    private JSlider slider;
-    public boolean[][] currentFrame = new boolean[HEIGHT][WIDTH];
-    public boolean[][] nextFrame = new boolean[HEIGHT][WIDTH];
+    public boolean[][] currentFrame = new boolean[HEIGHT][WIDTH];   // a value is true if there is a living agent (depends on the game the logic behind a true value) inside a grid's square, false otherwise
+    public boolean[][] nextFrame = new boolean[HEIGHT][WIDTH];  // the next rame boolean matrix, for the progress of the game through time
     public boolean play = false;   // state of the simulation
-    private final OptionsMenu optionsMenu;
-    private Game game;
-    // SGS.SocialGameSystem logic not here!
-    private Giocatore focusedPlayer;
+    private final OptionsMenu optionsMenu;  // the Options Menu object who holds this object
+    private Game game;  // an instance of Interface.game interface
+    // The next three are used only for SGS
+    private Giocatore focusedPlayer;    // the square on the grid that has the mouse hovering on it
     private boolean showLife = false;
     private boolean showWellness = false;
 
@@ -143,20 +142,22 @@ public class GUI {
             }
         });
 
-        JButton btnShowLife = new JButton("Show Life");
+        JButton btnShowLife = new JButton("Life");
         btnShowLife.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 showLife = !showLife;
+        		showWellness = false;
                 innerPanel.repaint();
             }
         });
 
-        JButton btnShowWellness = new JButton("Show wellness");
+        JButton btnShowWellness = new JButton("Wellness");
         btnShowWellness.addMouseListener(new MouseAdapter() {
         	@Override
         	public void mouseClicked(MouseEvent e) {
         		showWellness = !showWellness;
+                showLife = false;
         		innerPanel.repaint();
         	}
         });
@@ -168,7 +169,8 @@ public class GUI {
 
         JLabel labelStepDelay = new JLabel("Step delay in ms:");
 
-        slider = new JSlider(10, 200, 100);
+
+        JSlider slider = new JSlider(10, 200, 100);
         slider.setMinorTickSpacing(10);
         slider.setMajorTickSpacing(30);
         slider.setPaintTicks(true);
@@ -358,11 +360,9 @@ public class GUI {
 
             @Override
             public Dimension getPreferredSize() {
-
                 int width = outerPanel.getWidth() / GUI.WIDTH;
                 int height = outerPanel.getHeight() / GUI.HEIGHT;
                 int d = Integer.min(width, height);
-
                 return new Dimension(GUI.WIDTH * d, GUI.HEIGHT * d);
             }
         };
@@ -373,7 +373,7 @@ public class GUI {
                 if(SwingUtilities.isLeftMouseButton(e)) {
                     int x = e.getX() * WIDTH / innerPanel.getWidth();
                     int y = e.getY() * HEIGHT / innerPanel.getHeight();
-                    if(!currentFrame[y][x])
+                    if(!currentFrame[y][x])     // for painting the square in any game mode
                         currentFrame[y][x] = true;
                     if (OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
                         game.setMap(y, x);
@@ -382,29 +382,30 @@ public class GUI {
                 }
             }
 
+            /**
+             * Called whenever you move the mouse onf the frame.
+             * But actually the body is executed if only if the game is on pause and in mode Social Game System.
+             * It is used to call the repaint method having a non-null focused player. It is needed to call {@code paintAcquaintanceBasedPixels}.
+             * @param e MouseEvent
+             */
             @Override
             public void mouseMoved(MouseEvent e) {
                 if(!play && OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
                     int x = e.getX() * WIDTH / innerPanel.getWidth();
                     int y = e.getY() * HEIGHT / innerPanel.getHeight();
-                    callRepaint(y, x);
+                    focusedPlayer = SocialGameSystem.getCurrentAlive().get(SocialGameSystem.key(y, x));
+                    innerPanel.repaint();
                 }
             }
 
-            void callRepaint(int y, int x) {
-                if (OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
-                    focusedPlayer = SocialGameSystem.getCurrentAlive().get(SocialGameSystem.key(y, x));
-                }
-                innerPanel.repaint();
-            }
-        });
+        } );
 
         innerPanel.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int x = e.getX() * WIDTH / innerPanel.getWidth();
                 int y = e.getY() * HEIGHT / innerPanel.getHeight();
-                currentFrame[y][x] = !currentFrame[y][x];
+                currentFrame[y][x] = !currentFrame[y][x];   // for painting the square in any game mode
                 if(!currentFrame[y][x])
                     focusedPlayer = null;
                 game.setMap(y, x);

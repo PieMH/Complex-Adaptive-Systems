@@ -17,7 +17,7 @@ public class SocialGameSystem implements Game {
     private int dead;                              // n° giocatori morti nel ciclo corrente
     static boolean random = false;                 // variabile di differenziazione dello spawn iniziale dei giocatori nell'arena
     static int n_starting_players = 2000;          // numero di giocatori inizialmente creati se random è true
-    static final int random_starting_players = 3;  // distanza d'incontri tra giocatori
+    static final int meeting_distance = 3;         // distanza d'incontri tra giocatori
     private boolean reset;                         // booleana per segnalare se resettare la map o no
     private Random random_seed;                    // seme di generazione di numeri random
     private final GUI gui;                         // istanza d'interfaccia grafica di dialogo
@@ -38,23 +38,23 @@ public class SocialGameSystem implements Game {
 
     /**
      * Metodo invocato alla chiamata al costruttore o al click del tasto Reset su gui.
-     * Resetta la map CurrentAlive a tutta null, istanzia un nuovo oggetto {@code SGS.Food}
+     * Resetta la map CurrentAlive a tutta null, istanzia un nuovo oggetto SGS.Food
      * e resetta alcune statistiche di gioco
      */
     public void resetMap() {
         currentAlive = new Hashtable<>();
         reset = true;
-        food = new Food(this);
+        food = new Food();
         // for the stats
         n_iterations = 0;
         Class<? extends Personality> P;
         for (String s : Giocatore.personalityType) {
             try {
                 P = Class.forName(s).asSubclass(Personality.class);
-                Field totalnati = P.getDeclaredField("totalborn");
-                totalnati.setInt(null, 0);
-                Field totalmorti = P.getDeclaredField("totaldead");
-                totalmorti.setInt(null, 0);
+                Field tot_born = P.getDeclaredField("totalborn");
+                tot_born.setInt(null, 0);
+                Field tot_dead = P.getDeclaredField("totaldead");
+                tot_dead.setInt(null, 0);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -95,7 +95,7 @@ public class SocialGameSystem implements Game {
 
     /**
      * Metodo di scorrimento delle chiavi del dizionario di appoggio che si riferisce a quello presente
-     * il metodo è thread-safe in quanto vige mutua esclusione (mutex) tra il thread della gui e quello del gioco sgs
+     * il metodo è thread-safe in quanto vige mutua esclusione (mutex) tra il thread della gui e quello del gioco SGS
      * evitando che si modifichino le chiavi del dizionario mentre sto operando su di esso.
      * <p>
      * La "evolve" chiamata lavora su una fotografia della currentAlive e le modifiche lato user cliccando sul pannello della gui
@@ -111,15 +111,16 @@ public class SocialGameSystem implements Game {
         random_seed = new Random();
         synchronized (lock) {                                   // mutex tra il thread della gui e quello del gioco
             nextAlive = new Hashtable<>(currentAlive);
-            List<Integer> keyslist = new ArrayList<>(nextAlive.keySet());
+            List<Integer> keylist = new ArrayList<>(nextAlive.keySet());
             int n = nextAlive.size();
+            int m = keylist.size();
             for (int i = 0; i < n; i++) {
-                int m = keyslist.size();
                 int index = 0;
                 if (m-1 > 0) {
                     index = random_seed.nextInt(m - 1);
                 }
-                Integer key = keyslist.remove(index);
+                Integer key = keylist.remove(index);
+                m -= 1;
                 if (scelta == 0) {
                     evolve(key);
                 }
@@ -185,14 +186,14 @@ public class SocialGameSystem implements Game {
         synchronized (lock) {
             Integer k = key(i, j);
             if (gui.currentFrame[i][j]) {
-                if (!currentAlive.containsKey(k)) {       // inserisci chiave solo se libera, quindi senza sovrascrivere
+                if (!currentAlive.containsKey(k)) {     // inserisci chiave solo se libera, quindi senza sovrascrivere
                     Giocatore gio = new Giocatore(i, j);
                     currentAlive.put(k, gio);
                     gio.carattere.newborn();
                     born += 1;
                 }
             } else {
-                Giocatore gio = currentAlive.remove(k);                   // se la chiave già non c'è remove non fa nulla
+                Giocatore gio = currentAlive.remove(k);     // se la chiave già non c'è remove non fa nulla
                 if (gio != null) {
                 	gio.carattere.dead();
                 	gio.die();
@@ -212,11 +213,11 @@ public class SocialGameSystem implements Game {
     }
 
     /**
-     * metodo che gestisce l'algoritmo di incontri
-     * vengono generati casualmente nel range di distanza di incontri gli indici di una posizione nella matrice
+     * Metodo che gestisce l'algoritmo d'incontri
+     * vengono generati casualmente nel range di distanza d'incontri gli indici di una posizione nella matrice
      * se la posizione corrisponde a un giocatore vivo il giocatore attuale e questo nuovo si incontreranno sotto le
-     * condizioni di "encounter". Posso quindi conoscere al massimo una persona nuova a ciclo, a anno di vita
-     * @param gio il giocatore attule su cui è invocato il metodo come se fosse il this del metodo
+     * condizioni di "encounter". Posso quindi conoscere al massimo una persona nuova a ciclo, ad anno di vita
+     * @param gio il giocatore attuale su cui è invocato il metodo come se fosse il this del metodo
      * @param chiave la chiave nel dizionario dei vivi di gio
      */
     private void meet(Giocatore gio, Integer chiave) {
@@ -224,10 +225,10 @@ public class SocialGameSystem implements Game {
         random_seed = new Random();
         int y = coordinates(chiave, 0);
         int x = coordinates(chiave, 1);
-        int lowerbound_y = y - random_starting_players;
-        int lowerbound_x = x - random_starting_players;
-        int upperbound_y = y + random_starting_players;
-        int upperbound_x = x + random_starting_players;
+        int lowerbound_y = y - meeting_distance;
+        int lowerbound_x = x - meeting_distance;
+        int upperbound_y = y + meeting_distance;
+        int upperbound_x = x + meeting_distance;
         int[] pos = posizioniRandom(lowerbound_y, upperbound_y, lowerbound_x, upperbound_x);
         amico = currentAlive.get(key(pos[0], pos[1]));
         if (amico != null) {
@@ -244,12 +245,12 @@ public class SocialGameSystem implements Game {
      * 5- provo a riprodurmi
      * il metodo è dentro un synchronized per cui va in mutua esclusione con gli altri metodi modificanti, praticamente avviene che
      * mi evolvo basandomi su una fotografia attuale del dizionario currentAlive e non su ciò che verrà in futuro
-     * @param chiave: la chiave del dizionario dei vivi del giocatore attuale che si evolve
+     * @param chiave la chiave del dizionario dei vivi del giocatore attuale che si evolve
      */
     private void evolve(Integer chiave) {
         Giocatore attuale = currentAlive.get(chiave);
-        attuale.reduceLife();                               // invecchia
-        if (attuale.getLife() < 1) {     // se attule è già morto
+        attuale.reduceLife();            // invecchia
+        if (attuale.getLife() < 1) {     // se attuale è già morto
             muori(chiave);
             return;
         }
@@ -267,15 +268,15 @@ public class SocialGameSystem implements Game {
             return;
         }
         assert (attuale.getLife() > 0): "Sono dead/non mi sento bene, non posso fare figli";
-        if (attuale.canHaveChildren()) {                    // se il giocatore può avere un figlio
-            int lowerbound_i = i - random_starting_players;
-            int lowerbound_j = j - random_starting_players;
-            int upperbound_i = i + random_starting_players;
-            int upperbound_j = j + random_starting_players;
+        if (attuale.canHaveChildren()) {
+            int lowerbound_i = i - meeting_distance;
+            int lowerbound_j = j - meeting_distance;
+            int upperbound_i = i + meeting_distance;
+            int upperbound_j = j + meeting_distance;
             int[] pos = posizioniRandom(lowerbound_i, upperbound_i, lowerbound_j, upperbound_j);
             int y = pos[0]; int x = pos[1];
             Giocatore son = currentAlive.get(key(y, x));
-            if (son == null) {                      // se son è nullo vuoldire che c'è posto per inserire un figlio vero
+            if (son == null) {      // se son è nullo vuol dire che c'è posto per inserire un figlio vero
                 try {
                     son = attuale.haveChildren(y, x);
                     currentAlive.put(key(y, x), son);
@@ -287,100 +288,8 @@ public class SocialGameSystem implements Game {
                 }
             }
         }
-        if (attuale.getLife() < 1) {                          // se attuale è dead
+        if (attuale.getLife() < 1) {    // se attuale è dead
             muori(chiave);
-        }
-    }
-
-
-    /**
-     * Stampa il giocatore in posizione i, j in base al dizionario currentAlive
-     * @param i indice di riga
-     * @param j indice di colonna
-     */
-/*    private void printArena(int i, int j) {
-        System.out.print(currentAlive.get(key(i, j)) + ((j == UI.GUI.WIDTH - 1) ? "\n" : "\t"));
-    }*/
-    private void printArena(int i, int j) {
-        Giocatore gio = currentAlive.get(key(i, j));
-        if (gio != null) {
-            System.out.print(gio);
-        }
-    }
-
-    /**
-     * stampa la chiave key e il giocatore associato a essa
-     * @param key chiave del giocatore da stampare
-     */
-    private void printDizionario(Integer key) {
-        int i = coordinates(key, 0);
-        int j = coordinates(key, 1);
-        System.out.println("K:" + i + "," + j + " V:" + currentAlive.get(key));
-    }
-
-
-    /**
-     * metodo di stampa delle strutture dati di gioco e delle statistiche di gioco
-     * @param stampaArena se stampare tutta la matrice di gioco
-     * @param stampaDizionario se stampare tutto il dizionario di currentAlive
-     * @param stampaStatistiche se stampare le statistiche di gioco
-     */
-    private void printStats(boolean stampaArena, boolean stampaDizionario, boolean stampaStatistiche) {
-        if (stampaArena) {
-            scorriMatrice(2);  // printArena
-            System.out.println();
-        }
-        if (stampaDizionario) {
-            scorriDizionario(1);  // printDizionario
-            System.out.println();
-        }
-        if (stampaStatistiche) {
-            // GENERICHE
-            System.out.print("Numero di giocatori vivi: " + currentAlive.size());
-            System.out.print("; nati in questo turno: " + born);
-            System.out.print("; morti in questo turno: " + dead);
-            System.out.print(", (morti per fame: " + food.morti_di_fame);
-            System.out.print("); differenza: "); System.out.print(born-dead);
-            System.out.println(".\n");
-            // PERSONALITA'
-            Class<? extends Personality> P;
-            for (String s : Giocatore.personalityType) {
-                try {
-                    P = Class.forName(s).asSubclass(Personality.class);
-                    System.out.print(s.toUpperCase() + "-> ");
-                    System.out.print("nati quest'anno: ");
-                    Field nato = P.getDeclaredField("born");
-                    System.out.print(nato.get(null));
-                    System.out.print("; morti quest'anno: ");
-                    Field morto = P.getDeclaredField("dead");
-                    System.out.print(morto.get(null));
-                    System.out.print("; TOT nati : ");
-                    Field natotot = P.getDeclaredField("totalborn");
-                    System.out.print(natotot.get(null));
-                    System.out.print("; TOT morti : ");
-                    Field mortotot = P.getDeclaredField("totaldead");
-                    System.out.print(mortotot.get(null));
-                    System.out.print("; vivi attuali: ");
-                    System.out.print((Integer)natotot.get(null) - (Integer)mortotot.get(null));
-                    System.out.println(".\n");
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            // CIBO
-            System.out.print("Cibo totale " + food.riserve);
-            System.out.print("; cibo prodotto " + food.prodotto);
-            System.out.print("; cibo mangiato " + food.mangiato);
-            System.out.print("; cibo sprecato " + food.sprecato);
-//            System.out.print("; cibo andato a male " + food.andato_a_male);
-            System.out.print("; cibo creato " + food.creato);
-            System.out.print("; differenza: "); System.out.print(food.prodotto + food.creato - food.mangiato - food.sprecato - food.andato_a_male);
-            System.out.println(".");
-        }
-
-        if (stampaArena || stampaDizionario || stampaStatistiche) {
-            n_iterations++;
-            System.out.printf("****************************************************************************anno %d******************************************************************************%n", n_iterations);
         }
     }
 
@@ -465,6 +374,95 @@ public class SocialGameSystem implements Game {
 
     static public Map<Integer, Giocatore> getCurrentAlive() {
         return currentAlive;
+    }
+
+    // Print to stdout method. For debugging, logging or data analysis
+
+    /**
+     * Stampa il giocatore in posizione i, j in base al dizionario currentAlive
+     * @param i indice di riga
+     * @param j indice di colonna
+     */
+    private void printArena(int i, int j) {
+        Giocatore gio = currentAlive.get(key(i, j));
+        if (gio != null) {
+            System.out.print(gio);
+        }
+    }
+
+    /**
+     * stampa la chiave key e il giocatore associato a essa
+     * @param key chiave del giocatore da stampare
+     */
+    private void printDizionario(Integer key) {
+        int i = coordinates(key, 0);
+        int j = coordinates(key, 1);
+        System.out.println("K:" + i + "," + j + " V:" + currentAlive.get(key));
+    }
+
+    /**
+     * metodo di stampa delle strutture dati di gioco e delle statistiche di gioco
+     * @param stampaArena se stampare tutta la matrice di gioco
+     * @param stampaDizionario se stampare tutto il dizionario di currentAlive
+     * @param stampaStatistiche se stampare statistiche generali di gioco
+     */
+    private void printStats(boolean stampaArena, boolean stampaDizionario, boolean stampaStatistiche) {
+        if (stampaArena) {
+            scorriMatrice(2);  // printArena
+            System.out.println();
+        }
+        if (stampaDizionario) {
+            scorriDizionario(1);  // printDizionario
+            System.out.println();
+        }
+        if (stampaStatistiche) {
+            // GENERICHE
+            System.out.print("Numero di giocatori vivi: " + currentAlive.size());
+            System.out.print("; nati in questo turno: " + born);
+            System.out.print("; morti in questo turno: " + dead);
+            System.out.print(", (morti per fame: " + food.morti_di_fame);
+            System.out.print("); differenza: "); System.out.print(born-dead);
+            System.out.println(".\n");
+            // PERSONALITA'
+            Class<? extends Personality> P;
+            for (String s : Giocatore.personalityType) {
+                try {
+                    P = Class.forName(s).asSubclass(Personality.class);
+                    System.out.print(s.toUpperCase() + "-> ");
+                    System.out.print("nati quest'anno: ");
+                    Field nato = P.getDeclaredField("born");
+                    System.out.print(nato.get(null));
+                    System.out.print("; morti quest'anno: ");
+                    Field morto = P.getDeclaredField("dead");
+                    System.out.print(morto.get(null));
+                    System.out.print("; TOT nati : ");
+                    Field totBorn = P.getDeclaredField("totalborn");
+                    System.out.print(totBorn.get(null));
+                    System.out.print("; TOT morti : ");
+                    Field totDead = P.getDeclaredField("totaldead");
+                    System.out.print(totDead.get(null));
+                    System.out.print("; vivi attuali: ");
+                    System.out.print((Integer)totBorn.get(null) - (Integer)totDead.get(null));
+                    System.out.println(".\n");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            // CIBO
+            System.out.print("Cibo totale " + food.riserve);
+            System.out.print("; cibo prodotto " + food.prodotto);
+            System.out.print("; cibo mangiato " + food.mangiato);
+            System.out.print("; cibo sprecato " + food.sprecato);
+//            System.out.print("; cibo andato a male " + food.andato_a_male);
+            System.out.print("; cibo creato " + food.creato);
+            System.out.print("; differenza: "); System.out.print(food.prodotto + food.creato - food.mangiato - food.sprecato - food.andato_a_male);
+            System.out.println(".");
+        }
+
+        if (stampaArena || stampaDizionario || stampaStatistiche) {
+            n_iterations++;
+            System.out.printf("****************************************************************************anno %d******************************************************************************%n", n_iterations);
+        }
     }
 
     // overriding methods of Interfaces.Game Interface

@@ -88,7 +88,6 @@ public class Giocatore {
     }
 
     /**
-     *
      * @return numero messaggi
      */
     public int getNumeroMessaggi(){
@@ -110,7 +109,6 @@ public class Giocatore {
     }
 
     /**
-     *
      * @param i vita da incrementare
      * @return vita incrementata del giocatore
      */
@@ -120,7 +118,6 @@ public class Giocatore {
     }
 
     /**
-     *
      * @param i vita da decrementare
      * @return vita decrementata del giocatore
      */
