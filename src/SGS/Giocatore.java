@@ -6,17 +6,17 @@ import java.util.Random;
 
 public class Giocatore {
 
-    private final int NUMERO_CONOSCENTI = 20;                      // numero dei conoscenti
-    public Giocatore[] acquaintances = new Giocatore[NUMERO_CONOSCENTI];  // creazione array dei conoscenti
-    private int life;                                              // vita
-    private double wellness;                                       // benessere, specifica come hai vissuto la tua vita
+    private final int NUMERO_CONOSCENTI = 20;   // numero dei conoscenti
+    public Giocatore[] acquaintances = new Giocatore[NUMERO_CONOSCENTI];    // creazione array dei conoscenti
+    private int life;           // vita
+    private double wellness;    // benessere, specifica come hai vissuto la tua vita
     // gli stadi della fertilità sono invertiti perchè la vita parte da 100 e arriva a 0.
     final static int PUBERTA = 50;
     final static int MENOPAUSA = 80;
-    int son_counter;                                               // regolatore numero figli all'anno
-    int[] messageReceived = new int[NUMERO_CONOSCENTI];            // i messaggi che ho ricevuto da coloro che mi conoscono
-    public Personality carattere;                                         // il carattere di una persona è una classe che implementa l'interfaccia SGS.Personality
-    public int x_position, y_position;                                    // posizione che il giocatore occupa nell'arena
+    int son_counter;                                        // regolatore numero figli all'anno
+    int[] messageReceived = new int[NUMERO_CONOSCENTI];     // i messaggi che ho ricevuto da coloro che mi conoscono
+    public Personality carattere;                           // il carattere di una persona è una classe che implementa l'interfaccia SGS.Personality
+    public int x_position, y_position;                      // posizione che il giocatore occupa nell'arena
     // SCEGLIERE LA COMBINAZIONE DI CARATTERI DA VISUALIZZARE
     static String[] personalityType = {"SGS.Personalita1", "SGS.Personalita2", "SGS.Personalita3", "SGS.Personalita4"};  // array delle personalità
 
@@ -27,8 +27,8 @@ public class Giocatore {
      */
     Giocatore(int y, int x) {
 
-        this.acquaintances[0] = this; //il giocatore conosce se stesso
-        this.life = 100;             //la vita viene inizializzata a 100
+        this.acquaintances[0] = this;   // il giocatore conosce se stesso
+        this.life = 100;                // la vita viene inizializzata a 100
         this.y_position = y;
         this.x_position = x;
         this.wellness = 75;
@@ -48,8 +48,8 @@ public class Giocatore {
 
     /**
      * Costruttore invocato per creare un figlio
-     * @param carattere: carattere di this che si riproduce
-     * @param wellness: wellness di this che viene trasmessa al figlio
+     * @param carattere carattere di this che si riproduce
+     * @param wellness wellness di this che viene trasmessa al figlio
      * @param i indice di riga nell'arena
      * @param j indice di colonna nell'arena
      */

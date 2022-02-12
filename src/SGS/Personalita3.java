@@ -61,69 +61,66 @@ public class Personalita3 implements Personality {
     public int react(int mess, int indPers, int mode) {
         if (mode == 0) {
             if (giocatore.numPersonality("SGS.Personalita3") > 4) {
-                //comportamento positivo
+                // comportamento positivo
                 switch (mess) {
-                    //Riceve un abbraccio da un suo simile
-                    case 1: {
+                    // Riceve un abbraccio da un suo simile
+                    case 1 -> {
                         giocatore.increaseWellness(1);
                         return 1;
                     }
-                    //Ringiovanisce grazie ad dieta che gli hanno consigliato
-                    case 2: {
+                    // Ringiovanisce grazie ad dieta che gli hanno consigliato
+                    case 2 -> {
                         giocatore.increaseWellness(1.5);
                         return 1;
                     }
-                    //Scopre la sua ragazza con un altro
-                    case 3: {
+                    // Scopre la sua ragazza con un altro
+                    case 3 -> {
                         giocatore.decreaseWellness(1);
                         return 2;
                     }
-
-                    //Reputa il messaggio come una ruffianata, gli piace e manda segnali positivi
-                    case 4: {
+                    // Reputa il messaggio come una ruffianata, gli piace e manda segnali positivi
+                    case 4 -> {
                         giocatore.increaseWellness(1);
                         return 6;
                     }
-
-                    //Tranquille chiacchiere tra amici
-                    case 5: {
+                    // Tranquille chiacchiere tra amici
+                    case 5 -> {
                         giocatore.increaseWellness(1);
                         return 5;
                     }
-
-                    //Il giocatore con personalità "" reputa il messaggio 6 come una scocciatura, ma gli piace essere adulato cerca di liberarsene
-                    case 6: {
+                    // Il giocatore con personalità "" reputa il messaggio 6 come una scocciatura, ma gli piace essere adulato cerca di liberarsene
+                    case 6 -> {
                         giocatore.increaseWellness(1);
                         return 3;
                     }
                 }
             } else {
-                //comportamento negativo
+                // comportamento negativo
                 switch (mess) {
-                    //Il giocatore con personalità "" reputa il messaggio 1 come un insulto debilitante rivolto alla sua persona, si deprime.
-                    case 1: {
+                    // Il giocatore con personalità "" reputa il messaggio 1 come un insulto debilitante rivolto alla sua persona, si deprime.
+                    case 1 -> {
                         giocatore.increaseWellness(2.5);
                         return 1;
                     }
-                    //Il giocatore con personalità "" reputa il messaggio 2 come una presa in giro, risponde con un'offesa grave perchè è molto permaloso
-                    case 2: {
+                    // Il giocatore con personalità "" reputa il messaggio 2 come una presa in giro, risponde con un'offesa grave perchè è molto permaloso
+                    case 2 -> {
                         giocatore.acquaintances[indPers].decreaseWellness(1);
                         return 1;
                     }
-                    case 3: {
+                    case 3 -> {
                         giocatore.increaseWellness(1);
                         return 3;
                     }
-                    case 4: {
+                    case 4 -> {
                         giocatore.increaseWellness(1);
                         return 2;
                     }
-                    case 5: {
+                    case 5 -> {
                         giocatore.increaseWellness(1);
                         giocatore.acquaintances[indPers].increaseWellness(2);
                         return 3;
                     }
-                    case 6: {
+                    case 6 -> {
                         giocatore.increaseWellness(1);
                         return 5;
                     }
@@ -149,7 +146,7 @@ public class Personalita3 implements Personality {
                 return 1;
             }
         }
-        //In caso di errore invia 0, come se non avesse parlato
+        // In caso di errore invia 0, come se non avesse parlato
         return 0;
     }
 

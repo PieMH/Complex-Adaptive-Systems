@@ -2,12 +2,17 @@ package SGS;
 
 import java.awt.Color;
 
+/**
+ * An interface shared between the four Personality classes. It implements only act which is then the same for all of them
+ * The other methods are dependent of the kind of Personality that implements that.
+ * Remember that every agent (Giocatore) in SGS has only one Personality in his life.
+ */
 public interface Personality{
 
     int MEET = 5;
 
     /**
-     * @return il colore associato alla perosnalità
+     * @return il colore associato alla personalità
      */
     Color getMyColor();
 
@@ -33,13 +38,13 @@ public interface Personality{
      * @param mess il messaggio ricevuto da un mio acquaintance
      * @param indPers l'indice della posizione dell'acquintance nel mio array di acquaintances che mi ha inviato il messaggio
      * @param mode Viene modificato in {@see act} nel corpo del secondo {@code if}.
-     *             determina il modo in cui i giocatori si scambiano i messaggi:
+     *             Determina il modo in cui i giocatori si scambiano i messaggi:
      *             mode 0: 12 tipi di messaggi diversi codificati da 1 a 6 (per due volte). Tutte le personalità
      *             sviluppano 6 tipi di messaggi diversi in funzione di un unico tipo specifico di carattere da cui
      *             li ho ricevuti e altri 6 per tutte le altre;
      *             mode 1: 8 tipi di messaggi diversi codificati con 0 o 1 (per quattro volte). Tutte le personalità
-     *             sviluppano 2 tipi di risposte diverse ai messaggi ricevuti  in funzione di tutte e quattro
-     *             le personalitè in gioco.
+     *             sviluppano 2 tipi di risposte diverse ai messaggi ricevuti in funzione di tutte e quattro
+     *             le personalità in gioco.
      * @return il messaggio di risposta codificato diversamente in ogni diversa modalità
      */
     int react(int mess, int indPers, int mode);
@@ -50,8 +55,8 @@ public interface Personality{
     int getMyMessage();
 
     /**
-     * @return La mia promisquità (con quale persona che ho incontrato faccio figli
-     * es: getMyPromisquity=2 -> farò un figlio con la seconda persona nei miei conoscenti )
+     * @return La mia promiscuità (con quale persona che ho incontrato faccio figli
+     * es: {@code getMyPromiscuity} = 2 -> farò un figlio con la seconda persona nei miei conoscenti)
      */
     int getMyPromiscuity();
 

@@ -9,14 +9,20 @@ import java.lang.reflect.*;
 import java.util.*;
 
 /**
- * Classe di gestione dell'algoritmo di gioco evolutivo SGS.SocialGameSystem
+ * Main class of the Social Game Systems CAS model
+ * It manages the game algorithm and most of the functionality of this game model
+ * It needs a {@code Food} object that represent all the food available in the system.
+ * Every agent is a Giocatore, hence the name of the class who control the logic associated with one generic agent.
+ * Every giocatore has one type of personality.
+ * This class uses Reflection paradigm extensively to access the methods of a generic Personality for every giocatore.
+ * <b>Note:</b> feel free to change {@code meeting_distance} to change the maximum distance each player can interact with other players in the grid
  */
 public class SocialGameSystem implements Game {
     private static Map<Integer, Giocatore> currentAlive;  // dizionario di giocatori vivi momentaneo
     private int born;                              // n° giocatori nati nel ciclo corrente
     private int dead;                              // n° giocatori morti nel ciclo corrente
-    static boolean random = false;                 // variabile di differenziazione dello spawn iniziale dei giocatori nell'arena
-    static int n_starting_players = 2000;          // numero di giocatori inizialmente creati se random è true
+    static boolean random = false;                 // default value or given by Options Menu: variabile di differenziazione dello spawn iniziale dei giocatori nell'arena
+    static int n_starting_players = 2000;          // default value or given by Options Menu: set number of random agents spawning in the grid
     static final int meeting_distance = 3;         // distanza d'incontri tra giocatori
     private boolean reset;                         // booleana per segnalare se resettare la map o no
     private Random random_seed;                    // seme di generazione di numeri random
@@ -103,7 +109,6 @@ public class SocialGameSystem implements Game {
      * <p>
      * Per un aspetto più realistico del gioco le chiavi del dizionario vengono accedute casualmente una per una, evitando
      * che i giocatori alla fine del dizionario sfruttino il vantaggio di subire più raramente gli effetti ambientali (carenza di cibo)
-     * <p>
      * @param scelta scelta di funzione di scorrimento del dizionario
      */
     private void scorriDizionario(int scelta) {

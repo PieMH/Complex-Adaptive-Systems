@@ -32,10 +32,9 @@ class Food {
         }
         int quanto = character.produceOrWaste();
         if (quanto > 0) prodotto += quanto;
-        else sprecato -= quanto;           // qui quanto è negativo perciò doppia negazione fa una somma
+        else sprecato -= quanto;    // qui quanto è negativo perciò doppia negazione fa una somma
         riserve += quanto;
     }
-
 
     void cresci() {
         int quanto = ((GUI.HEIGHT * GUI.WIDTH) - SocialGameSystem.getCurrentAlive().size()) >> 2;   // 1° VARIANTE: più sono i giocatori minore è la crescita
