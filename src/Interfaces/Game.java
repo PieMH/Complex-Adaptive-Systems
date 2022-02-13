@@ -10,6 +10,8 @@ public interface Game {
 
 	void setStartingRandomAgents(int number);
 
+	void setMapRandom();
+
 	void setMap(int y, int x);
 
 	Timer getTimer();

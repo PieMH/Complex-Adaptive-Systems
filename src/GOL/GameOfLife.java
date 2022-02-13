@@ -30,7 +30,7 @@ public class GameOfLife implements Game {
 		ActionListener taskPerformer = e -> {
 			if(gui.play) {
 				if (reset) {	// is it possible to optimize this if section?
-					if (random) generateRandomAgents();
+					if (random) setMapRandom();
 					reset = false;
 				}
 				iterate();
@@ -75,7 +75,8 @@ public class GameOfLife implements Game {
 		return neighbors;
 	}
 
-	private void generateRandomAgents() {
+	@Override
+	public void setMapRandom() {
 		synchronized (lock) {
 			Random random_seed = new Random();
 			int y, x;

@@ -19,15 +19,39 @@ import java.util.Objects;
  */
 public class OptionsMenu {
 
-	private JFrame frame;	// the GUI frame
-	private JTextField textNStartingPlayers;	// number of starting players iff checkBoxRandom is true
-	private JCheckBox checkBoxRandom;			// check if number of starting player is random or fixed from the above variable
+	private JFrame frame;
+
+	/**
+	 * number of starting players iff checkBoxRandom is true
+	 */
+	private JTextField textNStartingPlayers;
+
+	/**
+	 * check if number of starting player is random or fixed from the above variable
+	 */
+	private JCheckBox checkBoxRandom;
 	private JTextField textWidth;
 	private JTextField textHeight;
+
+	/**
+	 * an instance of Interface.Game interface
+	 */
 	private Game game;
+
+	/**
+	 * the UI.GUI this object creates as a thread child
+	 */
 	private GUI gui;
-	protected enum CAS {AntSimulator, SocialGameSystem, GameOfLIfe}    // The enum that specifies all the CAS modelled
-    protected static CAS CAS_type = CAS.SocialGameSystem;   // control which CAS to simulate
+
+	/**
+	 * The enum that specifies all the CAS modelled
+	 */
+	protected enum CAS {AntSimulator, SocialGameSystem, GameOfLIfe}
+
+	/**
+	 * control which CAS to simulate
+	 */
+	protected static CAS CAS_type = CAS.SocialGameSystem;
 
 	/**
 	 * Constructor called ONLY by the Launcher.Launcher

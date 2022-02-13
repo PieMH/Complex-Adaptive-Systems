@@ -34,19 +34,56 @@ import javax.swing.JLabel;
  */
 public class GUI {
 
+    /**
+     * number of horizontal cells, or of columns on the grid
+     */
     public static int WIDTH = 100;
+
+    /**
+     * number of vertical cells, or of rows on the grid
+     */
     public static int HEIGHT = 50;
+
+    /**
+     * total number of cells int the grid
+     */
     public static int DIMENSION = WIDTH * HEIGHT;
+
     private JFrame frame;
     private JPanel innerPanel;
     private JPanel outerPanel;
-    public boolean[][] currentFrame = new boolean[HEIGHT][WIDTH];   // a value is true if there is a living agent (depends on the game the logic behind a true value) inside a grid's square, false otherwise
-    public boolean[][] nextFrame = new boolean[HEIGHT][WIDTH];  // the next rame boolean matrix, for the progress of the game through time
-    public boolean play = false;   // state of the simulation
-    private final OptionsMenu optionsMenu;  // the Options Menu object who holds this object
-    private Game game;  // an instance of Interface.game interface
+
+    /**
+     * a value is true if there is a living agent (depends on the game the logic behind a true value) inside a grid's square, false otherwise
+     */
+    public boolean[][] currentFrame = new boolean[HEIGHT][WIDTH];
+
+    /**
+     * the next rame boolean matrix, for the progress of the game through time
+     */
+    public boolean[][] nextFrame = new boolean[HEIGHT][WIDTH];
+
+    /**
+     * state of the simulation
+     */
+    public boolean play = false;
+
+    /**
+     * the Options Menu object who holds this object
+     */
+    private final OptionsMenu optionsMenu;
+
+    /**
+     * an instance of Interface.game interface
+     */
+    private Game game;
+
     // The next three are used only for SGS
-    private Giocatore focusedPlayer;    // the square on the grid that has the mouse hovering on it
+
+    /**
+     * the square on the grid that has the mouse hovering on it
+     */
+    private Giocatore focusedPlayer;
     private boolean showLife = false;
     private boolean showWellness = false;
 

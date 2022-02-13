@@ -159,7 +159,7 @@ public class SocialGameSystem implements Game {
      * anche questa è thread-safe per non andare in conflitto con setMap potenzialmente chiamata dal thread della gui
      * quando si clicca su pannello
      */
-    private void setMapRandom() {
+    public void setMapRandom() {
         synchronized (lock) {
             random_seed = new Random();
             int y, x;
@@ -218,8 +218,8 @@ public class SocialGameSystem implements Game {
     }
 
     /**
-     * Metodo che gestisce l'algoritmo d'incontri
-     * vengono generati casualmente nel range di distanza d'incontri gli indici di una posizione nella matrice
+     * Metodo che gestisce l'algoritmo d'incontri.
+     * Vengono generati casualmente nel range di distanza d'incontri gli indici di una posizione nella matrice
      * se la posizione corrisponde a un giocatore vivo il giocatore attuale e questo nuovo si incontreranno sotto le
      * condizioni di "encounter". Posso quindi conoscere al massimo una persona nuova a ciclo, ad anno di vita
      * @param gio il giocatore attuale su cui è invocato il metodo come se fosse il this del metodo
@@ -243,11 +243,14 @@ public class SocialGameSystem implements Game {
 
     /**
      * Algoritmo di evoluzione di gioco invocato su tutti e soli i giocatori vivi di currentAlive, passi evolutivi:
-     * 1- invecchio
-     * 2- incontro un nuovo giocatore
-     * 3- comunico coi giocatori che conosco
-     * 4- produco/spreco cibo e poi lo mangio
-     * 5- provo a riprodurmi
+     * <ol>
+     *     <li>invecchio</li>
+     *     <li>incontro un nuovo giocatore</li>
+     *     <li>comunico coi giocatori che conosco</li>
+     *     <li>produco/spreco cibo e poi lo mangio</li>
+     *     <li>provo a riprodurmi</li>
+     * </ol>
+     * <p>
      * il metodo è dentro un synchronized per cui va in mutua esclusione con gli altri metodi modificanti, praticamente avviene che
      * mi evolvo basandomi su una fotografia attuale del dizionario currentAlive e non su ciò che verrà in futuro
      * @param chiave la chiave del dizionario dei vivi del giocatore attuale che si evolve
@@ -310,11 +313,11 @@ public class SocialGameSystem implements Game {
     /**
      * Funzione inversa della key
      * @param chiave una chiave del dizionario
-     * @param col_row 0 per sapere l'indice di colonna, 1 per sapere l'indice di riga
+     * @param columnOrRow 0 per sapere l'indice di colonna, 1 per sapere l'indice di riga
      * @return l'indice o di riga o di colonna associato alla chiave in funzione del parametro d'input
      */
-    private static int coordinates(Integer chiave, int col_row) {
-        if (col_row == 0) {
+    private static int coordinates(Integer chiave, int columnOrRow) {
+        if (columnOrRow == 0) {
             return chiave / GUI.WIDTH;
         }
         return chiave % GUI.WIDTH;
