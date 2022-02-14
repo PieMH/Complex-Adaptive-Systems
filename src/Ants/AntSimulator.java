@@ -2,15 +2,15 @@ package Ants;
 
 import UI.GUI;
 import Interfaces.Game;
-import SGS.Giocatore;
 
-import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.event.ActionListener;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
- *
+ * The main class that delineate the algorithm of the Ant sim model.
+ * It manages the general behavior of the sim and its core functionalities.
+ * It also serves as a mainframe for the classes Ants, Ambient, Feromon ??.
  */
 public class AntSimulator implements Game {
 
@@ -22,10 +22,14 @@ public class AntSimulator implements Game {
     private final Object lock = new Object();      // lock per i thread gioco/UI.GUI nella modifica contemporanea allo scorrimento sul dizionario
     private static int delay = 100;                // ritardo di repaint del current frame
     static boolean random = false;                 // default value or given by Options Menu: variabile di differenziazione dello spawn iniziale dei giocatori nell'arena
-    static int n_starting_players = 2000;          // default value or given by Options Menu: set number of random agents spawning in the grid
+    static int n_starting_agents = 2000;          // default value or given by Options Menu: set number of random agents spawning in the grid
+    private int born = 0;                              // n° giocatori nati nel ciclo corrente
+    private int dead = 0;                              // n° giocatori morti nel ciclo corrente
+
 
     public AntSimulator(GUI gui) {
         resetMap();
+        resetStats();
         this.gui = gui;
     }
 
@@ -38,14 +42,14 @@ public class AntSimulator implements Game {
                         setMapRandom();    // setMapRandom
                     }
                     else {
-//                        scorriMatrice(0);  // setMap
+                        iterateMatrix(0);  // setMap
                     }
+                    resetStats();
                     reset = false;
                 }
-//                scorriDizionario(0);  // evolve
-//                printStats(false, false, true);
-//                resetStats();
-//                scorriMatrice(1);     // updateFrame
+                iterateHashMap(0);  // evolve
+                printStats(true);
+                iterateMatrix(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;
                 gui.nextFrame = new boolean[GUI.HEIGHT][GUI.WIDTH];
                 gui.getPanel().repaint();
@@ -55,28 +59,211 @@ public class AntSimulator implements Game {
         t.start();
     }
 
-    @Override
-    public void setRandom(boolean random) {
+    /**
+     * main algorithm of the model.
+     * @param hashKey
+     */
+    private void evolve(Integer hashKey) {
+        Ant currentAnt = currentAlive.get(hashKey);
+        currentAnt.age();
+        if (currentAnt.getLife() < 1) {
+            currentAnt.die();
+            dead += 1;
+        }
+        currentAnt.action();
+        if (currentAnt.getLife() < 1) {
+            currentAnt.die();
+            dead += 1;
+        }
     }
 
-    @Override
-    public void setStartingRandomAgents(int number) {
+    /**
+     * Metodo di scorrimento delle chiavi del dizionario di appoggio che si riferisce a quello presente
+     * il metodo è thread-safe in quanto vige mutua esclusione (mutex) tra il thread della gui e quello del gioco SGS
+     * evitando che si modifichino le chiavi del dizionario mentre sto operando su di esso.
+     * <p>
+     * La "evolve" chiamata lavora su una fotografia della currentAlive e le modifiche lato user cliccando sul pannello della gui
+     * non creano inconsistenze ma avvengono solo alla fine dell'evoluzione del ciclo di gioco.
+     * <p>
+     * Per un aspetto più realistico del gioco le chiavi del dizionario vengono accedute casualmente una per una, evitando
+     * che i giocatori alla fine del dizionario sfruttino il vantaggio di subire più raramente gli effetti ambientali (carenza di cibo)
+     * @param scelta scelta di funzione di scorrimento del dizionario
+     */
+    private void iterateHashMap(int scelta) {
+        Map<Integer, Ant> nextAlive;                      // dizionario di appoggio
+        random_seed = new Random();
+        synchronized (lock) {                                   // mutex tra il thread della gui e quello del gioco
+            nextAlive = new Hashtable<>(currentAlive);
+            List<Integer> keylist = new ArrayList<>(nextAlive.keySet());
+            int n = nextAlive.size();
+            int m = keylist.size();
+            for (int i = 0; i < n; i++) {
+                int index = 0;
+                if (m-1 > 0) {
+                    index = random_seed.nextInt(m - 1);
+                }
+                Integer key = keylist.remove(index);
+                m -= 1;
+                if (scelta == 0) {
+                    evolve(key);
+                }
+                else if (scelta == 1) {
+//                    printDizionario(key);
+                }
+            }
+        }
     }
 
+    /**
+     * @param scelta scelta di funzione di scorrimento della matrice del pannello della gui
+     */
+    private void iterateMatrix(int scelta) {
+        for (int i = 0; i < GUI.HEIGHT; i++) {
+            for (int j = 0; j < GUI.WIDTH; j++) {
+                if (scelta == 0) {
+                    setMap(i, j);
+                } else if (scelta == 1) {
+                    updateFrame(i, j);
+                } else if (scelta == 2) {
+//                    printArena(i, j);
+                }
+            }
+        }
+    }
+
+    /**
+     * Imposta la currentAlive casualmente generando posizioni casuali nella matrice,
+     * tanti quanti dice n_starting_players
+     * anche questa è thread-safe per non andare in conflitto con setMap potenzialmente chiamata dal thread della gui
+     * quando si clicca su pannello
+     */
     @Override
     public void setMapRandom() {
+        synchronized (lock) {
+            random_seed = new Random();
+            int y, x;
+            for (int n = 0; n < n_starting_agents; n++) {
+                y = random_seed.nextInt(GUI.HEIGHT);
+                x = random_seed.nextInt(GUI.WIDTH);
+                Integer k = key(y, x);
+                if (currentAlive.containsKey(k)) {
+                    n--;
+                    continue;
+                }
+                Ant ant = new Ant(y, x);
+                currentAlive.put(k, ant);
+//                ant.carattere.newborn();
+                born += 1;
+            }
+        }
     }
 
     @Override
     public void setMap(int y, int x) {
+        synchronized (lock) {
+            Integer k = key(y, x);
+            if (gui.currentFrame[y][x]) {
+                if (!currentAlive.containsKey(k)) {     // inserisci chiave solo se libera, quindi senza sovrascrivere
+                    Ant ant = new Ant(y, x);
+                    currentAlive.put(k, ant);
+//                    gio.carattere.newborn();
+                    born += 1;
+                }
+            } else {
+                Ant ant = currentAlive.remove(k);     // se la chiave già non c'è remove non fa nulla
+                if (ant != null) {
+//                    ant.carattere.dead();
+                    ant.die();
+                    dead += 1;
+                }
+            }
+        }
+    }
+
+    /**
+     * Aggiorna il nextFrame della gui rispetto alla situazione attuale della currentAlive
+     * @param y indice di riga
+     * @param x indice di colonna
+     */
+    private void updateFrame(int y, int x) {
+        gui.nextFrame[y][x] = (currentAlive.containsKey(key(y, x)));
+    }
+
+    /**
+     * @param y indice di riga
+     * @param x indice di colonna
+     * @return la chiave univoca associata alla coppia di coordinate y, x
+     */
+    public static Integer key(int y, int x) {
+        return (y * GUI.WIDTH) + x;
+    }
+
+    /**
+     * Funzione inversa della key
+     * @param chiave una chiave del dizionario
+     * @param columnOrRow 0 per sapere l'indice di colonna, 1 per sapere l'indice di riga
+     * @return l'indice o di riga o di colonna associato alla chiave in funzione del parametro d'input
+     */
+    private static int coordinates(Integer chiave, int columnOrRow) {
+        if (columnOrRow == 0) {
+            return chiave / GUI.WIDTH;
+        }
+        return chiave % GUI.WIDTH;
+    }
+
+    /**
+     * metodo di generazione di una coppia di numeri pseudo-casuali all'interno dei range passati in input
+     * inoltre sistema i numeri generati casualmente affinché rientrino all'interno della dimensione della gui
+     * @param lowerbound_i estremo inferiore di riga
+     * @param upperbound_i estremo superiore di riga
+     * @param lowerbound_j estremo inferiore di colonna
+     * @param upperbound_j estremo superiore di colonna
+     * @return la coppia di numeri casuali
+     */
+    private int[] posizioniRandom(int lowerbound_i, int upperbound_i, int lowerbound_j, int upperbound_j) {
+        random_seed = new Random();
+        int[] pos = new int[2];
+        pos[0] = random_seed.nextInt(upperbound_i - lowerbound_i) + lowerbound_i;
+        pos[1] = random_seed.nextInt(upperbound_j - lowerbound_j) + lowerbound_j;
+        pos[0] = Integer.max(Integer.min(pos[0], GUI.HEIGHT - 1), 0);
+        pos[1] = Integer.max(Integer.min(pos[1], GUI.WIDTH - 1), 0);
+        return pos;
+    }
+
+    static public Map<Integer, Ant> getCurrentAlive() {
+        return currentAlive;
+    }
+
+    private void resetStats() {
+        born = 0;
+        dead = 0;
+    }
+
+    private void printStats(boolean choice) {
+        if (choice) {
+            System.out.println("Total born is" + born);
+            System.out.println("Total dead is" + dead);
+        }
+    }
+
+    @Override
+    public void resetMap() {
+        currentAlive = new Hashtable<>();
+        reset = true;
+    }
+
+    @Override
+    public void setRandom(boolean r) {
+        random = r;
+    }
+
+    @Override
+    public void setStartingRandomAgents(int number) {
+        n_starting_agents = number;
     }
 
     @Override
     public Timer getTimer() {
         return null;
-    }
-
-    @Override
-    public void resetMap() {
     }
 }

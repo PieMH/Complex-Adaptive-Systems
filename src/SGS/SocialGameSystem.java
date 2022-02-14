@@ -159,6 +159,7 @@ public class SocialGameSystem implements Game {
      * anche questa è thread-safe per non andare in conflitto con setMap potenzialmente chiamata dal thread della gui
      * quando si clicca su pannello
      */
+    @Override
     public void setMapRandom() {
         synchronized (lock) {
             random_seed = new Random();
@@ -187,6 +188,7 @@ public class SocialGameSystem implements Game {
      * @param i indice di riga
      * @param j indice di colonna
      */
+    @Override
     public void setMap(int i, int j) {
         synchronized (lock) {
             Integer k = key(i, j);

@@ -1,5 +1,6 @@
 package UI;
 
+import Ants.AntSimulator;
 import Interfaces.Game;
 import SGS.Giocatore;
 import SGS.SocialGameSystem;
@@ -74,7 +75,7 @@ public class GUI {
     private final OptionsMenu optionsMenu;
 
     /**
-     * an instance of Interface.game interface
+     * an instance of Interface.Game interface
      */
     private Game game;
 
@@ -290,7 +291,7 @@ public class GUI {
                     }
                 }
                 else if (OptionsMenu.CAS_type == OptionsMenu.CAS.AntSimulator) {
-
+                    paintAnts(g);
                 }
 
                 g.setColor(Color.BLACK);
@@ -395,6 +396,21 @@ public class GUI {
                 g.fillRect(x * innerPanel.getWidth() / GUI.WIDTH , y * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
             }
 
+            private void paintAnts(Graphics g) {
+                for(int i = 0; i < GUI.HEIGHT; i++) {
+                    for (int j = 0; j < GUI.WIDTH; j++) {
+                        if(currentFrame[i][j]) {
+                            g.setColor(AntSimulator.getCurrentAlive().get(AntSimulator.key(i, j)).getColor());
+                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                        }
+                        else {
+                            g.setColor(innerPanel.getBackground());
+                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                        }
+                    }
+                }
+            }
+
             @Override
             public Dimension getPreferredSize() {
                 int width = outerPanel.getWidth() / GUI.WIDTH;
@@ -410,11 +426,10 @@ public class GUI {
                 if(SwingUtilities.isLeftMouseButton(e)) {
                     int x = e.getX() * WIDTH / innerPanel.getWidth();
                     int y = e.getY() * HEIGHT / innerPanel.getHeight();
-                    if(!currentFrame[y][x])     // for painting the square in any game mode
+                    if(!currentFrame[y][x]) {   // for painting the square in any game mode
                         currentFrame[y][x] = true;
-                    if (OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
-                        game.setMap(y, x);
                     }
+                    game.setMap(y, x);
                     innerPanel.repaint();
                 }
             }
@@ -450,8 +465,10 @@ public class GUI {
             }
             @Override
             public void mouseExited(MouseEvent e) {
-                focusedPlayer = null;
-                innerPanel.repaint();
+                if (OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
+                    focusedPlayer = null;
+                    innerPanel.repaint();
+                }
             }
         });
 
