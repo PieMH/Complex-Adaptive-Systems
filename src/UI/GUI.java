@@ -212,8 +212,8 @@ public class GUI {
 
 
         JSlider slider = new JSlider(10, 300, 100);
-        slider.setMinorTickSpacing(10);
-        slider.setMajorTickSpacing(30);
+        slider.setMinorTickSpacing(15);
+        slider.setMajorTickSpacing(45);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
         slider.addChangeListener(e -> {

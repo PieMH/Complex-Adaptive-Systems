@@ -53,7 +53,7 @@ public class AntSimulator implements Game {
 //                    statsDelayCounter = 0;
 //                }
 //                statsDelayCounter += 1;
-                printStats(1);  // print Hash Map
+//                printStats(1);  // print Hash Map
                 iterateMatrix(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;
                 gui.nextFrame = new boolean[GUI.HEIGHT][GUI.WIDTH];
