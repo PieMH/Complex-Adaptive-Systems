@@ -1,5 +1,6 @@
 package UI;
 
+import Ants.AntSimulator;
 import Interfaces.Game;
 import GOL.*;
 import SGS.SocialGameSystem;
@@ -51,7 +52,7 @@ public class OptionsMenu {
 	/**
 	 * control which CAS to simulate
 	 */
-	protected static CAS CAS_type = CAS.SocialGameSystem;
+	protected static CAS CAS_type = CAS.AntSimulator;
 
 	/**
 	 * Constructor called ONLY by the Launcher.Launcher
@@ -86,7 +87,7 @@ public class OptionsMenu {
 		gui = new GUI(this);
 
         if (CAS_type == CAS.AntSimulator) {
-            CAS_type = CAS.SocialGameSystem;
+            game = new AntSimulator(gui);
         }
         else if (CAS_type == CAS.SocialGameSystem) {
     		game = new SocialGameSystem(gui);
@@ -111,7 +112,7 @@ public class OptionsMenu {
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(false);
 
-		JButton gameType = new JButton("Social Game System");
+		JButton gameType = new JButton("Ant Simulator");
 		gameType.setBounds(100, 79, 198, 26);
 		gameType.addMouseListener(new MouseAdapter() {
 			@Override
@@ -169,27 +170,27 @@ public class OptionsMenu {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (SwingUtilities.isLeftMouseButton(e)) {
+					// get text from gameType button and set CAS_type accordingly, remember that the button shows the NEXT CAS type not the current one
 					if (!textWidth.getText().isEmpty()) {
 						GUI.WIDTH = Integer.parseInt(textWidth.getText());
 					}
 					if (!textHeight.getText().isEmpty()) {
 						GUI.HEIGHT = Integer.parseInt(textHeight.getText());
 					}
-					if (!textNStartingPlayers.getText().isEmpty()) {
-						game.setStartingRandomAgents(Integer.parseInt(textNStartingPlayers.getText()));
-					}
-					// get text from gameType button and set CAS_type accordingly, remember that the button shows the NEXT CAS type not the current one
                     if (Objects.equals(gameType.getText(), "Ant Simulator")) {
                         CAS_type = CAS.GameOfLIfe;
                     }
                     else if (Objects.equals(gameType.getText(), "Social Game System")) {
-                        CAS_type = CAS.SocialGameSystem;    // FOR NOW
+                        CAS_type = CAS.AntSimulator;
                     }
                     else if (Objects.equals(gameType.getText(), "Game Of Life")){
                         CAS_type = CAS.SocialGameSystem;
                     }
                     createGuiAndGame();
                     game.setRandom(checkBoxRandom.isSelected());  // to be executed after "createGuiandGame" if you want to enable random from the very start for every game
+					if (!textNStartingPlayers.getText().isEmpty()) {
+						game.setStartingRandomAgents(Integer.parseInt(textNStartingPlayers.getText()));
+					}
 					frame.setVisible(false);
 				}
 			}

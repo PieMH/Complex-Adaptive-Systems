@@ -200,8 +200,11 @@ public class GUI {
         	}
         });
 
-        if (OptionsMenu.CAS_type != OptionsMenu.CAS.SocialGameSystem) {
+        if (OptionsMenu.CAS_type == OptionsMenu.CAS.GameOfLIfe) {
             btnShowLife.setVisible(false);
+            btnShowWellness.setVisible(false);
+        }
+        else if (OptionsMenu.CAS_type == OptionsMenu.CAS.AntSimulator) {
             btnShowWellness.setVisible(false);
         }
 
@@ -291,7 +294,12 @@ public class GUI {
                     }
                 }
                 else if (OptionsMenu.CAS_type == OptionsMenu.CAS.AntSimulator) {
-                    paintAnts(g);
+                    if (showLife) {
+                        paintLife(g);
+                    }
+                    else {
+                        paintAnts(g);
+                    }
                 }
 
                 g.setColor(Color.BLACK);
@@ -312,8 +320,14 @@ public class GUI {
                 for(int i = 0; i < GUI.HEIGHT; i++) {
                     for(int j = 0; j < GUI.WIDTH; j++) {
                         if(currentFrame[i][j]) {
-                            g.setColor(new Color(0, 128, 0, ((SocialGameSystem.getCurrentAlive().get(SocialGameSystem.key(i, j)).getLife()) * 255 / 100)));
-                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                            if (OptionsMenu.CAS_type == OptionsMenu.CAS.AntSimulator) {
+                                g.setColor(new Color(0, 128, 0, ((AntSimulator.getCurrentAlive().get(AntSimulator.key(i, j)).getLife()) * 255 / 100)));
+                                g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                            }
+                            else if (OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
+                                g.setColor(new Color(0, 128, 0, ((SocialGameSystem.getCurrentAlive().get(SocialGameSystem.key(i, j)).getLife()) * 255 / 100)));
+                                g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                            }
                         }
                         else {
                             g.setColor(innerPanel.getBackground());

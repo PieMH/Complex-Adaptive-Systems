@@ -20,12 +20,12 @@ public class AntSimulator implements Game {
     private boolean reset;                         // booleana per segnalare se resettare la map o no
     private Random random_seed;                    // seme di generazione di numeri random
     private final Object lock = new Object();      // lock per i thread gioco/UI.GUI nella modifica contemporanea allo scorrimento sul dizionario
-    private static int delay = 100;                // ritardo di repaint del current frame
+    private static final int delay = 100;                // ritardo di repaint del current frame
     static boolean random = false;                 // default value or given by Options Menu: variabile di differenziazione dello spawn iniziale dei giocatori nell'arena
     static int n_starting_agents = 2000;          // default value or given by Options Menu: set number of random agents spawning in the grid
     private int born = 0;                              // n° giocatori nati nel ciclo corrente
     private int dead = 0;                              // n° giocatori morti nel ciclo corrente
-
+    private int counter = 0;
 
     public AntSimulator(GUI gui) {
         resetMap();
@@ -48,7 +48,11 @@ public class AntSimulator implements Game {
                     reset = false;
                 }
                 iterateHashMap(0);  // evolve
-                printStats(true);
+                if (counter == 2) {
+                    printStats(true);
+                    counter = 0;
+                }
+                counter += 1;
                 iterateMatrix(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;
                 gui.nextFrame = new boolean[GUI.HEIGHT][GUI.WIDTH];
@@ -61,19 +65,27 @@ public class AntSimulator implements Game {
 
     /**
      * main algorithm of the model.
-     * @param hashKey
+     * @param hashKey the kye for the hashmap currentAlive
      */
     private void evolve(Integer hashKey) {
         Ant currentAnt = currentAlive.get(hashKey);
         currentAnt.age();
         if (currentAnt.getLife() < 1) {
-            currentAnt.die();
-            dead += 1;
+            death(hashKey);
+            return;
         }
+
         currentAnt.action();
+        Integer newKey = currentAnt.getPos();
+        boolean moved = !(Objects.equals(newKey, hashKey));
+        if (moved) {   // the ant may have moved !
+            currentAlive.put(newKey, currentAnt);   // should be granted by Ant.move() that this doesn't throw error and don't replace any already existing keys
+            currentAlive.remove(hashKey, currentAnt);
+        }
+
         if (currentAnt.getLife() < 1) {
-            currentAnt.die();
-            dead += 1;
+            if (moved) death(newKey);
+            else death(hashKey);
         }
     }
 
@@ -132,6 +144,15 @@ public class AntSimulator implements Game {
     }
 
     /**
+     * Aggiorna il nextFrame della gui rispetto alla situazione attuale della currentAlive
+     * @param y indice di riga
+     * @param x indice di colonna
+     */
+    private void updateFrame(int y, int x) {
+        gui.nextFrame[y][x] = (currentAlive.containsKey(key(y, x)));
+    }
+
+    /**
      * Imposta la currentAlive casualmente generando posizioni casuali nella matrice,
      * tanti quanti dice n_starting_players
      * anche questa è thread-safe per non andare in conflitto con setMap potenzialmente chiamata dal thread della gui
@@ -152,12 +173,17 @@ public class AntSimulator implements Game {
                 }
                 Ant ant = new Ant(y, x);
                 currentAlive.put(k, ant);
-//                ant.carattere.newborn();
                 born += 1;
             }
         }
     }
 
+    /**
+     * called by UI.GUI on a click or a click and drag of the mouse on the grid
+     * It generates new ants in the squares clicked on or kill them if the square was already filled
+     * @param y row number
+     * @param x column number
+     */
     @Override
     public void setMap(int y, int x) {
         synchronized (lock) {
@@ -166,27 +192,16 @@ public class AntSimulator implements Game {
                 if (!currentAlive.containsKey(k)) {     // inserisci chiave solo se libera, quindi senza sovrascrivere
                     Ant ant = new Ant(y, x);
                     currentAlive.put(k, ant);
-//                    gio.carattere.newborn();
                     born += 1;
                 }
             } else {
                 Ant ant = currentAlive.remove(k);     // se la chiave già non c'è remove non fa nulla
                 if (ant != null) {
-//                    ant.carattere.dead();
                     ant.die();
                     dead += 1;
                 }
             }
         }
-    }
-
-    /**
-     * Aggiorna il nextFrame della gui rispetto alla situazione attuale della currentAlive
-     * @param y indice di riga
-     * @param x indice di colonna
-     */
-    private void updateFrame(int y, int x) {
-        gui.nextFrame[y][x] = (currentAlive.containsKey(key(y, x)));
     }
 
     /**
@@ -211,6 +226,12 @@ public class AntSimulator implements Game {
         return chiave % GUI.WIDTH;
     }
 
+    private void death(Integer hashKey) {
+        Ant ant = currentAlive.remove(hashKey);
+        ant.die();
+        dead += 1;
+    }
+
     /**
      * metodo di generazione di una coppia di numeri pseudo-casuali all'interno dei range passati in input
      * inoltre sistema i numeri generati casualmente affinché rientrino all'interno della dimensione della gui
@@ -220,7 +241,7 @@ public class AntSimulator implements Game {
      * @param upperbound_j estremo superiore di colonna
      * @return la coppia di numeri casuali
      */
-    private int[] posizioniRandom(int lowerbound_i, int upperbound_i, int lowerbound_j, int upperbound_j) {
+    private int [] posizioniRandom(int lowerbound_i, int upperbound_i, int lowerbound_j, int upperbound_j) {
         random_seed = new Random();
         int[] pos = new int[2];
         pos[0] = random_seed.nextInt(upperbound_i - lowerbound_i) + lowerbound_i;
@@ -230,7 +251,7 @@ public class AntSimulator implements Game {
         return pos;
     }
 
-    static public Map<Integer, Ant> getCurrentAlive() {
+    public static Map<Integer, Ant> getCurrentAlive() {
         return currentAlive;
     }
 
@@ -264,6 +285,6 @@ public class AntSimulator implements Game {
 
     @Override
     public Timer getTimer() {
-        return null;
+        return t;
     }
 }

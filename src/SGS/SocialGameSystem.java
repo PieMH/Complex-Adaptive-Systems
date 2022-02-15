@@ -382,7 +382,7 @@ public class SocialGameSystem implements Game {
         dead += 1;
     }
 
-    static public Map<Integer, Giocatore> getCurrentAlive() {
+    public static Map<Integer, Giocatore> getCurrentAlive() {
         return currentAlive;
     }
 
