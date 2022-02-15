@@ -112,7 +112,7 @@ public class OptionsMenu {
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(false);
 
-		JButton gameType = new JButton("Ant Simulator");
+		JButton gameType = new JButton("Social Game System");
 		gameType.setBounds(100, 79, 198, 26);
 		gameType.addMouseListener(new MouseAdapter() {
 			@Override

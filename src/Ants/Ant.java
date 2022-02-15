@@ -48,8 +48,8 @@ public class Ant {
      * @param x the row number in the grid
      */
     Ant (Integer y, Integer x) {
-        xPos = x;
         yPos = y;
+        xPos = x;
         this.life = 100;
     }
 
@@ -62,9 +62,12 @@ public class Ant {
 
     boolean move() {
         boolean dirFound = false;
-        while (safe_exit < 6 || !dirFound) {
+        System.out.println("yPos " + this.yPos + ", xPos " + this.xPos);
+        while (safe_exit < 6 && !dirFound) {
+            System.out.println("nuovo tentativo");
             dirFound = findRandomDirection();
         }
+        System.out.println("yPos " + this.yPos + ", xPos " + this.xPos);
         if (dirFound) {
             // call the other action
         }
@@ -121,7 +124,7 @@ public class Ant {
 
     private boolean posIsFree(Integer xPos, Integer yPos) {
         boolean response = true;
-        if (xPos < 0 || yPos < 0 || xPos > GUI.WIDTH || yPos > GUI.HEIGHT) response = false;
+        if (xPos < 0 || yPos < 0 || xPos >= GUI.WIDTH || yPos >= GUI.HEIGHT) response = false;
         Ant otherAnt = AntSimulator.getCurrentAlive().get(AntSimulator.key(yPos, xPos));
         if (otherAnt != null && otherAnt.getLife() > 0) response = false;
         return response;

@@ -25,7 +25,7 @@ public class AntSimulator implements Game {
     static int n_starting_agents = 2000;          // default value or given by Options Menu: set number of random agents spawning in the grid
     private int born = 0;                              // n° giocatori nati nel ciclo corrente
     private int dead = 0;                              // n° giocatori morti nel ciclo corrente
-    private int counter = 0;
+    private int statsDelayCounter = 0;
 
     public AntSimulator(GUI gui) {
         resetMap();
@@ -48,11 +48,12 @@ public class AntSimulator implements Game {
                     reset = false;
                 }
                 iterateHashMap(0);  // evolve
-                if (counter == 2) {
-                    printStats(true);
-                    counter = 0;
-                }
-                counter += 1;
+//                if (statsDelayCounter == 1) {
+//                    printStats(0);
+//                    statsDelayCounter = 0;
+//                }
+//                statsDelayCounter += 1;
+                printStats(1);  // print Hash Map
                 iterateMatrix(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;
                 gui.nextFrame = new boolean[GUI.HEIGHT][GUI.WIDTH];
@@ -120,7 +121,7 @@ public class AntSimulator implements Game {
                     evolve(key);
                 }
                 else if (scelta == 1) {
-//                    printDizionario(key);
+                    printHashMap(key);
                 }
             }
         }
@@ -260,11 +261,20 @@ public class AntSimulator implements Game {
         dead = 0;
     }
 
-    private void printStats(boolean choice) {
-        if (choice) {
+    private void printStats(int choice) {
+        if (choice == 0) {
             System.out.println("Total born is" + born);
             System.out.println("Total dead is" + dead);
         }
+        else if (choice == 1) {
+            iterateHashMap(1);
+        }
+    }
+
+    private void printHashMap(Integer hashKey) {
+        int i = coordinates(hashKey, 0);
+        int j = coordinates(hashKey, 1);
+        System.out.println("K:" + i + "," + j + " V:" + currentAlive.get(hashKey));
     }
 
     @Override

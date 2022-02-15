@@ -87,7 +87,7 @@ public class SocialGameSystem implements Game {
 
                 food.riserve = Integer.min(Integer.max(food.riserve, 0), GUI.HEIGHT*GUI.WIDTH*2);
                 food.cresci();
-                printStats(false, false, true);
+                printStats(false, true, false);
                 resetStats();
                 scorriMatrice(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;
@@ -304,8 +304,8 @@ public class SocialGameSystem implements Game {
     }
 
     /**
-     * @param y indice di colonna
-     * @param x indice di riga
+     * @param y indice di riga
+     * @param x indice di colonna
      * @return la chiave univoca associata alla coppia di coordinate y, x
      */
     public static Integer key(int y, int x) {
@@ -315,7 +315,7 @@ public class SocialGameSystem implements Game {
     /**
      * Funzione inversa della key
      * @param chiave una chiave del dizionario
-     * @param columnOrRow 0 per sapere l'indice di colonna, 1 per sapere l'indice di riga
+     * @param columnOrRow 0 per sapere l'indice di riga, 1 per sapere l'indice di colonna
      * @return l'indice o di riga o di colonna associato alla chiave in funzione del parametro d'input
      */
     private static int coordinates(Integer chiave, int columnOrRow) {
