@@ -18,7 +18,7 @@ public class Ant {
     /**
      * the color used by UI.GUI to paint the {@code GUI.innerPanel} correctly
      */
-    public final Color color = new Color(75, 75, 75);
+    public final Color color = new Color(90, 90, 90);
 
     /**
      * the column number in the grid of this ant
@@ -42,9 +42,9 @@ public class Ant {
     private Integer safe_exit = 0;
 
     /**
-     * the 4 cardinal directions
+     * the 8 cardinal directions
      */
-    private enum Direction {N, E, S, O}
+    private enum Direction {N, NE, E, SE, S, SO, O, NO}
 
     /**
      * the chosen direction to follow
@@ -62,7 +62,12 @@ public class Ant {
     /**
      * the max number of turns before an ant following a path changes mind and changes direction
      */
-    private Integer changeDirection = 5;
+    private Integer changeDirection;
+
+    /**
+     * the nest of this ant
+     */
+    private final AntsNest nest;
 
     /**
      * This constructor is called only by AntSimulator at the start of the simulation
@@ -70,12 +75,13 @@ public class Ant {
      * @param y the column number in the grid
      * @param x the row number in the grid
      */
-    Ant (Integer y, Integer x) {
+    Ant (Integer y, Integer x, AntsNest nest) {
         yPos = y;
         xPos = x;
         random_seed = new Random();
         changeDirection = random_seed.nextInt(2, 11);
         this.life = 100;
+        this.nest = nest;
     }
 
     void action() {
@@ -112,16 +118,44 @@ public class Ant {
                 if (posIsFree(xPos, yPos - 1)) this.yPos = yPos - 1;
                 else countDir = changeDirection;
             }
+            case NE -> {
+                if (posIsFree(xPos + 1, yPos - 1)) {
+                    this.xPos = xPos + 1;
+                    this.yPos = yPos - 1;
+                }
+                else countDir = changeDirection;
+            }
             case E -> {
                 if (posIsFree(xPos + 1, yPos)) this.xPos = xPos + 1;
+                else countDir = changeDirection;
+            }
+            case SE -> {
+                if (posIsFree(xPos + 1, yPos + 1)) {
+                    this.xPos = xPos + 1;
+                    this.yPos = yPos + 1;
+                }
                 else countDir = changeDirection;
             }
             case S -> {
                 if (posIsFree(xPos, yPos + 1)) this.yPos = yPos + 1;
                 else countDir = changeDirection;
             }
+            case SO -> {
+                if (posIsFree(xPos - 1, yPos + 1)) {
+                    this.xPos = xPos - 1;
+                    this.yPos = yPos + 1;
+                }
+                else countDir = changeDirection;
+            }
             case O -> {
                 if (posIsFree(xPos - 1, yPos)) this.xPos = xPos - 1;
+                else countDir = changeDirection;
+            }
+            case NO -> {
+                if (posIsFree(xPos - 1, yPos - 1)) {
+                    this.xPos = xPos - 1;
+                    this.yPos = yPos - 1;
+                }
                 else countDir = changeDirection;
             }
         }
@@ -135,7 +169,7 @@ public class Ant {
      */
     private boolean findRandomDirection() {
         random_seed = new Random();
-        int direction = random_seed.nextInt(4);
+        int direction = random_seed.nextInt(8);
         switch (direction) {
             case 0 -> {     // Nord
                 if (posIsFree(xPos, yPos - 1)) {
@@ -147,7 +181,17 @@ public class Ant {
                     return false;
                 }
             }
-            case 1 -> {     // Est
+            case 1 -> {     // NordEst
+                if (posIsFree(xPos + 1, yPos - 1)) {
+                    chosenDir = Direction.NE;
+                    return true;
+                }
+                else {
+                    safe_exit += 1;
+                    return false;
+                }
+            }
+            case 2 -> {     // Est
                 if (posIsFree(xPos + 1, yPos)) {
                     chosenDir = Direction.E;
                     return true;
@@ -157,7 +201,17 @@ public class Ant {
                     return false;
                 }
             }
-            case 2 -> {     // Sud
+            case 3 -> {     // SudEst
+                if (posIsFree(xPos + 1, yPos + 1)) {
+                    chosenDir = Direction.SE;
+                    return true;
+                }
+                else {
+                    safe_exit += 1;
+                    return false;
+                }
+            }
+            case 4 -> {     // Sud
                 if (posIsFree(xPos, yPos + 1)) {
                     chosenDir = Direction.S;
                     return true;
@@ -167,9 +221,29 @@ public class Ant {
                     return false;
                 }
             }
-            case 3 -> {     // Ovest
+            case 5 -> {     // SudOvest
+                if (posIsFree(xPos - 1, yPos + 1)) {
+                    chosenDir = Direction.SO;
+                    return true;
+                }
+                else {
+                    safe_exit += 1;
+                    return false;
+                }
+            }
+            case 6 -> {     // Ovest
                 if (posIsFree(xPos - 1, yPos)) {
                     chosenDir = Direction.O;
+                    return true;
+                }
+                else {
+                    safe_exit += 1;
+                    return false;
+                }
+            }
+            case 7 -> {     // NordOvest
+                if (posIsFree(xPos - 1, yPos - 1)) {
+                    chosenDir = Direction.NO;
                     return true;
                 }
                 else {
@@ -190,8 +264,12 @@ public class Ant {
     private boolean posIsFree(Integer xPos, Integer yPos) {
         boolean response = true;
         if (xPos < 0 || yPos < 0 || xPos >= GUI.WIDTH || yPos >= GUI.HEIGHT) response = false;
+
         Ant otherAnt = AntSimulator.getCurrentAlive().get(AntSimulator.key(yPos, xPos));
         if (otherAnt != null && otherAnt.getLife() > 0) response = false;
+
+        else if (nest.inNest(AntSimulator.key(yPos, xPos))) response = false;
+
         return response;
     }
 

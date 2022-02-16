@@ -1,6 +1,8 @@
 package UI;
 
 import Ants.AntSimulator;
+import Ants.Ant;
+import Ants.AntsNest;
 import Interfaces.Game;
 import SGS.Giocatore;
 import SGS.SocialGameSystem;
@@ -321,7 +323,10 @@ public class GUI {
                     for(int j = 0; j < GUI.WIDTH; j++) {
                         if(currentFrame[i][j]) {
                             if (OptionsMenu.CAS_type == OptionsMenu.CAS.AntSimulator) {
-                                g.setColor(new Color(0, 128, 0, ((AntSimulator.getCurrentAlive().get(AntSimulator.key(i, j)).getLife()) * 255 / 100)));
+                                if (AntSimulator.isAnt(i, j)) {
+                                    g.setColor(new Color(0, 128, 0, ((AntSimulator.getCurrentAlive().get(AntSimulator.key(i, j)).getLife()) * 255 / 100)));
+                                }
+                                else g.setColor(AntSimulator.getColor(i, j));
                                 g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                             }
                             else if (OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
@@ -414,7 +419,7 @@ public class GUI {
                 for(int i = 0; i < GUI.HEIGHT; i++) {
                     for (int j = 0; j < GUI.WIDTH; j++) {
                         if(currentFrame[i][j]) {
-                            g.setColor(AntSimulator.getCurrentAlive().get(AntSimulator.key(i, j)).getColor());
+                            g.setColor(AntSimulator.getColor(i, j));
                             g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         }
                         else {

@@ -4,8 +4,10 @@ import UI.GUI;
 import Interfaces.Game;
 
 import javax.swing.Timer;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.*;
+import java.util.List;
 
 /**
  * The main class that delineate the algorithm of the Ant sim model.
@@ -14,25 +16,81 @@ import java.util.*;
  */
 public class AntSimulator implements Game {
 
-    private static Map<Integer, Ant> currentAlive;  // dizionario di giocatori vivi momentaneo
+    /**
+     * HasMap of the ant currently alive.
+     * The key is calculated always by calling {@code key(y,x)},
+     * the values are the objects Ants
+     */
+    private static Map<Integer, Ant> currentAlive;
+
+    /**
+     * the UI.GUI that it is used to display the model
+     */
     private final GUI gui;
+
+    /**
+     * used to slow down or speed up the simulation
+     */
     private Timer t;
-    private boolean reset;                         // booleana per segnalare se resettare la map o no
-    private Random random_seed;                    // seme di generazione di numeri random
-    private final Object lock = new Object();      // lock per i thread gioco/UI.GUI nella modifica contemporanea allo scorrimento sul dizionario
-    private static final int delay = 100;                // ritardo di repaint del current frame
-    static boolean random = false;                 // default value or given by Options Menu: variabile di differenziazione dello spawn iniziale dei giocatori nell'arena
-    static int n_starting_agents = 2000;          // default value or given by Options Menu: set number of random agents spawning in the grid
-    private int born = 0;                              // n° giocatori nati nel ciclo corrente
-    private int dead = 0;                              // n° giocatori morti nel ciclo corrente
-    private int statsDelayCounter = 0;
+
+    /**
+     * delay on the repaint call of the current frame
+     */
+    private static final int delay = 100;
+
+    /**
+     * flag used when the user click on reset on the GUI
+     */
+    private boolean reset;
+
+    /**
+     * Given by UI.OptionsMenu: use to invoke the {@code SetRandomMap}
+     */
+    static boolean random = false;
+
+    /**
+     * default value or given by UI.OptionsMenu: set number of random agents spawning in the grid
+     */
+    static int n_starting_agents = 2000;
+
+    /**
+     * seed for pseudorandom uniformly distributed random values
+     */
+    private Random random_seed;
+
+    /**
+     * lock for MUTEX between this thread and the UI.GUI one
+     * used for atomic changes on the hashMap currentAlive
+     */
+    private final Object lock = new Object();
+
+    /**
+     * total number of ants born in the simulation
+     */
+    private int born = 0;
+
+    /**
+     * total number of dead ants in the simulation
+     */
+    private int dead = 0;
+
+    /**
+     * the nest of the ants
+     */
+    static AntsNest nest;
+
+//    private int statsDelayCounter = 0;
 
     public AntSimulator(GUI gui) {
         resetMap();
         resetStats();
+        nest = new AntsNest();
         this.gui = gui;
     }
 
+    /**
+     * called by UI.OptionsMenu on time = 0 or on a click of the button "Apply"
+     */
     @Override
     public void startGame() {
         ActionListener taskPerformer = e -> {
@@ -47,7 +105,7 @@ public class AntSimulator implements Game {
                     resetStats();
                     reset = false;
                 }
-                iterateHashMap(0);  // evolve
+                iterateCurrentAlive(0);  // evolve
 //                if (statsDelayCounter == 1) {
 //                    printStats(0);
 //                    statsDelayCounter = 0;
@@ -66,7 +124,7 @@ public class AntSimulator implements Game {
 
     /**
      * main algorithm of the model.
-     * @param hashKey the kye for the hashmap currentAlive
+     * @param hashKey the kye of the hashmap currentAlive
      */
     private void evolve(Integer hashKey) {
         Ant currentAnt = currentAlive.get(hashKey);
@@ -91,6 +149,16 @@ public class AntSimulator implements Game {
     }
 
     /**
+     * manages a new death of an ant
+     * @param hashKey the key on the hashMap currentAlive
+     */
+    private void death(Integer hashKey) {
+        Ant ant = currentAlive.remove(hashKey);
+        if (ant != null) ant.die();
+        dead += 1;
+    }
+
+    /**
      * Metodo di scorrimento delle chiavi del dizionario di appoggio che si riferisce a quello presente
      * il metodo è thread-safe in quanto vige mutua esclusione (mutex) tra il thread della gui e quello del gioco SGS
      * evitando che si modifichino le chiavi del dizionario mentre sto operando su di esso.
@@ -102,7 +170,7 @@ public class AntSimulator implements Game {
      * che i giocatori alla fine del dizionario sfruttino il vantaggio di subire più raramente gli effetti ambientali (carenza di cibo)
      * @param scelta scelta di funzione di scorrimento del dizionario
      */
-    private void iterateHashMap(int scelta) {
+    private void iterateCurrentAlive(int scelta) {
         Map<Integer, Ant> nextAlive;                      // dizionario di appoggio
         random_seed = new Random();
         synchronized (lock) {                                   // mutex tra il thread della gui e quello del gioco
@@ -150,7 +218,7 @@ public class AntSimulator implements Game {
      * @param x indice di colonna
      */
     private void updateFrame(int y, int x) {
-        gui.nextFrame[y][x] = (currentAlive.containsKey(key(y, x)));
+        gui.nextFrame[y][x] = (currentAlive.containsKey(key(y, x)) || nest.inNest(key(y, x)));
     }
 
     /**
@@ -168,11 +236,11 @@ public class AntSimulator implements Game {
                 y = random_seed.nextInt(GUI.HEIGHT);
                 x = random_seed.nextInt(GUI.WIDTH);
                 Integer k = key(y, x);
-                if (currentAlive.containsKey(k)) {
+                if (currentAlive.containsKey(k) || nest.inNest(k)) {    // if it is already occupied
                     n--;
                     continue;
                 }
-                Ant ant = new Ant(y, x);
+                Ant ant = new Ant(y, x, nest);
                 currentAlive.put(k, ant);
                 born += 1;
             }
@@ -190,8 +258,8 @@ public class AntSimulator implements Game {
         synchronized (lock) {
             Integer k = key(y, x);
             if (gui.currentFrame[y][x]) {
-                if (!currentAlive.containsKey(k)) {     // inserisci chiave solo se libera, quindi senza sovrascrivere
-                    Ant ant = new Ant(y, x);
+                if (!currentAlive.containsKey(k) && !nest.inNest(k)) {     // only if it is empty
+                    Ant ant = new Ant(y, x, nest);
                     currentAlive.put(k, ant);
                     born += 1;
                 }
@@ -206,19 +274,20 @@ public class AntSimulator implements Game {
     }
 
     /**
-     * @param y indice di riga
-     * @param x indice di colonna
-     * @return la chiave univoca associata alla coppia di coordinate y, x
+     * @param y row number
+     * @param x column number
+     * @return the unique key associated to the coordinates y, x on the grid.
+     *          Actually it is the position on the grid seen as one dimensional
      */
     public static Integer key(int y, int x) {
         return (y * GUI.WIDTH) + x;
     }
 
     /**
-     * Funzione inversa della key
-     * @param chiave una chiave del dizionario
-     * @param columnOrRow 0 per sapere l'indice di colonna, 1 per sapere l'indice di riga
-     * @return l'indice o di riga o di colonna associato alla chiave in funzione del parametro d'input
+     * Inverse function of the {@code key()} function.
+     * @param chiave the key on the hashMap calculated by {@code key()}.
+     * @param columnOrRow 0 to know the column index on the 2 dimensional grid; 1 to know the row index on the 2 dimensional grid
+     * @return the column or row index based on {@code columnOrRow}.
      */
     private static int coordinates(Integer chiave, int columnOrRow) {
         if (columnOrRow == 0) {
@@ -227,60 +296,99 @@ public class AntSimulator implements Game {
         return chiave % GUI.WIDTH;
     }
 
-    private void death(Integer hashKey) {
-        Ant ant = currentAlive.remove(hashKey);
-        ant.die();
-        dead += 1;
-    }
-
     /**
      * metodo di generazione di una coppia di numeri pseudo-casuali all'interno dei range passati in input
      * inoltre sistema i numeri generati casualmente affinché rientrino all'interno della dimensione della gui
-     * @param lowerbound_i estremo inferiore di riga
-     * @param upperbound_i estremo superiore di riga
-     * @param lowerbound_j estremo inferiore di colonna
-     * @param upperbound_j estremo superiore di colonna
+     * @param lowerBound_i estremo inferiore di riga
+     * @param upperBound_i estremo superiore di riga
+     * @param lowerBound_j estremo inferiore di colonna
+     * @param upperBound_j estremo superiore di colonna
      * @return la coppia di numeri casuali
      */
-    private int [] posizioniRandom(int lowerbound_i, int upperbound_i, int lowerbound_j, int upperbound_j) {
+    private int [] posizioniRandom(int lowerBound_i, int upperBound_i, int lowerBound_j, int upperBound_j) {
         random_seed = new Random();
         int[] pos = new int[2];
-        pos[0] = random_seed.nextInt(upperbound_i - lowerbound_i) + lowerbound_i;
-        pos[1] = random_seed.nextInt(upperbound_j - lowerbound_j) + lowerbound_j;
+        pos[0] = random_seed.nextInt(upperBound_i - lowerBound_i) + lowerBound_i;
+        pos[1] = random_seed.nextInt(upperBound_j - lowerBound_j) + lowerBound_j;
         pos[0] = Integer.max(Integer.min(pos[0], GUI.HEIGHT - 1), 0);
         pos[1] = Integer.max(Integer.min(pos[1], GUI.WIDTH - 1), 0);
         return pos;
     }
 
-    public static Map<Integer, Ant> getCurrentAlive() {
-        return currentAlive;
-    }
-
+    /**
+     * reset the stats of the simulation
+     */
     private void resetStats() {
         born = 0;
         dead = 0;
     }
 
+    /**
+     * the debugger function responsible for printing to stdout the stats of the simulation
+     * @param choice which kind of prints do you want:
+     *               0 is for displaying only the total ants born and dead;
+     *               1 is for displaying the whole hashMap keys and values associated
+     */
     private void printStats(int choice) {
         if (choice == 0) {
             System.out.println("Total born is" + born);
             System.out.println("Total dead is" + dead);
         }
         else if (choice == 1) {
-            iterateHashMap(1);
+            iterateCurrentAlive(1);
         }
     }
 
+    /**
+     * the auxiliary function of printStats, called by it when choice is on 1
+     * @param hashKey the kye of the hashmap currentAlive
+     */
     private void printHashMap(Integer hashKey) {
         int i = coordinates(hashKey, 0);
         int j = coordinates(hashKey, 1);
         System.out.println("K:" + i + "," + j + " V:" + currentAlive.get(hashKey));
     }
 
+    /**
+     * called by UI.GUI paintLife and UI.GUI paintAnts
+     * @param y the row number value
+     * @param x the column number value
+     * @return the correct color of the object in this position
+     */
+    public static Color getColor(Integer y, Integer x) {
+        Integer k = key(y, x);
+        Ant a = currentAlive.get(k);
+        if (a != null) {
+            return a.getColor();
+        }
+        else if (nest.inNest(k)) {
+            return nest.getColor();
+        }
+        return new Color(200,0,0);
+    }
+
+    /**
+     * called by UI.GUI paintLife to know whether to paint the life of an ant based on its age
+     * or to paint another object normally
+     * @param y the row number value
+     * @param x the column number value
+     * @return true if this position is currently occupied by a living ant, this is granted by {@code evolve()}
+     */
+    public static boolean isAnt(Integer y, Integer x) {
+        return (currentAlive.get(key(y, x)) != null);
+    }
+
+    /**
+     * invoked on a click on reset on the UI.GUI
+     */
     @Override
     public void resetMap() {
         currentAlive = new Hashtable<>();
         reset = true;
+    }
+
+    public static Map<Integer, Ant> getCurrentAlive() {
+        return currentAlive;
     }
 
     @Override
