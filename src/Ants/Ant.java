@@ -48,7 +48,7 @@ public class Ant {
 
     /**
      * the chosen direction to follow
-     * If no major events occur (other ant meeting, feromon sniffing)
+     * If no major events occur (other ant meeting, pheromone sniffing)
      * then every n random turns the ants changes direction randomly.
      *
      */
@@ -85,15 +85,20 @@ public class Ant {
     }
 
     void action() {
+        boolean foundSomething = sniff();
         safe_exit = 0;
         movement();
+    }
+
+    boolean sniff() {
+
     }
 
     /**
      * the complete algorithm who controls the movement of an ant
      */
     void movement() {
-        // choose to move randomly or follow a scent of food or feromon trail
+        // choose to move randomly or follow a scent of food or pheromone trail
         // if you choose to move randomly
         countDir += 1;
         if (countDir > changeDirection) {

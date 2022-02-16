@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * The main class that delineate the algorithm of the Ant sim model.
  * It manages the general behavior of the sim and its core functionalities.
- * It also serves as a mainframe for the classes Ants, Ambient, Feromon ??.
+ * It also serves as a mainframe for the classes Ants, FoodSource, AntsNest, Pheromone.
  */
 public class AntSimulator implements Game {
 
@@ -22,6 +22,8 @@ public class AntSimulator implements Game {
      * the values are the objects Ants
      */
     private static Map<Integer, Ant> currentAlive;
+
+    private Map<Integer, FoodSource> currentFood;
 
     /**
      * the UI.GUI that it is used to display the model
@@ -79,13 +81,38 @@ public class AntSimulator implements Game {
      */
     static AntsNest nest;
 
+    /**
+     * the minimal value of elements in the grid if generated randomly.
+     * It follows a logarithmic growth proportional to the GUI.DIMENSION value,
+     * that is the total number of cells in the grid
+     */
+    int minimal = 1;
+
+    int maximal = minimal * 2;
+
 //    private int statsDelayCounter = 0;
 
     public AntSimulator(GUI gui) {
+        this.gui = gui;
+
+        nest = new AntsNest();
+
+        random_seed = new Random();
+        minimal = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION)) - 1, 1);
+        int maxFood = random_seed.nextInt(minimal, maximal);
+        for (int m = 0; m < maxFood; m++) {
+            int y = random_seed.nextInt(GUI.HEIGHT);
+            int x = random_seed.nextInt(GUI.WIDTH);
+            Integer k = key(y, x);
+            if (!currentAlive.containsKey(k) && !nest.inNest(k)) { // balanceFood() will add food sources to the environment eventually
+                FoodSource food = new FoodSource(y, x);
+                currentFood.put(k, food);
+            }
+        }
+
         resetMap();
         resetStats();
-        nest = new AntsNest();
-        this.gui = gui;
+        iterateMatrix(1);     // updateFrame
     }
 
     /**
@@ -102,7 +129,6 @@ public class AntSimulator implements Game {
                     else {
                         iterateMatrix(0);  // setMap
                     }
-                    resetStats();
                     reset = false;
                 }
                 iterateCurrentAlive(0);  // evolve
@@ -112,6 +138,7 @@ public class AntSimulator implements Game {
 //                }
 //                statsDelayCounter += 1;
 //                printStats(1);  // print Hash Map
+                balanceFood();
                 iterateMatrix(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;
                 gui.nextFrame = new boolean[GUI.HEIGHT][GUI.WIDTH];
@@ -156,6 +183,34 @@ public class AntSimulator implements Game {
         Ant ant = currentAlive.remove(hashKey);
         if (ant != null) ant.die();
         dead += 1;
+    }
+
+    /**
+     * invoked by an ant who is the last to access to a food's source before it is completely run out
+     * @param k the key for currentFood
+     */
+    void foodFinished(Integer k) {
+        currentFood.remove(k);
+    }
+
+    /**
+     * Called by startGame to balance the food in the environment of the model
+     */
+    private void balanceFood() {
+        int fSize = currentFood.size();
+        if (fSize < minimal) {
+            random_seed = new Random();
+            int maxFood = maximal - fSize;
+            for (int m = 0; m < maxFood; m++) {
+                int y = random_seed.nextInt(GUI.HEIGHT);
+                int x = random_seed.nextInt(GUI.WIDTH);
+                Integer k = key(y, x);
+                if (!currentAlive.containsKey(k) && !nest.inNest(k)) {  // if it is a free spot ok, otherwise we'll try on the next frame
+                    FoodSource food = new FoodSource(y, x);
+                    currentFood.put(k, food);
+                }
+            }
+        }
     }
 
     /**

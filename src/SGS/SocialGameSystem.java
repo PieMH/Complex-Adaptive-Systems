@@ -43,31 +43,6 @@ public class SocialGameSystem implements Game {
     }
 
     /**
-     * Metodo invocato alla chiamata al costruttore o al click del tasto Reset su gui.
-     * Resetta la map CurrentAlive a tutta null, istanzia un nuovo oggetto SGS.Food
-     * e resetta alcune statistiche di gioco
-     */
-    public void resetMap() {
-        currentAlive = new Hashtable<>();
-        reset = true;
-        food = new Food();
-        // for the stats
-        n_iterations = 0;
-        Class<? extends Personality> P;
-        for (String s : Giocatore.personalityType) {
-            try {
-                P = Class.forName(s).asSubclass(Personality.class);
-                Field tot_born = P.getDeclaredField("totalborn");
-                tot_born.setInt(null, 0);
-                Field tot_dead = P.getDeclaredField("totaldead");
-                tot_dead.setInt(null, 0);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
      * thread motore di gioco
      * fa evolvere il dizionario di giocatori vivi, lo aggiorna e aggiorna i frame della gui
      */
@@ -206,6 +181,31 @@ public class SocialGameSystem implements Game {
                 	gio.die();
                 }
                 dead += 1;
+            }
+        }
+    }
+
+    /**
+     * Metodo invocato alla chiamata al costruttore o al click del tasto Reset su gui.
+     * Resetta la map CurrentAlive a tutta null, istanzia un nuovo oggetto SGS.Food
+     * e resetta alcune statistiche di gioco
+     */
+    public void resetMap() {
+        currentAlive = new Hashtable<>();
+        reset = true;
+        food = new Food();
+        // for the stats
+        n_iterations = 0;
+        Class<? extends Personality> P;
+        for (String s : Giocatore.personalityType) {
+            try {
+                P = Class.forName(s).asSubclass(Personality.class);
+                Field tot_born = P.getDeclaredField("totalborn");
+                tot_born.setInt(null, 0);
+                Field tot_dead = P.getDeclaredField("totaldead");
+                tot_dead.setInt(null, 0);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
