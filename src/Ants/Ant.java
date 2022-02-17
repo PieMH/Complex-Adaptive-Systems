@@ -3,7 +3,8 @@ package Ants;
 import UI.GUI;
 
 import java.awt.*;
-import java.util.Random;
+import java.util.*;
+import java.util.List;
 
 /**
  *
@@ -29,17 +30,15 @@ public class Ant {
      * the row number on the grid of this ant
      */
     private Integer yPos;
+    
+    private Integer nextX;
+    
+    private Integer nextY;
 
     /**
      * random seed for stochastic actions
      */
     private Random random_seed;
-
-    /**
-     * for exiting move loopholes where no place is available,
-     * after 5 trials quit trying and wait or do something else
-     */
-    private Integer safe_exit = 0;
 
     /**
      * the 8 cardinal directions
@@ -52,17 +51,19 @@ public class Ant {
      * then every n random turns the ants changes direction randomly.
      *
      */
-    private Direction chosenDir = Direction.N;
+    private Direction chosenDir;
 
     /**
      * the counter for the change of the direction
      */
-    private Integer countDir = 0;
+    private Integer countDir;
 
     /**
      * the max number of turns before an ant following a path changes mind and changes direction
      */
     private Integer changeDirection;
+
+    private boolean onARandomPath = true;
 
     /**
      * the nest of this ant
@@ -80,90 +81,85 @@ public class Ant {
         xPos = x;
         random_seed = new Random();
         changeDirection = random_seed.nextInt(2, 11);
+        countDir = changeDirection;
         this.life = 100;
         this.nest = nest;
     }
 
+    /**
+     * called by AntSimulator to activate an Ant.
+     * The possible actions are:
+     * <ol>
+     *     <li>search the 8 squares around you</li>
+     *     <li>interact with something around you</li>
+     *     <li>decide if you want to follow something you found</li>
+     *     <li>follow your trail</li>
+     *     <li>after some time if you are on a random trail change it randomly>
+     * </ol>
+     */
     void action() {
-        boolean foundSomething = sniff();
-        safe_exit = 0;
+        search(true, false);
+
         movement();
-    }
-
-    boolean sniff() {
-
     }
 
     /**
      * the complete algorithm who controls the movement of an ant
      */
     void movement() {
-        // choose to move randomly or follow a scent of food or pheromone trail
-        // if you choose to move randomly
-        countDir += 1;
-        if (countDir > changeDirection) {
-            boolean dirFound = false;
-            while (safe_exit < 6 && !dirFound) {
-                dirFound = findRandomDirection();
-            }
-            if (!dirFound) {
-                // call the other action
-            }
-            countDir = 0;
+        if (onARandomPath) {
+            countDir += 1;
         }
-        move();
+
+        // follow your path
+        if (countDir < changeDirection) {
+            translateDirInPos(chosenDir);    // updates nextY and nextX
+            if (move(nextY, nextX)) return;
+        }
+
+        // otherwise, search a random path
+        search(false, true);
+
+        move(nextY, nextX);
+    }
+
+    void search(boolean something, boolean newDirection) {
+        random_seed = new Random();
+        ArrayList<Direction> directionList = new ArrayList<>(List.of(Direction.values()));
+        int index;
+        for (int i = 0; i < 8; i++) {
+            index = random_seed.nextInt(directionList.size());
+            Direction dir = directionList.remove(index);
+            if (something) {
+                translateDirInPos(dir);     // updates nextY and nextX
+                interact(nextY, nextX);
+            }
+            else if (newDirection) {
+                if (findRandomDirection(dir)) {
+                    return;
+                }
+            }
+        }
+    }
+
+    void interact(Integer y, Integer x) {
+        Object o = whoIsThere(y, x);
+//        chooseWhatToDo(o);  // update chosenDir // update countDir  // update onARandomPath
     }
 
     /**
-     * move the ant in the chosen Direction
+     *
+     * @param y the column number in the grid
+     * @param x the row number in the grid
      */
-    void move() {
-        switch (chosenDir) {
-            case N -> {
-                if (posIsFree(xPos, yPos - 1)) this.yPos = yPos - 1;
-                else countDir = changeDirection;
-            }
-            case NE -> {
-                if (posIsFree(xPos + 1, yPos - 1)) {
-                    this.xPos = xPos + 1;
-                    this.yPos = yPos - 1;
-                }
-                else countDir = changeDirection;
-            }
-            case E -> {
-                if (posIsFree(xPos + 1, yPos)) this.xPos = xPos + 1;
-                else countDir = changeDirection;
-            }
-            case SE -> {
-                if (posIsFree(xPos + 1, yPos + 1)) {
-                    this.xPos = xPos + 1;
-                    this.yPos = yPos + 1;
-                }
-                else countDir = changeDirection;
-            }
-            case S -> {
-                if (posIsFree(xPos, yPos + 1)) this.yPos = yPos + 1;
-                else countDir = changeDirection;
-            }
-            case SO -> {
-                if (posIsFree(xPos - 1, yPos + 1)) {
-                    this.xPos = xPos - 1;
-                    this.yPos = yPos + 1;
-                }
-                else countDir = changeDirection;
-            }
-            case O -> {
-                if (posIsFree(xPos - 1, yPos)) this.xPos = xPos - 1;
-                else countDir = changeDirection;
-            }
-            case NO -> {
-                if (posIsFree(xPos - 1, yPos - 1)) {
-                    this.xPos = xPos - 1;
-                    this.yPos = yPos - 1;
-                }
-                else countDir = changeDirection;
-            }
+    private boolean move(Integer y, Integer x) {
+        if (whoIsThere(y, x) == null && inBounds(y, x) && (!Objects.equals(yPos, y) || !Objects.equals(xPos, x))) {
+            this.yPos = y;
+            this.xPos = x;
+            return true;
         }
+        else countDir = changeDirection;
+        return false;
     }
 
     /**
@@ -172,110 +168,79 @@ public class Ant {
      * safe_exit is for {@code movement()} to avoid keeping searching an available position forever
      * @return true if it finds a new direction, false otherwise
      */
-    private boolean findRandomDirection() {
-        random_seed = new Random();
-        int direction = random_seed.nextInt(8);
-        switch (direction) {
-            case 0 -> {     // Nord
-                if (posIsFree(xPos, yPos - 1)) {
-                    chosenDir = Direction.N;
-                    return true;
-                }
-                else {
-                    safe_exit += 1;
-                    return false;
-                }
-            }
-            case 1 -> {     // NordEst
-                if (posIsFree(xPos + 1, yPos - 1)) {
-                    chosenDir = Direction.NE;
-                    return true;
-                }
-                else {
-                    safe_exit += 1;
-                    return false;
-                }
-            }
-            case 2 -> {     // Est
-                if (posIsFree(xPos + 1, yPos)) {
-                    chosenDir = Direction.E;
-                    return true;
-                }
-                else {
-                    safe_exit += 1;
-                    return false;
-                }
-            }
-            case 3 -> {     // SudEst
-                if (posIsFree(xPos + 1, yPos + 1)) {
-                    chosenDir = Direction.SE;
-                    return true;
-                }
-                else {
-                    safe_exit += 1;
-                    return false;
-                }
-            }
-            case 4 -> {     // Sud
-                if (posIsFree(xPos, yPos + 1)) {
-                    chosenDir = Direction.S;
-                    return true;
-                }
-                else {
-                    safe_exit += 1;
-                    return false;
-                }
-            }
-            case 5 -> {     // SudOvest
-                if (posIsFree(xPos - 1, yPos + 1)) {
-                    chosenDir = Direction.SO;
-                    return true;
-                }
-                else {
-                    safe_exit += 1;
-                    return false;
-                }
-            }
-            case 6 -> {     // Ovest
-                if (posIsFree(xPos - 1, yPos)) {
-                    chosenDir = Direction.O;
-                    return true;
-                }
-                else {
-                    safe_exit += 1;
-                    return false;
-                }
-            }
-            case 7 -> {     // NordOvest
-                if (posIsFree(xPos - 1, yPos - 1)) {
-                    chosenDir = Direction.NO;
-                    return true;
-                }
-                else {
-                    safe_exit += 1;
-                    return false;
-                }
-            }
+    private boolean findRandomDirection(Direction dir) {
+        translateDirInPos(dir);     // updates nextY and nextX
+
+        if (whoIsThere(nextY, nextX) == null && inBounds(nextY, nextX) && (!Objects.equals(yPos, nextY) || !Objects.equals(xPos, nextX))) {
+            chosenDir = dir;
+            countDir = 0;
+            onARandomPath = true;
+            return true;
         }
         return false;
     }
 
+    private void translateDirInPos(Direction direction) {
+        nextX = this.xPos;
+        nextY = this.yPos;
+        switch (direction) {
+            case N -> // Nord
+                nextY -= 1;
+            case NE -> {     // NordEst
+                nextY -= 1;
+                nextX += 1;
+            }
+            case E -> // Est
+                nextX += 1;
+            case SE -> {     // SudEst
+                nextY += 1;
+                nextX += 1;
+            }
+            case S -> // Sud
+                nextY += 1;
+            case SO -> {     // SudOvest
+                nextY += 1;
+                nextX -= 1;
+            }
+            case O -> // Ovest
+                nextX -= 1;
+            case NO -> {     // NordOvest
+                nextY -= 1;
+                nextX -= 1;
+            }
+        }
+    }
+
     /**
-     * control whether a position in the grid is free or out of bounds or already occupied
+     *
      * @param xPos the column number
      * @param yPos the row number
-     * @return true if it is free, false otherwise
+     * @return ??? to do with generics
      */
-    private boolean posIsFree(Integer xPos, Integer yPos) {
-        boolean response = true;
-        if (xPos < 0 || yPos < 0 || xPos >= GUI.WIDTH || yPos >= GUI.HEIGHT) response = false;
+    private Object whoIsThere(Integer yPos, Integer xPos) {
 
+        // another living ant
         Ant otherAnt = AntSimulator.getCurrentAlive().get(AntSimulator.key(yPos, xPos));
-        if (otherAnt != null && otherAnt.getLife() > 0) response = false;
+        if (otherAnt != null && otherAnt.getLife() > 0) return otherAnt;
 
-        else if (nest.inNest(AntSimulator.key(yPos, xPos))) response = false;
+        // your nest
+        if (nest.inNest(AntSimulator.key(yPos, xPos))) return nest;
 
-        return response;
+        // a food's source
+        FoodSource food = AntSimulator.getCurrentFood().get(AntSimulator.key(yPos, xPos));
+        if (food.getAmountLeft() > 0) return food;
+
+        return null;
+    }
+
+    /**
+     * to tell if the position given as a parameter is actually out of the bounds of the grid
+     * @param xPos the column number
+     * @param yPos the row number
+     * @return false if it is out of the bounds, true otherwise
+     */
+    private boolean inBounds(Integer yPos, Integer xPos) {
+        return (xPos >= 0 && yPos >= 0 && xPos < GUI.WIDTH && yPos < GUI.HEIGHT);
     }
 
     /**

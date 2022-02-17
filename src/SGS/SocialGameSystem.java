@@ -96,7 +96,7 @@ public class SocialGameSystem implements Game {
             int m = keylist.size();
             for (int i = 0; i < n; i++) {
                 int index = 0;
-                if (m-1 > 0) {
+                if (m - 1 > 0) {
                     index = random_seed.nextInt(m - 1);
                 }
                 Integer key = keylist.remove(index);

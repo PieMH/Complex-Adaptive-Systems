@@ -23,7 +23,10 @@ public class AntSimulator implements Game {
      */
     private static Map<Integer, Ant> currentAlive;
 
-    private Map<Integer, FoodSource> currentFood;
+    /**
+     *
+     */
+    private static Map<Integer, FoodSource> currentFood;
 
     /**
      * the UI.GUI that it is used to display the model
@@ -88,6 +91,9 @@ public class AntSimulator implements Game {
      */
     int minimal = 1;
 
+    /**
+     *
+     */
     int maximal = minimal * 2;
 
 //    private int statsDelayCounter = 0;
@@ -444,6 +450,10 @@ public class AntSimulator implements Game {
 
     public static Map<Integer, Ant> getCurrentAlive() {
         return currentAlive;
+    }
+
+    public static Map<Integer, FoodSource> getCurrentFood() {
+        return currentFood;
     }
 
     @Override
