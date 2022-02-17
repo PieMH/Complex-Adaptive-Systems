@@ -27,6 +27,18 @@ public class FoodSource {
      */
     private Integer amountLeft;
 
+    /**
+     * the minimal value of elements in the grid if generated randomly.
+     * It follows a logarithmic growth proportional to the GUI.DIMENSION value,
+     * that is the total number of cells in the grid
+     */
+    int minimal = 1;
+
+    /**
+     *
+     */
+    int maximal;
+
     FoodSource(Integer y, Integer x) {
         this.yPos = y;
         this.xPos = x;
@@ -36,8 +48,9 @@ public class FoodSource {
           The logic is to ensure the growth of the minimal value is logarithmic proportional
           to that of the number of cells in the grid, that is GUI.DIMENSION.
          */
-        int minimal = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION * GUI.DIMENSION)), 1);
-        amountLeft = random_seed.nextInt(minimal, minimal * 5);
+        minimal = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION * GUI.DIMENSION)), 1);   // minimal number of quantity of food in this source
+        maximal = minimal * 5;
+        amountLeft = random_seed.nextInt(minimal, maximal);
     }
 
     Integer getAmountLeft() {

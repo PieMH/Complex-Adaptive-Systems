@@ -17,7 +17,7 @@ public class Ant {
     public Integer life;
 
     /**
-     * the color used by UI.GUI to paint the {@code GUI.innerPanel} correctly
+     * the color used by UI.GUI to paint the GUI.innerPanel correctly
      */
     public final Color color = new Color(90, 90, 90);
 
@@ -30,9 +30,23 @@ public class Ant {
      * the row number on the grid of this ant
      */
     private Integer yPos;
-    
+
+    /**
+     * A nearby x position.
+     * <b>DO NOT CHANGE THIS DIRECTLY</b>.
+     * <p></p>
+     * <b><u>The method {@code translateDirInPos()} is the only one who can modify this</u></b>
+     * @see #translateDirInPos
+     */
     private Integer nextX;
-    
+
+    /**
+     * A nearby y position.
+     * <b>DO NOT CHANGE THIS DIRECTLY</b>.
+     * <p></p>
+     * <b><u>The method {@code translateDirInPos()} is the only one who can modify this</u></b>
+     * @see #translateDirInPos
+     */
     private Integer nextY;
 
     /**
@@ -49,21 +63,27 @@ public class Ant {
      * the chosen direction to follow
      * If no major events occur (other ant meeting, pheromone sniffing)
      * then every n random turns the ants changes direction randomly.
-     *
+     * @see #movement
      */
     private Direction chosenDir;
 
     /**
-     * the counter for the change of the direction
+     * the counter for the change of the direction. When it reaches "changeDirection" triggers findRandomDirection
+     * @see #movement
      */
     private Integer countDir;
 
     /**
      * the max number of turns before an ant following a path changes mind and changes direction
+     * @see #movement
      */
     private Integer changeDirection;
 
-    private boolean onARandomPath = true;
+    /**
+     * a simple flag use by movement() to know if the path the ant is following it was chosen randomly or not
+     * @see #movement
+     */
+    private boolean onARandomPath;
 
     /**
      * the nest of this ant
@@ -82,6 +102,7 @@ public class Ant {
         random_seed = new Random();
         changeDirection = random_seed.nextInt(2, 11);
         countDir = changeDirection;
+        onARandomPath = true;
         this.life = 100;
         this.nest = nest;
     }
@@ -123,6 +144,15 @@ public class Ant {
         move(nextY, nextX);
     }
 
+    /**
+     * Searches in the 8 nearby position for something to interact whith or just for an empty space to go to.
+     * This depends upon the value of two parameters. <b>NEVER CALL THIS METHOD WITH BOTH OF THEM AT TRUE</b>.
+     * It would break the little mind of the ant. If you call this method with both parameters at false it is simply useless.
+     * @param something true if you want to find something around you
+     * @param newDirection true if you want to search for a new random direction to follow
+     * @see #interact
+     * @see #findRandomDirection
+     */
     void search(boolean something, boolean newDirection) {
         random_seed = new Random();
         ArrayList<Direction> directionList = new ArrayList<>(List.of(Direction.values()));
@@ -142,15 +172,39 @@ public class Ant {
         }
     }
 
-    void interact(Integer y, Integer x) {
-        Object o = whoIsThere(y, x);
+    /**
+     *
+     * @param y
+     * @param x
+     * @param <E>
+     */
+    <E> void interact(Integer y, Integer x) {
+        E element = whoIsThere(y, x);
+        if (element == null) return;
+        if (element.getClass() == Ant.class) {
+
+        }
+        else if (element.getClass() == AntsNest.class) {
+
+        }
+        else if (element.getClass() == FoodSource.class) {
+
+        }
+        else if (element.getClass() == Pheromone.class) {
+
+        }
+
 //        chooseWhatToDo(o);  // update chosenDir // update countDir  // update onARandomPath
     }
 
     /**
-     *
+     * Simply moves the ant to the positions given by parameters. They must be nearby but this is delegated to search(), movement() and translateDirInPos().
+     * If the position given is not free then changes countDir to trigger a recalculation of the path to follow by the ant
      * @param y the column number in the grid
      * @param x the row number in the grid
+     * @see #search
+     * @see #movement
+     * @see #translateDirInPos
      */
     private boolean move(Integer y, Integer x) {
         if (whoIsThere(y, x) == null && inBounds(y, x) && (!Objects.equals(yPos, y) || !Objects.equals(xPos, x))) {
@@ -163,9 +217,7 @@ public class Ant {
     }
 
     /**
-     * finds a new direction to follow
-     * it must be free
-     * safe_exit is for {@code movement()} to avoid keeping searching an available position forever
+     * decide whether the direction given as a parameter can be a new direction to follow: it must be free.
      * @return true if it finds a new direction, false otherwise
      */
     private boolean findRandomDirection(Direction dir) {
@@ -180,6 +232,12 @@ public class Ant {
         return false;
     }
 
+    /**
+     * simply translate a cardinal direction in a pair of coordinates relative to that of this ant.
+     * The translation is saved on the local attributes of this class called nextX and nextY,
+     * they are the nearby position on the grid relative to this.xPos and this.yPos, translation from a Direction
+     * @param direction the cardinal direction to translate
+     */
     private void translateDirInPos(Direction direction) {
         nextX = this.xPos;
         nextY = this.yPos;
@@ -215,20 +273,20 @@ public class Ant {
      *
      * @param xPos the column number
      * @param yPos the row number
-     * @return ??? to do with generics
+     * @return ??
      */
-    private Object whoIsThere(Integer yPos, Integer xPos) {
+    private <E> E whoIsThere(Integer yPos, Integer xPos) {
 
         // another living ant
         Ant otherAnt = AntSimulator.getCurrentAlive().get(AntSimulator.key(yPos, xPos));
-        if (otherAnt != null && otherAnt.getLife() > 0) return otherAnt;
+        if (otherAnt != null && otherAnt.getLife() > 0) return (E) otherAnt;
 
         // your nest
-        if (nest.inNest(AntSimulator.key(yPos, xPos))) return nest;
+        if (nest.inNest(AntSimulator.key(yPos, xPos))) return (E) nest;
 
         // a food's source
         FoodSource food = AntSimulator.getCurrentFood().get(AntSimulator.key(yPos, xPos));
-        if (food.getAmountLeft() > 0) return food;
+        if (food != null && food.getAmountLeft() > 0) return (E) food;
 
         return null;
     }

@@ -94,29 +94,31 @@ public class AntSimulator implements Game {
     /**
      *
      */
-    int maximal = minimal * 2;
+    int maximal;
 
 //    private int statsDelayCounter = 0;
 
     public AntSimulator(GUI gui) {
         this.gui = gui;
 
+        resetMap();
+
         nest = new AntsNest();
 
         random_seed = new Random();
-        minimal = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION)) - 1, 1);
+        minimal = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION)) - 1, 1);   // minimal number of food's sources generated on the grid
+        maximal = minimal * 2;
         int maxFood = random_seed.nextInt(minimal, maximal);
         for (int m = 0; m < maxFood; m++) {
             int y = random_seed.nextInt(GUI.HEIGHT);
             int x = random_seed.nextInt(GUI.WIDTH);
             Integer k = key(y, x);
-            if (!currentAlive.containsKey(k) && !nest.inNest(k)) { // balanceFood() will add food sources to the environment eventually
+            if (!currentAlive.containsKey(k) && !nest.inNest(k)) { // balanceFood() will add food's sources to the environment eventually
                 FoodSource food = new FoodSource(y, x);
                 currentFood.put(k, food);
             }
         }
 
-        resetMap();
         resetStats();
         iterateMatrix(1);     // updateFrame
     }
@@ -279,7 +281,7 @@ public class AntSimulator implements Game {
      * @param x indice di colonna
      */
     private void updateFrame(int y, int x) {
-        gui.nextFrame[y][x] = (currentAlive.containsKey(key(y, x)) || nest.inNest(key(y, x)));
+        gui.nextFrame[y][x] = (currentAlive.containsKey(key(y, x)) || nest.inNest(key(y, x)) || currentFood.containsKey(key(y, x)));
     }
 
     /**
@@ -425,6 +427,10 @@ public class AntSimulator implements Game {
         else if (nest.inNest(k)) {
             return nest.getColor();
         }
+        FoodSource food = currentFood.get(k);
+        if (food != null) {
+            return food.getColor();
+        }
         return new Color(200,0,0);
     }
 
@@ -445,6 +451,7 @@ public class AntSimulator implements Game {
     @Override
     public void resetMap() {
         currentAlive = new Hashtable<>();
+        currentFood = new Hashtable<>();
         reset = true;
     }
 
