@@ -96,6 +96,19 @@ public class Ant {
     private boolean onARandomPath;
 
     /**
+     * a flag to let move() know whether to leave a trail of pheromones after encountering a food's source or the nest.
+     * @see #move
+     */
+    private Integer leaveTrail;
+
+    private Integer maxLeaveTrail;
+
+    /**
+     * the strength of a new Trail type of Pheromone release
+     */
+    private Integer strengthOfNewTrailPheromone;
+
+    /**
      * the nest of this ant
      */
     private final AntsNest nest;
@@ -111,15 +124,24 @@ public class Ant {
     Ant (Integer y, Integer x, AntsNest nest) {
         yPos = y;
         xPos = x;
+
         random_seed = new Random();
-        int minchange = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1, 2);
-        int maxchange = (int) Math.ceil(minchange * Math.sqrt(minchange)) + 1;
-        changeDirection = random_seed.nextInt(minchange, maxchange);
+        int minChange = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1, 2);
+        int maxChange = (int) Math.ceil(minChange * Math.sqrt(minChange)) + 1;
+        changeDirection = random_seed.nextInt(minChange, maxChange);
+
+        int minTrail = 2 * minChange;
+        int maxTrail = (int) Math.ceil(minTrail * 3.0 / 2.0 * minTrail);
+        maxLeaveTrail = random_seed.nextInt(minTrail, maxTrail);
+        leaveTrail = maxLeaveTrail;
+
+        strengthOfNewTrailPheromone = random_seed.nextInt(minTrail, maxTrail);
+
         countDir = changeDirection;
         onARandomPath = true;
         this.life = 100;
         this.nest = nest;
-        this.personalPheromone = new Pheromone(yPos, xPos);
+        this.personalPheromone = new Pheromone(yPos, xPos, this);
     }
 
     /**
@@ -140,7 +162,7 @@ public class Ant {
     }
 
     /**
-     * Searches in the 8 nearby position for something to interact whith or just for an empty space to go to.
+     * Searches in the 8 nearby position for something to interact with or just for an empty space to go to.
      * This depends upon the value of two parameters. <b>NEVER CALL THIS METHOD WITH BOTH OF THEM AT TRUE</b>.
      * It would break the little mind of the ant. If you call this method with both parameters at false it is simply useless.
      * @param something true if you want to find something around you
@@ -216,27 +238,38 @@ public class Ant {
 
     void antInteraction(Ant otherAnt) {
         // do action relative to meeting a new ant or a previously known ant
+        // mating and pheromones sniffing
     }
 
     void nestInteraction(AntsNest nest) {
         // you have found your nest
         // do action relative to the nest encounter
+        leaveTrail = maxLeaveTrail;
+        // deposit eggs ??
+        // deposit food or eat its reserves ??
     }
 
     void foodInteraction(FoodSource food) {
-        // if you have already eaten the maximum food you can, AND you are carrying the maximum food you can ingore it
+        // if you have already eaten the maximum food you can, AND you are carrying the maximum food you can ignore it
         // otherwise:
         boolean gatherFood = food.gatherFood();
         if (gatherFood) {
             // do action relative to gathering food and discovering a new food source
+            leaveTrail = maxLeaveTrail;
         }
         else AntSimulator.foodFinished(food);
     }
 
-    void pheromoneInteraction(Pheromone phrmn) {
+    void pheromoneInteraction(Pheromone phe) {
         // you came across a pheromone trail
         // if it is yours ignore it
-        // else choose to folllow it or not and in what direction
+        if (phe.ant == this) {
+            if (Math.random() < 0.1) { // with a P of < 0.1
+                // follow it
+            }
+            return;
+        };
+        // else choose to follow it or not and in what direction
     }
 
     /**
@@ -250,6 +283,10 @@ public class Ant {
      */
     private boolean move(Integer y, Integer x) {
         if (whoIsThere(y, x) == null && inBounds(y, x) && (!Objects.equals(yPos, y) || !Objects.equals(xPos, x))) {
+            if (leaveTrail > 1) {
+                AntSimulator.addPheromone(new Pheromone(yPos, xPos, this, Pheromone.pheType.Trail, strengthOfNewTrailPheromone));
+                leaveTrail -= 1;
+            }
             this.yPos = y;
             this.xPos = x;
             return true;

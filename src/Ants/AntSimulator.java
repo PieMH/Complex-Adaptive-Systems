@@ -200,17 +200,17 @@ public class AntSimulator implements Game {
     }
 
     private void agePheromones() {
-        for (Pheromone ph : currentTrailPheromones.values()) {
-            ph.decay();
+        for (Pheromone phe : currentTrailPheromones.values()) {
+            phe.decay();
         }
     }
 
-    static void erasePheromone(Pheromone trailPh) {
-        currentTrailPheromones.remove(key(trailPh.yPos, trailPh.xPos));
+    static void erasePheromone(Pheromone trailPhe) {
+        currentTrailPheromones.remove(key(trailPhe.yPos, trailPhe.xPos));
     }
 
-    static void addPheromone(Pheromone trailPh) {
-        currentTrailPheromones.put(key(trailPh.yPos, trailPh.xPos), trailPh);
+    static void addPheromone(Pheromone trailPhe) {
+        currentTrailPheromones.put(key(trailPhe.yPos, trailPhe.xPos), trailPhe);
     }
 
     /**
