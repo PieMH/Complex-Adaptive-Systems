@@ -10,17 +10,17 @@ public class FoodSource {
     /**
      * the color for every food source
      */
-    public final Color color = new Color(60, 60, 10);
+    public final Color color = new Color(95, 110, 0);
 
     /**
      * the row number in the grid of this Food Source
      */
-    private Integer yPos;
+    final Integer yPos;
 
     /**
      * the column number in the grid of this Food Source
      */
-    private Integer xPos;
+    final Integer xPos;
 
     /**
      * the amount of food left available for the ants to gather
@@ -32,7 +32,7 @@ public class FoodSource {
      * It follows a logarithmic growth proportional to the GUI.DIMENSION value,
      * that is the total number of cells in the grid
      */
-    int minimal = 1;
+    int minimal;
 
     /**
      *
@@ -51,6 +51,7 @@ public class FoodSource {
         minimal = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION * GUI.DIMENSION)), 1);   // minimal number of quantity of food in this source
         maximal = minimal * 5;
         amountLeft = random_seed.nextInt(minimal, maximal);
+        System.out.println(amountLeft);
     }
 
     Integer getAmountLeft() {

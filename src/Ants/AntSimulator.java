@@ -28,6 +28,8 @@ public class AntSimulator implements Game {
      */
     private static Map<Integer, FoodSource> currentFood;
 
+    private static Map<Integer, Pheromone> currentTrailPheromones;
+
     /**
      * the UI.GUI that it is used to display the model
      */
@@ -124,13 +126,8 @@ public class AntSimulator implements Game {
                     reset = false;
                 }
                 iterateCurrentAlive(0);  // evolve
-//                if (statsDelayCounter == 1) {
-//                    printStats(0);
-//                    statsDelayCounter = 0;
-//                }
-//                statsDelayCounter += 1;
-//                printStats(1);  // print Hash Map
-//                balanceFood();
+                if (Math.random() < 0.02) balanceFood();    // with a probability of 2% every turn add a food's source
+                agePheromones();
                 iterateMatrix(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;
                 gui.nextFrame = new boolean[GUI.HEIGHT][GUI.WIDTH];
@@ -179,10 +176,10 @@ public class AntSimulator implements Game {
 
     /**
      * invoked by an ant who is the last to access to a food's source before it is completely run out
-     * @param k the key for currentFood
+     * @param food the FoodSource food object to erase from the currentFood hashmap because it is worn out
      */
-    static void foodFinished(Integer k) {
-        currentFood.remove(k);
+    static void foodFinished(FoodSource food) {
+        currentFood.remove(key(food.yPos, food.xPos));
     }
 
     /**
@@ -190,19 +187,30 @@ public class AntSimulator implements Game {
      */
     private void balanceFood() {
         int fSize = currentFood.size();
-        if (fSize < minimal) {
+        if (fSize < maximal) {
             random_seed = new Random();
-            int maxFood = maximal - fSize;
-            for (int m = 0; m < maxFood; m++) {
-                int y = random_seed.nextInt(GUI.HEIGHT);
-                int x = random_seed.nextInt(GUI.WIDTH);
-                Integer k = key(y, x);
-                if (!currentAlive.containsKey(k) && !nest.inNest(k)) {  // if it is a free spot ok, otherwise we'll try on the next frame
-                    FoodSource food = new FoodSource(y, x);
-                    currentFood.put(k, food);
-                }
+            int y = random_seed.nextInt(GUI.HEIGHT);
+            int x = random_seed.nextInt(GUI.WIDTH);
+            Integer k = key(y, x);
+            if (!currentAlive.containsKey(k) && !nest.inNest(k)) {  // if it is a free spot ok, otherwise we'll try on the next frame
+                FoodSource food = new FoodSource(y, x);
+                currentFood.put(k, food);
             }
         }
+    }
+
+    private void agePheromones() {
+        for (Pheromone ph : currentTrailPheromones.values()) {
+            ph.decay();
+        }
+    }
+
+    static void erasePheromone(Pheromone trailPh) {
+        currentTrailPheromones.remove(key(trailPh.yPos, trailPh.xPos));
+    }
+
+    static void addPheromone(Pheromone trailPh) {
+        currentTrailPheromones.put(key(trailPh.yPos, trailPh.xPos), trailPh);
     }
 
     /**
@@ -436,9 +444,10 @@ public class AntSimulator implements Game {
     public void resetMap() {
         currentAlive = new Hashtable<>();
         currentFood = new Hashtable<>();
-        reset = true;
-
+        currentTrailPheromones = new Hashtable<>();
         nest = new AntsNest();
+
+        reset = true;
 
         random_seed = new Random();
 //        minimal = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1, 1);   // minimal number of food's sources generated on the grid

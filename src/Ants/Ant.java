@@ -17,6 +17,16 @@ public class Ant {
     public Integer life;
 
     /**
+     * the hunger level of the ant, if it reaches zero it dies
+     */
+    public Integer hunger;
+
+    /**
+     * the amount of food the ant can carry to share with other ants or to eat by itself
+     */
+    public Integer carriedFood;
+
+    /**
      * the color used by UI.GUI to paint the GUI.innerPanel correctly
      */
     public final Color color = new Color(90, 90, 90);
@@ -90,6 +100,8 @@ public class Ant {
      */
     private final AntsNest nest;
 
+    final Pheromone personalPheromone;
+
     /**
      * This constructor is called only by AntSimulator at the start of the simulation
      * For newborn ants ?? is called instead.
@@ -107,6 +119,7 @@ public class Ant {
         onARandomPath = true;
         this.life = 100;
         this.nest = nest;
+        this.personalPheromone = new Pheromone(yPos, xPos);
     }
 
     /**
@@ -217,7 +230,7 @@ public class Ant {
         if (gatherFood) {
             // do action relative to gathering food and discovering a new food source
         }
-        else AntSimulator.foodFinished(AntSimulator.key(nextY, nextX));
+        else AntSimulator.foodFinished(food);
     }
 
     void pheromoneInteraction(Pheromone phrmn) {
