@@ -22,7 +22,7 @@ public class SocialGameSystem implements Game {
     private int born;                              // n° giocatori nati nel ciclo corrente
     private int dead;                              // n° giocatori morti nel ciclo corrente
     static boolean random = false;                 // default value or given by Options Menu: variabile di differenziazione dello spawn iniziale dei giocatori nell'arena
-    static int n_starting_players = 2000;          // default value or given by Options Menu: set number of random agents spawning in the grid
+    static int n_starting_players;          // default value or given by Options Menu: set number of random agents spawning in the grid
     static final int meeting_distance = 3;         // distanza d'incontri tra giocatori
     private boolean reset;                         // booleana per segnalare se resettare la map o no
     private Random random_seed;                    // seme di generazione di numeri random
@@ -40,6 +40,7 @@ public class SocialGameSystem implements Game {
     public SocialGameSystem(GUI gui) {
         resetMap();
         this.gui = gui;
+        n_starting_players = Math.floorDiv(GUI.DIMENSION, 10);
     }
 
     /**
@@ -52,6 +53,7 @@ public class SocialGameSystem implements Game {
                 if (reset) {
                     if (random) {
                         setMapRandom();    // setMapRandom
+                        System.out.println(currentAlive.size());
                     }
                     else {
                         scorriMatrice(0);  // setMap
@@ -62,7 +64,7 @@ public class SocialGameSystem implements Game {
 
                 food.riserve = Integer.min(Integer.max(food.riserve, 0), GUI.HEIGHT*GUI.WIDTH*2);
                 food.cresci();
-                printStats(false, true, false);
+                printStats(false, false, false);
                 resetStats();
                 scorriMatrice(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;

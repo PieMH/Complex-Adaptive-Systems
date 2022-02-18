@@ -36,7 +36,7 @@ public class AntsNest {
     public Integer nestEntrance4;
 
     AntsNest() {
-        nestEntrance1 = AntSimulator.key(Math.floorDiv(GUI.HEIGHT, 2), Math.floorDiv(GUI.WIDTH, 2)); // the top left square in the centre of the grid
+        nestEntrance1 = AntSimulator.key(Math.floorDiv(GUI.HEIGHT, 2), Math.floorDiv(GUI.WIDTH - 1, 2)); // the top left square in the centre of the grid
         nestEntrance2 = nestEntrance1 + 1;  // the square on the right has exactly the next value
         nestEntrance3 = nestEntrance1 + GUI.WIDTH; // the square on the left bottom corner, just add the width of the grid
         nestEntrance4 = nestEntrance3 + 1;

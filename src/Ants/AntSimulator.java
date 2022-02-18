@@ -56,7 +56,7 @@ public class AntSimulator implements Game {
     /**
      * default value or given by UI.OptionsMenu: set number of random agents spawning in the grid
      */
-    static int n_starting_agents = 2000;
+    static int n_starting_agents;
 
     /**
      * seed for pseudorandom uniformly distributed random values
@@ -100,7 +100,7 @@ public class AntSimulator implements Game {
 
     public AntSimulator(GUI gui) {
         this.gui = gui;
-
+        n_starting_agents = Math.floorDiv(GUI.DIMENSION, 20);
         resetMap();
         resetStats();
         iterateMatrix(1);     // updateFrame
@@ -116,6 +116,7 @@ public class AntSimulator implements Game {
                 if (reset) {
                     if (random) {
                         setMapRandom();    // setMapRandom
+                        System.out.println(currentAlive.size());
                     }
                     else {
                         iterateMatrix(0);  // setMap
@@ -440,7 +441,6 @@ public class AntSimulator implements Game {
         nest = new AntsNest();
 
         random_seed = new Random();
-        System.out.println(GUI.DIMENSION);
 //        minimal = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1, 1);   // minimal number of food's sources generated on the grid
         minimal = (int) Math.max(Math.floor(Math.pow(GUI.DIMENSION / 5.0, 1.0 / 4.0)) - 1, 1);   // minimal number of food's sources generated on the grid
         maximal = (minimal * 2) + 1;
@@ -454,8 +454,6 @@ public class AntSimulator implements Game {
                 currentFood.put(k, food);
             }
         }
-        System.out.println(currentFood.size());
-        System.out.println(GUI.HEIGHT + " x " + GUI.WIDTH);
     }
 
     public static Map<Integer, Ant> getCurrentAlive() {

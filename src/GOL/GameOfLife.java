@@ -24,6 +24,7 @@ public class GameOfLife implements Game {
 	public GameOfLife(GUI gui) {
 		resetMap();
 		this.gui = gui;
+		random_starting_players = Math.floorDiv(GUI.DIMENSION, 5);
 	}
 
 	public void startGame() {

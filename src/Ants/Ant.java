@@ -100,7 +100,9 @@ public class Ant {
         yPos = y;
         xPos = x;
         random_seed = new Random();
-        changeDirection = random_seed.nextInt(2, 11);
+        int minchange = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1, 2);
+        int maxchange = (int) Math.ceil(minchange * Math.sqrt(minchange)) + 1;
+        changeDirection = random_seed.nextInt(minchange, maxchange);
         countDir = changeDirection;
         onARandomPath = true;
         this.life = 100;
