@@ -102,23 +102,6 @@ public class AntSimulator implements Game {
         this.gui = gui;
 
         resetMap();
-
-        nest = new AntsNest();
-
-        random_seed = new Random();
-        minimal = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION)) - 1, 1);   // minimal number of food's sources generated on the grid
-        maximal = minimal * 2;
-        int maxFood = random_seed.nextInt(minimal, maximal);
-        for (int m = 0; m < maxFood; m++) {
-            int y = random_seed.nextInt(GUI.HEIGHT);
-            int x = random_seed.nextInt(GUI.WIDTH);
-            Integer k = key(y, x);
-            if (!currentAlive.containsKey(k) && !nest.inNest(k)) { // balanceFood() will add food's sources to the environment eventually
-                FoodSource food = new FoodSource(y, x);
-                currentFood.put(k, food);
-            }
-        }
-
         resetStats();
         iterateMatrix(1);     // updateFrame
     }
@@ -146,7 +129,7 @@ public class AntSimulator implements Game {
 //                }
 //                statsDelayCounter += 1;
 //                printStats(1);  // print Hash Map
-                balanceFood();
+//                balanceFood();
                 iterateMatrix(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;
                 gui.nextFrame = new boolean[GUI.HEIGHT][GUI.WIDTH];
@@ -197,7 +180,7 @@ public class AntSimulator implements Game {
      * invoked by an ant who is the last to access to a food's source before it is completely run out
      * @param k the key for currentFood
      */
-    void foodFinished(Integer k) {
+    static void foodFinished(Integer k) {
         currentFood.remove(k);
     }
 
@@ -453,6 +436,26 @@ public class AntSimulator implements Game {
         currentAlive = new Hashtable<>();
         currentFood = new Hashtable<>();
         reset = true;
+
+        nest = new AntsNest();
+
+        random_seed = new Random();
+        System.out.println(GUI.DIMENSION);
+//        minimal = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1, 1);   // minimal number of food's sources generated on the grid
+        minimal = (int) Math.max(Math.floor(Math.pow(GUI.DIMENSION / 5.0, 1.0 / 4.0)) - 1, 1);   // minimal number of food's sources generated on the grid
+        maximal = (minimal * 2) + 1;
+        int maxFood = random_seed.nextInt(minimal, maximal);
+        for (int m = 0; m < maxFood; m++) {
+            int y = random_seed.nextInt(GUI.HEIGHT);
+            int x = random_seed.nextInt(GUI.WIDTH);
+            Integer k = key(y, x);
+            if (!currentAlive.containsKey(k) && !nest.inNest(k)) { // balanceFood() will add food's sources to the environment eventually
+                FoodSource food = new FoodSource(y, x);
+                currentFood.put(k, food);
+            }
+        }
+        System.out.println(currentFood.size());
+        System.out.println(GUI.HEIGHT + " x " + GUI.WIDTH);
     }
 
     public static Map<Integer, Ant> getCurrentAlive() {

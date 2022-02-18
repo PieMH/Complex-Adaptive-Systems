@@ -1,0 +1,6 @@
+C'è un errore se provi a fare il resize in diminuzione con random attivo.
+Ma non sempre,
+se prima fai il resize e poi il random funziona
+e funziona anche se poi li fai contemporaneamente
+
+Si rompe solo se li fai in contemporanea la prima volta

@@ -208,6 +208,7 @@ public class SocialGameSystem implements Game {
                 e.printStackTrace();
             }
         }
+        printStats(false, false, false);    // DO NOT CHANGE THE VALUES OF THIS PARAMETES INSTEAD USE THE CALL TO PRINTSTATS INSIDE startGame()
     }
 
     /**

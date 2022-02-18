@@ -125,26 +125,6 @@ public class Ant {
     }
 
     /**
-     * the complete algorithm who controls the movement of an ant
-     */
-    void movement() {
-        if (onARandomPath) {
-            countDir += 1;
-        }
-
-        // follow your path
-        if (countDir < changeDirection) {
-            translateDirInPos(chosenDir);    // updates nextY and nextX
-            if (move(nextY, nextX)) return;
-        }
-
-        // otherwise, search a random path
-        search(false, true);
-
-        move(nextY, nextX);
-    }
-
-    /**
      * Searches in the 8 nearby position for something to interact whith or just for an empty space to go to.
      * This depends upon the value of two parameters. <b>NEVER CALL THIS METHOD WITH BOTH OF THEM AT TRUE</b>.
      * It would break the little mind of the ant. If you call this method with both parameters at false it is simply useless.
@@ -173,28 +153,75 @@ public class Ant {
     }
 
     /**
+     * the complete algorithm who controls the movement of an ant
+     */
+    void movement() {
+        if (onARandomPath) {
+            countDir += 1;
+        }
+
+        // follow your path
+        if (countDir < changeDirection) {
+            translateDirInPos(chosenDir);    // updates nextY and nextX
+            if (move(nextY, nextX)) return;
+        }
+
+        // otherwise, search a random path
+        search(false, true);
+
+        move(nextY, nextX);
+    }
+
+    /**
      *
-     * @param y
-     * @param x
-     * @param <E>
+     * @param y nextY
+     * @param x nextX
+     * @param <E> a generic element. Can be ONLY an Ant (different from this), a FoodSource, an AntsNest or a Pheromone.
      */
     <E> void interact(Integer y, Integer x) {
-        E element = whoIsThere(y, x);
-        if (element == null) return;
-        if (element.getClass() == Ant.class) {
+        E element = whoIsThere(y, x);   // called on nextY and nextX
 
+        if (element == null) return;    // it there is no one
+
+        if (element.getClass() == Ant.class) {
+            antInteraction((Ant) element);
         }
         else if (element.getClass() == AntsNest.class) {
-
+            nestInteraction((AntsNest) element);
         }
         else if (element.getClass() == FoodSource.class) {
-
+            foodInteraction((FoodSource) element);
         }
         else if (element.getClass() == Pheromone.class) {
-
+            pheromoneInteraction((Pheromone) element);
         }
 
 //        chooseWhatToDo(o);  // update chosenDir // update countDir  // update onARandomPath
+    }
+
+    void antInteraction(Ant otherAnt) {
+        // do action relative to meeting a new ant or a previously known ant
+    }
+
+    void nestInteraction(AntsNest nest) {
+        // you have found your nest
+        // do action relative to the nest encounter
+    }
+
+    void foodInteraction(FoodSource food) {
+        // if you have already eaten the maximum food you can, AND you are carrying the maximum food you can ingore it
+        // otherwise:
+        boolean gatherFood = food.gatherFood();
+        if (gatherFood) {
+            // do action relative to gathering food and discovering a new food source
+        }
+        else AntSimulator.foodFinished(AntSimulator.key(nextY, nextX));
+    }
+
+    void pheromoneInteraction(Pheromone phrmn) {
+        // you came across a pheromone trail
+        // if it is yours ignore it
+        // else choose to folllow it or not and in what direction
     }
 
     /**

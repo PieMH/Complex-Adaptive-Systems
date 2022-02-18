@@ -1,8 +1,6 @@
 package UI;
 
 import Ants.AntSimulator;
-import Ants.Ant;
-import Ants.AntsNest;
 import Interfaces.Game;
 import SGS.Giocatore;
 import SGS.SocialGameSystem;
@@ -455,7 +453,7 @@ public class GUI {
 
             /**
              * Called whenever you move the mouse onf the frame.
-             * But actually the body is executed if only if the game is on pause and in mode Social Game System.
+             * But actually the body is executed if the game is on pause and in mode Social Game System.
              * It is used to call the repaint method having a non-null focused player. It is needed to call {@code paintAcquaintanceBasedPixels}.
              * @param e MouseEvent
              */
@@ -492,5 +490,15 @@ public class GUI {
         });
 
         outerPanel.add(innerPanel);
+    }
+
+    /**
+     * triggered from OptionsMenu
+     */
+    public void onApply() {
+        play = false;
+        currentFrame = new boolean[HEIGHT][WIDTH];
+        game.resetMap();
+        innerPanel.repaint();
     }
 }

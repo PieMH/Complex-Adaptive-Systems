@@ -170,6 +170,9 @@ public class OptionsMenu {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (SwingUtilities.isLeftMouseButton(e)) {
+					// stop the previous maybe running simulation
+					gui.onApply();
+
 					// get text from gameType button and set CAS_type accordingly, remember that the button shows the NEXT CAS type not the current one
 					if (!textWidth.getText().isEmpty()) {
 						GUI.WIDTH = Integer.parseInt(textWidth.getText());
@@ -177,6 +180,7 @@ public class OptionsMenu {
 					if (!textHeight.getText().isEmpty()) {
 						GUI.HEIGHT = Integer.parseInt(textHeight.getText());
 					}
+					GUI.DIMENSION = GUI.WIDTH * GUI.HEIGHT;
                     if (Objects.equals(gameType.getText(), "Ant Simulator")) {
                         CAS_type = CAS.GameOfLIfe;
                     }
@@ -186,7 +190,9 @@ public class OptionsMenu {
                     else if (Objects.equals(gameType.getText(), "Game Of Life")){
                         CAS_type = CAS.SocialGameSystem;
                     }
+
                     createGuiAndGame();
+
                     game.setRandom(checkBoxRandom.isSelected());  // to be executed after "createGuiandGame" if you want to enable random from the very start for every game
 					if (!textNStartingPlayers.getText().isEmpty()) {
 						game.setStartingRandomAgents(Integer.parseInt(textNStartingPlayers.getText()));
