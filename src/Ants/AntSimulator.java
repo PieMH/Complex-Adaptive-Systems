@@ -1,7 +1,7 @@
 package Ants;
 
 import UI.GUI;
-import Interfaces.Game;
+import Interfaces.CASModel;
 
 import javax.swing.Timer;
 import java.awt.*;
@@ -13,8 +13,12 @@ import java.util.List;
  * The main class that delineate the algorithm of the Ant sim model.
  * It manages the general behavior of the sim and its core functionalities.
  * It also serves as a mainframe for the classes Ants, FoodSource, AntsNest, Pheromone.
+ * @see Ant
+ * @see AntsNest
+ * @see FoodSource
+ * @see Pheromone
  */
-public class AntSimulator implements Game {
+public class AntSimulator implements CASModel {
 
     /**
      * HasMap of the ant currently alive.
@@ -112,7 +116,7 @@ public class AntSimulator implements Game {
      * called by UI.OptionsMenu on time = 0 or on a click of the button "Apply"
      */
     @Override
-    public void startGame() {
+    public void startSimulation() {
         ActionListener taskPerformer = e -> {
             if (gui.play) {
                 if (reset) {
@@ -182,7 +186,7 @@ public class AntSimulator implements Game {
     }
 
     /**
-     * Called by startGame to balance the food in the environment of the model
+     * Called by startSimulation to balance the food in the environment of the model
      */
     private void balanceFood() {
         int fSize = currentFood.size();
@@ -460,7 +464,13 @@ public class AntSimulator implements Game {
     }
 
     /**
-     * invoked on a click on reset on the UI.GUI
+     * invoked on a click on reset on the UI.GUI.
+     * <ol>
+     * <li>resets the three hashMaps
+     * <li>creates a new nest
+     * <li>recalculates Pheromone.maxStrength (it depends on UI.GUI.DIMENSION changes)
+     * <li>spawns new food on the grid
+     * </ol>
      */
     @Override
     public void resetMap() {
@@ -475,7 +485,6 @@ public class AntSimulator implements Game {
         reset = true;
 
         random_seed = new Random();
-//        minimal = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1, 1);   // minimal number of food's sources generated on the grid
         minimal = (int) Math.max(Math.floor(Math.pow(GUI.DIMENSION / 5.0, 1.0 / 4.0)) - 1, 1);   // minimal number of food's sources generated on the grid
         maximal = (minimal * 2) + 1;
         int maxFood = random_seed.nextInt(minimal, maximal);

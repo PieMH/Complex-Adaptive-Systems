@@ -188,7 +188,7 @@ public class Giocatore {
 
     /**
      * Metodo per riprodursi (che sarà invocato se ...)
-     * @return l'oggetto figlio alla classe TheGame
+     * @return l'oggetto figlio alla classe Social Game System
      * @param i indice di riga nell'arena
      * @param j indice di colonna nell'arena
      */

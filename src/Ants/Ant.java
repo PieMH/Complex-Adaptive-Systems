@@ -7,7 +7,14 @@ import java.util.*;
 import java.util.List;
 
 /**
- *
+ * The class who sets the laws under which every ant acts upon.
+ * <p>
+ * AntSimulator calls action() every turn, and it delegates every ant related law and logic to the current class.
+ * Key methods are search(), whoIsThere(), interact(), movement() and translateDirInPos().
+ * @see AntSimulator
+ * @see AntsNest
+ * @see FoodSource
+ * @see Pheromone
  */
 public class Ant {
 
@@ -123,7 +130,10 @@ public class Ant {
      */
     private final AntsNest nest;
 
-    final Pheromone personalPheromone;
+    /**
+     * my personal pheromone of type personal and strength 100
+     */
+    private Pheromone personalPheromone;
 
     /**
      * This constructor is called only by AntSimulator at the start of the simulation
@@ -146,6 +156,7 @@ public class Ant {
         leaveTrail = 0;
 
         int minStrength = 3 * minChange;
+        // for Pheromone.maxStrength calculation see AntSimulator.resetMap()
         strengthOfNewTrailPheromone = random_seed.nextInt(minStrength, Pheromone.maxStrength);
 
         countDir = changeDirection;
@@ -403,6 +414,7 @@ public class Ant {
      */
     void die() {
         life = 0;
+        personalPheromone = null;
     }  // maybe a call to the Java Garbage Collector
 
     /**

@@ -1,6 +1,6 @@
 package SGS;
 
-import Interfaces.Game;
+import Interfaces.CASModel;
 import UI.GUI;
 
 import java.awt.event.ActionListener;
@@ -10,14 +10,14 @@ import java.util.*;
 
 /**
  * Main class of the Social Game Systems CAS model
- * It manages the game algorithm and most of the functionality of this game model
+ * It manages the CAS model algorithm and most of the functionality of this CAS model
  * It needs a {@code Food} object that represent all the food available in the system.
  * Every agent is a Giocatore, hence the name of the class who control the logic associated with one generic agent.
  * Every giocatore has one type of personality.
  * This class uses Reflection paradigm extensively to access the methods of a generic Personality for every giocatore.
  * <b>Note:</b> feel free to change {@code meeting_distance} to change the maximum distance each player can interact with other players in the grid
  */
-public class SocialGameSystem implements Game {
+public class SocialGameSystem implements CASModel {
     private static Map<Integer, Giocatore> currentAlive;  // dizionario di giocatori vivi momentaneo
     private int born;                              // n° giocatori nati nel ciclo corrente
     private int dead;                              // n° giocatori morti nel ciclo corrente
@@ -47,7 +47,7 @@ public class SocialGameSystem implements Game {
      * thread motore di gioco
      * fa evolvere il dizionario di giocatori vivi, lo aggiorna e aggiorna i frame della gui
      */
-    public void startGame() {
+    public void startSimulation() {
 		ActionListener taskPerformer = e -> {
             if (gui.play) {
                 if (reset) {
@@ -209,7 +209,7 @@ public class SocialGameSystem implements Game {
                 e.printStackTrace();
             }
         }
-        printStats(false, false, false);    // DO NOT CHANGE THE VALUES OF THIS PARAMETES INSTEAD USE THE CALL TO PRINTSTATS INSIDE startGame()
+        printStats(false, false, false);    // DO NOT CHANGE THE VALUES OF THIS PARAMETES INSTEAD USE THE CALL TO PRINTSTATS INSIDE startSimulation()
     }
 
     /**
@@ -477,7 +477,7 @@ public class SocialGameSystem implements Game {
         }
     }
 
-    // overriding methods of Interfaces.Game Interface
+    // overriding methods of Interfaces.CASModel Interface
 
     @Override
     public void setRandom(boolean r) {

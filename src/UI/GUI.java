@@ -2,7 +2,7 @@ package UI;
 
 import Ants.AntSimulator;
 import Ants.Pheromone;
-import Interfaces.Game;
+import Interfaces.CASModel;
 import SGS.Giocatore;
 import SGS.SocialGameSystem;
 
@@ -27,7 +27,7 @@ import javax.swing.JLabel;
 /**
  * This is the class responsible for managing the UI.GUI for the simulation.
  * It is instantiated by UI.OptionsMenu and thus is strongly dependent by it.
- * Runs as a separate thread from UI.OptionsMenu and the Games it is displaying on the frame.
+ * Runs as a separate thread from UI.OptionsMenu and the CAS modelss it is displaying on the frame.
  * <p>
  * There are two panel, inner and outer. The most important is the centre where there is a rectangular frame, where the simulation is shown.
  * The bottom holds many control buttons and a slider.
@@ -56,12 +56,12 @@ public class GUI {
     private JPanel outerPanel;
 
     /**
-     * a value is true if there is a living agent (depends on the game the logic behind a true value) inside a grid's square, false otherwise
+     * a value is true if there is a living agent (depends on the model the logic behind a true value) inside a grid's square, false otherwise
      */
     public boolean[][] currentFrame = new boolean[HEIGHT][WIDTH];
 
     /**
-     * the next rame boolean matrix, for the progress of the game through time
+     * the next rame boolean matrix, for the progress of the model through time
      */
     public boolean[][] nextFrame = new boolean[HEIGHT][WIDTH];
 
@@ -76,9 +76,9 @@ public class GUI {
     private final OptionsMenu optionsMenu;
 
     /**
-     * an instance of Interface.Game interface
+     * an instance of Interface.CASModel interface
      */
-    private Game game;
+    private CASModel CASModel;
 
     // The next three are used only for SGS
 
@@ -102,11 +102,11 @@ public class GUI {
     }
 
     /**
-     * Connects this class with the interface Interfaces.Game
-     * @param game: instance of Interfaces.Game interface
+     * Connects this class with the interface Interfaces.CASModel
+     * @param CASModel: instance of Interfaces.CASModel interface
      */
-    void setGame(Game game) {
-        this.game = game;
+    void setModel(CASModel CASModel) {
+        this.CASModel = CASModel;
     }
 
     /**
@@ -168,7 +168,7 @@ public class GUI {
             @Override
             public void mouseClicked(MouseEvent e) {
                 currentFrame = new boolean[HEIGHT][WIDTH];
-                game.resetMap();
+                CASModel.resetMap();
                 innerPanel.repaint();
             }
         });
@@ -235,7 +235,7 @@ public class GUI {
         slider.setPaintLabels(true);
         slider.addChangeListener(e -> {
             if(!slider.getValueIsAdjusting()) {
-                game.getTimer().setDelay(slider.getValue() + 1);
+                CASModel.getTimer().setDelay(slider.getValue() + 1);
             }
         });
 
@@ -495,17 +495,17 @@ public class GUI {
                 if(SwingUtilities.isLeftMouseButton(e)) {
                     int x = e.getX() * WIDTH / innerPanel.getWidth();
                     int y = e.getY() * HEIGHT / innerPanel.getHeight();
-                    if(!currentFrame[y][x]) {   // for painting the square in any game mode
+                    if(!currentFrame[y][x]) {   // for painting the square in any model mode
                         currentFrame[y][x] = true;
                     }
-                    game.setMap(y, x);
+                    CASModel.setMap(y, x);
                     innerPanel.repaint();
                 }
             }
 
             /**
              * Called whenever you move the mouse onf the frame.
-             * But actually the body is executed if the game is on pause and in mode Social Game System.
+             * But actually the body is executed if the simulation is on pause and in mode Social Game System.
              * It is used to call the repaint method having a non-null focused player. It is needed to call {@code paintAcquaintanceBasedPixels}.
              * @param e MouseEvent
              */
@@ -526,10 +526,10 @@ public class GUI {
             public void mouseClicked(MouseEvent e) {
                 int x = e.getX() * WIDTH / innerPanel.getWidth();
                 int y = e.getY() * HEIGHT / innerPanel.getHeight();
-                currentFrame[y][x] = !currentFrame[y][x];   // for painting the square in any game mode
+                currentFrame[y][x] = !currentFrame[y][x];   // for painting the square in any simulation mode
                 if(!currentFrame[y][x])
                     focusedPlayer = null;
-                game.setMap(y, x);
+                CASModel.setMap(y, x);
                 innerPanel.repaint();
             }
             @Override
@@ -550,7 +550,7 @@ public class GUI {
     public void onApply() {
         play = false;
         currentFrame = new boolean[HEIGHT][WIDTH];
-        game.resetMap();
+        CASModel.resetMap();
         innerPanel.repaint();
     }
 }

@@ -6,7 +6,7 @@ import java.awt.EventQueue;
 
 /**
  * The launcher for this application.
- * It instantiates UI.OptionsMenu which then instantiates the UI.GUI and an Interfaces.Game
+ * It instantiates UI.OptionsMenu which then instantiates the UI.GUI and an Interfaces.CASModel
  */
 public class Launcher {
 
@@ -14,7 +14,7 @@ public class Launcher {
         EventQueue.invokeLater( () -> {
             try {
                 OptionsMenu optionsMenu = new OptionsMenu();
-                optionsMenu.createGuiAndGame();
+                optionsMenu.createGuiAndModel();
             } catch (Exception e) {
                 e.printStackTrace();
             }

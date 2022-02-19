@@ -1,7 +1,7 @@
 package UI;
 
 import Ants.AntSimulator;
-import Interfaces.Game;
+import Interfaces.CASModel;
 import GOL.*;
 import SGS.SocialGameSystem;
 
@@ -16,7 +16,7 @@ import java.util.Objects;
  * In reality an instance of this class runs on a thread that is the father of all successive threads.
  * <p>
  * In particular from the thread associated with this class are created and forked the two main
- * threads that run the UI.GUI and an Interfaces.Game Interface instance.
+ * threads that run the UI.GUI and an Interfaces.CASModel Interface instance.
  */
 public class OptionsMenu {
 
@@ -35,9 +35,9 @@ public class OptionsMenu {
 	private JTextField textHeight;
 
 	/**
-	 * an instance of Interface.Game interface
+	 * an instance of Interface.CASModel interface
 	 */
-	private Game game;
+	private CASModel CASModel;
 
 	/**
 	 * the UI.GUI this object creates as a thread child
@@ -69,35 +69,35 @@ public class OptionsMenu {
 	}
 
 	/**
-	 * Connects this class with the interface Interfaces.Game
-	 * @param game: instance of Interfaces.Game interface
+	 * Connects this class with the interface Interfaces.CASModel
+	 * @param CASModel: instance of Interfaces.CASModel interface
 	 */
-	private void setGame(Game game) {
-		this.game = game;
+	private void setModel(CASModel CASModel) {
+		this.CASModel = CASModel;
 	}
 
 	/**
-	 * Instantiate the UI.GUI and one of three possible instances of Interfaces.Game interface.
-     * Then runs the UI.GUI and the Interfaces.Game as two different threads.
+	 * Instantiate the UI.GUI and one of three possible instances of Interfaces.CASModel interface.
+     * Then runs the UI.GUI and the Interfaces.CASModel as two different threads.
 	 */
-	public void createGuiAndGame() {
+	public void createGuiAndModel() {
 		if (gui != null) {
 			gui.getFrame().dispose();
 		}
 		gui = new GUI(this);
 
         if (CAS_type == CAS.AntSimulator) {
-            game = new AntSimulator(gui);
+            CASModel = new AntSimulator(gui);
         }
         else if (CAS_type == CAS.SocialGameSystem) {
-    		game = new SocialGameSystem(gui);
+    		CASModel = new SocialGameSystem(gui);
     	}
     	else if (CAS_type == CAS.GameOfLIfe){
-    		game = new GameOfLife(gui);
+    		CASModel = new GameOfLife(gui);
     	}
-		this.setGame(game);
-		gui.setGame(game);
-    	game.startGame();
+		this.setModel(CASModel);
+		gui.setModel(CASModel);
+    	CASModel.startSimulation();
 	}
 	
 	/**
@@ -112,23 +112,23 @@ public class OptionsMenu {
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(false);
 
-		JButton gameType = new JButton("Social Game System");
-		gameType.setBounds(100, 79, 198, 26);
-		gameType.addMouseListener(new MouseAdapter() {
+		JButton simulationType = new JButton("Social Game System");
+		simulationType.setBounds(100, 79, 198, 26);
+		simulationType.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-                if (Objects.equals(gameType.getText(), "Ant Simulator")) {
-                    gameType.setText("Social Game System");
+                if (Objects.equals(simulationType.getText(), "Ant Simulator")) {
+                    simulationType.setText("Social Game System");
                 }
-				else if (Objects.equals(gameType.getText(), "Social Game System")) {
-					gameType.setText("Game Of Life");
+				else if (Objects.equals(simulationType.getText(), "Social Game System")) {
+					simulationType.setText("Game Of Life");
 				}
-				else if (Objects.equals(gameType.getText(), "Game Of Life")) {
-					gameType.setText("Ant Simulator");
+				else if (Objects.equals(simulationType.getText(), "Game Of Life")) {
+					simulationType.setText("Ant Simulator");
 				}
 			}
 		});
-		frame.getContentPane().add(gameType);
+		frame.getContentPane().add(simulationType);
 
 		checkBoxRandom = new JCheckBox("Random");
 		checkBoxRandom.setComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);
@@ -173,7 +173,7 @@ public class OptionsMenu {
 					// stop the previous maybe running simulation
 					gui.onApply();
 
-					// get text from gameType button and set CAS_type accordingly, remember that the button shows the NEXT CAS type not the current one
+					// get text from simulationType button and set CAS_type accordingly, remember that the button shows the NEXT CAS type not the current one
 					if (!textWidth.getText().isEmpty()) {
 						GUI.WIDTH = Integer.parseInt(textWidth.getText());
 					}
@@ -181,21 +181,21 @@ public class OptionsMenu {
 						GUI.HEIGHT = Integer.parseInt(textHeight.getText());
 					}
 					GUI.DIMENSION = GUI.WIDTH * GUI.HEIGHT;
-                    if (Objects.equals(gameType.getText(), "Ant Simulator")) {
+                    if (Objects.equals(simulationType.getText(), "Ant Simulator")) {
                         CAS_type = CAS.GameOfLIfe;
                     }
-                    else if (Objects.equals(gameType.getText(), "Social Game System")) {
+                    else if (Objects.equals(simulationType.getText(), "Social Game System")) {
                         CAS_type = CAS.AntSimulator;
                     }
-                    else if (Objects.equals(gameType.getText(), "Game Of Life")){
+                    else if (Objects.equals(simulationType.getText(), "Game Of Life")){
                         CAS_type = CAS.SocialGameSystem;
                     }
 
-                    createGuiAndGame();
+                    createGuiAndModel();
 
-                    game.setRandom(checkBoxRandom.isSelected());  // to be executed after "createGuiandGame" if you want to enable random from the very start for every game
+                    CASModel.setRandom(checkBoxRandom.isSelected());  // to be executed after "createGuiandModel" if you want to enable random from the very start for every Model
 					if (!textNStartingPlayers.getText().isEmpty()) {
-						game.setStartingRandomAgents(Integer.parseInt(textNStartingPlayers.getText()));
+						CASModel.setStartingRandomAgents(Integer.parseInt(textNStartingPlayers.getText()));
 					}
 					frame.setVisible(false);
 				}

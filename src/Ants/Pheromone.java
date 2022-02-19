@@ -8,7 +8,7 @@ import java.awt.*;
  * There are two types of Pheromones. The first one is the Personal one.
  * The personal pheromone is personal and unique to every ant, it is used when two ants meet.
  * It is not added to AntSimulator.currentTrailPheromone hence is not a trail pheromone.
- * The game knows its position because it is the one associated with the ant carrying it.
+ * The model knows its position because it is the one associated with the ant carrying it.
  * In fact if it is a personal pheromone this.yPos and this.xPos are useless, see Ant.xPos and Ant.yPos instead.
  * <p>
  * The other type is the Trail one. Trail pheromones are very popular and widely used by ant to leave a trail of their passage in the natura.
@@ -56,7 +56,7 @@ public class Pheromone {
 
     /**
      * maximum strength value for a pheromone trail, it depends on UI.GUI.DIMENSION
-     * It is final but can't say final because it must change between different Interfaces.Game instances
+     * It is final but can't say final because it must change between different Interfaces.CASModel instances
      * It is used by {@code Ants.Ant(), Ants.Ant.pheromoneInteraction() and UI.GUI.paintPheromones(Graphics g)}
      */
     public static int maxStrength;

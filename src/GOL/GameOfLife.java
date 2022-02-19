@@ -1,7 +1,7 @@
 package GOL;
 
 import UI.GUI;
-import Interfaces.Game;
+import Interfaces.CASModel;
 
 import javax.swing.Timer;
 
@@ -11,15 +11,15 @@ import java.util.Random;
 /**
  *
  */
-public class GameOfLife implements Game {
+public class GameOfLife implements CASModel {
 	
     public static int delay = 100;
 	private final GUI gui;
 	private Timer t;
-	static boolean random = false;	// if there is random spawn of agents in the Interfaces.Game
+	static boolean random = false;	// if there is random spawn of agents in the Interfaces.CASModel
 	static int random_starting_players = 2000;	// if random is true this is the amount of agents spawned
 	private boolean reset = true;	// notifies if the button reset is pressed, if random is true is needed to recreate random agents
-	private final Object lock = new Object();	// lock for threads Interfaces.Game and UI.GUI to avoid attempting to modify same data structures simultaneously
+	private final Object lock = new Object();	// lock for threads Interfaces.CASModel and UI.GUI to avoid attempting to modify same data structures simultaneously
 
 	public GameOfLife(GUI gui) {
 		resetMap();
@@ -27,7 +27,7 @@ public class GameOfLife implements Game {
 		random_starting_players = Math.floorDiv(GUI.DIMENSION, 5);
 	}
 
-	public void startGame() {
+	public void startSimulation() {
 		ActionListener taskPerformer = e -> {
 			if(gui.play) {
 				if (reset) {	// is it possible to optimize this if section?
@@ -93,7 +93,7 @@ public class GameOfLife implements Game {
 		}
 	}
 
-	// overriding methods of Interfaces.Game Interface
+	// overriding methods of Interfaces.CASModel Interface
 
 	@Override
 	public void setRandom(boolean r) {
