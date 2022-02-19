@@ -19,12 +19,19 @@ public class Ant {
     /**
      * the hunger level of the ant, if it reaches zero it dies
      */
-    public Integer hunger;
+    Integer hunger;
 
     /**
-     * the amount of food the ant can carry to share with other ants or to eat by itself
+     * the first stomach of an ant. The food carried in the first stomach it is used to share it with other ants;
+     * or it is passed to the second private stomach for foraging the single ant
      */
-    public Integer carriedFood;
+    Integer sharedStomach;
+
+    /**
+     * the second private stomach of an ant, the food stored in this stomach serves only to sustain its ant
+     * If this is empty the ant will starve
+     */
+    private Integer privateStomach;
 
     /**
      * the color used by UI.GUI to paint the GUI.innerPanel correctly
@@ -87,7 +94,7 @@ public class Ant {
      * the max number of turns before an ant following a path changes mind and changes direction
      * @see #movement
      */
-    private Integer changeDirection;
+    private final Integer changeDirection;
 
     /**
      * a simple flag use by movement() to know if the path the ant is following it was chosen randomly or not
@@ -101,12 +108,15 @@ public class Ant {
      */
     private Integer leaveTrail;
 
-    private Integer maxLeaveTrail;
+    /**
+     *
+     */
+    private final Integer maxLeaveTrail;
 
     /**
      * the strength of a new Trail type of Pheromone release
      */
-    private Integer strengthOfNewTrailPheromone;
+    private final Integer strengthOfNewTrailPheromone;
 
     /**
      * the nest of this ant
@@ -133,9 +143,9 @@ public class Ant {
         int minTrail = 2 * minChange;
         int maxTrail = (int) Math.ceil(minTrail * 3.0 / 2.0 * minTrail);
         maxLeaveTrail = random_seed.nextInt(minTrail, maxTrail);
-        leaveTrail = maxLeaveTrail;
+        leaveTrail = 0;
 
-        strengthOfNewTrailPheromone = random_seed.nextInt(minTrail, maxTrail);
+        strengthOfNewTrailPheromone = random_seed.nextInt(minTrail * 2, Math.min(100, maxTrail * 2));
 
         countDir = changeDirection;
         onARandomPath = true;
@@ -157,6 +167,8 @@ public class Ant {
      */
     void action() {
         search(true, false);
+
+//        decide();
 
         movement();
     }
@@ -252,9 +264,10 @@ public class Ant {
     void foodInteraction(FoodSource food) {
         // if you have already eaten the maximum food you can, AND you are carrying the maximum food you can ignore it
         // otherwise:
-        boolean gatherFood = food.gatherFood();
-        if (gatherFood) {
+        boolean gatheredFood = food.gatherFood();
+        if (gatheredFood) {
             // do action relative to gathering food and discovering a new food source
+//          gatherFood(gatheredFood);
             leaveTrail = maxLeaveTrail;
         }
         else AntSimulator.foodFinished(food);
@@ -268,7 +281,7 @@ public class Ant {
                 // follow it
             }
             return;
-        };
+        }
         // else choose to follow it or not and in what direction
     }
 
@@ -393,6 +406,8 @@ public class Ant {
     void age() {
         life -= 1;
     }
+
+//    boolean eat()
 
     public Color getColor() {
         return color;

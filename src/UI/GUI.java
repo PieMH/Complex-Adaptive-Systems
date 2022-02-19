@@ -1,6 +1,7 @@
 package UI;
 
 import Ants.AntSimulator;
+import Ants.Pheromone;
 import Interfaces.Game;
 import SGS.Giocatore;
 import SGS.SocialGameSystem;
@@ -85,8 +86,10 @@ public class GUI {
      * the square on the grid that has the mouse hovering on it
      */
     private Giocatore focusedPlayer;
+
     private boolean showLife = false;
     private boolean showWellness = false;
+    private boolean showPheromones = false;
 
     /**
      * Creates the UI.GUI for the simulation.
@@ -186,6 +189,7 @@ public class GUI {
             public void mouseClicked(MouseEvent e) {
                 showLife = !showLife;
         		showWellness = false;
+                showPheromones = false;
                 innerPanel.repaint();
             }
         });
@@ -200,16 +204,29 @@ public class GUI {
         	}
         });
 
-        if (OptionsMenu.CAS_type == OptionsMenu.CAS.GameOfLIfe) {
-            btnShowLife.setVisible(false);
+        JButton btnShowPheromones = new JButton("Pheromones");
+        btnShowPheromones.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                showPheromones = !showPheromones;
+                showLife = false;
+                innerPanel.repaint();
+            }
+        });
+
+        if (OptionsMenu.CAS_type == OptionsMenu.CAS.AntSimulator) {
             btnShowWellness.setVisible(false);
         }
-        else if (OptionsMenu.CAS_type == OptionsMenu.CAS.AntSimulator) {
+        else if (OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
+            btnShowPheromones.setVisible(false);
+        }
+        else if (OptionsMenu.CAS_type == OptionsMenu.CAS.GameOfLIfe) {
+            btnShowLife.setVisible(false);
             btnShowWellness.setVisible(false);
+            btnShowPheromones.setVisible(false);
         }
 
         JLabel labelStepDelay = new JLabel("Step delay in ms:");
-
 
         JSlider slider = new JSlider(10, 300, 100);
         slider.setMinorTickSpacing(15);
@@ -242,6 +259,7 @@ public class GUI {
         					.addComponent(btnShowLife, GroupLayout.PREFERRED_SIZE, 92, GroupLayout.PREFERRED_SIZE)
         					.addPreferredGap(ComponentPlacement.RELATED)
         					.addComponent(btnShowWellness, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
+        					.addComponent(btnShowPheromones, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE)
         					.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         					.addComponent(labelStepDelay)
         					.addPreferredGap(ComponentPlacement.RELATED)
@@ -261,6 +279,7 @@ public class GUI {
         					.addComponent(btnOptions)
         					.addComponent(btnShowLife)
         					.addComponent(btnShowWellness)
+                            .addComponent(btnShowPheromones)
         					.addComponent(labelStepDelay))
         				.addComponent(slider, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
         			.addContainerGap())
@@ -277,29 +296,35 @@ public class GUI {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
 
-                if (OptionsMenu.CAS_type == OptionsMenu.CAS.GameOfLIfe) {
-                    paintGOL(g);
+                if (OptionsMenu.CAS_type == OptionsMenu.CAS.AntSimulator) {
+                    if (showLife) {
+                        paintLife(g);
+                    }
+                    else if (showPheromones) {
+                        paintPheromones(g);
+                    }
+                    else {
+                        paintAnts(g);
+                    }
                 }
                 else if (OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem){
                      if (focusedPlayer != null) {
                         paintAcquaintanceBasedPixels(g);
                     }
                     else {
-                        if (showLife)
+                        if (showLife) {
                             paintLife(g);
-                        else if (showWellness)
-                        	paintWellness(g);
-                        else
-                        	paintPersonalityBasedPixel(g);
+                        }
+                        else if (showWellness) {
+                            paintWellness(g);
+                        }
+                        else {
+                            paintPersonalityBasedPixel(g);
+                        }
                     }
                 }
-                else if (OptionsMenu.CAS_type == OptionsMenu.CAS.AntSimulator) {
-                    if (showLife) {
-                        paintLife(g);
-                    }
-                    else {
-                        paintAnts(g);
-                    }
+                else if (OptionsMenu.CAS_type == OptionsMenu.CAS.GameOfLIfe) {
+                    paintGOL(g);
                 }
 
                 g.setColor(Color.BLACK);
@@ -324,7 +349,9 @@ public class GUI {
                                 if (AntSimulator.isAnt(i, j)) {
                                     g.setColor(new Color(0, 128, 0, ((AntSimulator.getCurrentAlive().get(AntSimulator.key(i, j)).getLife()) * 255 / 100)));
                                 }
-                                else g.setColor(AntSimulator.getColor(i, j));
+                                else {
+                                    g.setColor(AntSimulator.getColor(i, j));
+                                }
                                 g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                             }
                             else if (OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
@@ -340,25 +367,51 @@ public class GUI {
                 }
             }
 
-            private void paintWellness(Graphics g) {
-                for (int i = 0; i < GUI.HEIGHT; i++) {
-                    for (int j = 0; j < GUI.WIDTH; j++) {
-                        if (currentFrame[i][j]) {
-                            g.setColor(new Color(160, 0, 200, ((int) (Double.min(Double.max(((SocialGameSystem.getCurrentAlive().get(SocialGameSystem.key(i, j)).getWellness())), 0), 100))) * 255 / 100));
+            private void paintPheromones(Graphics g) {
+                for(int i = 0; i < GUI.HEIGHT; i++) {
+                    for(int j = 0; j < GUI.WIDTH; j++) {
+                        if(currentFrame[i][j]) {
+                            if (AntSimulator.isAnt(i, j)) {
+                                g.setColor(AntSimulator.getColor(i, j));
+                            }
+                            else if (AntSimulator.isPheromone(i, j)) {
+                                Pheromone phe = AntSimulator.getCurrentTrailPheromones().get(AntSimulator.key(i, j));
+                                Color pheColor = phe.getColor();
+                                g.setColor(new Color(pheColor.getRed(), pheColor.getGreen(), pheColor.getBlue(), phe.getStrength() * 255 / 100));
+                            }
+                            else {
+                                g.setColor(AntSimulator.getColor(i, j));
+                            }
                             g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
-                        } else {
+                        }
+                        else {
                             g.setColor(innerPanel.getBackground());
-                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         }
                     }
                 }
             }
 
-            private void paintGOL(Graphics g) {
+            private void paintAnts(Graphics g) {
                 for(int i = 0; i < GUI.HEIGHT; i++) {
                     for (int j = 0; j < GUI.WIDTH; j++) {
+                        if(currentFrame[i][j]) {
+                            g.setColor(AntSimulator.getColor(i, j));
+                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                        }
+                        else {
+                            g.setColor(innerPanel.getBackground());
+                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                        }
+                    }
+                }
+            }
+
+            private void paintWellness(Graphics g) {
+                for (int i = 0; i < GUI.HEIGHT; i++) {
+                    for (int j = 0; j < GUI.WIDTH; j++) {
                         if (currentFrame[i][j]) {
-                            g.setColor(Color.BLUE);
+                            g.setColor(new Color(160, 0, 200, ((int) (Double.min(Double.max(((SocialGameSystem.getCurrentAlive().get(SocialGameSystem.key(i, j)).getWellness())), 0), 100))) * 255 / 100));
                             g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         } else {
                             g.setColor(innerPanel.getBackground());
@@ -413,16 +466,15 @@ public class GUI {
                 g.fillRect(x * innerPanel.getWidth() / GUI.WIDTH , y * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
             }
 
-            private void paintAnts(Graphics g) {
+            private void paintGOL(Graphics g) {
                 for(int i = 0; i < GUI.HEIGHT; i++) {
                     for (int j = 0; j < GUI.WIDTH; j++) {
-                        if(currentFrame[i][j]) {
-                            g.setColor(AntSimulator.getColor(i, j));
-                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
-                        }
-                        else {
+                        if (currentFrame[i][j]) {
+                            g.setColor(Color.BLUE);
+                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                        } else {
                             g.setColor(innerPanel.getBackground());
-                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         }
                     }
                 }

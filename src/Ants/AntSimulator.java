@@ -200,8 +200,12 @@ public class AntSimulator implements Game {
     }
 
     private void agePheromones() {
-        for (Pheromone phe : currentTrailPheromones.values()) {
-            phe.decay();
+        Map<Integer, Pheromone> nextTrailPheromones;
+        synchronized (lock) {
+            nextTrailPheromones = new Hashtable<>(currentTrailPheromones);
+            for (Pheromone phe : nextTrailPheromones.values()) {
+                phe.decay();
+            }
         }
     }
 
@@ -273,7 +277,11 @@ public class AntSimulator implements Game {
      * @param x indice di colonna
      */
     private void updateFrame(int y, int x) {
-        gui.nextFrame[y][x] = (currentAlive.containsKey(key(y, x)) || nest.inNest(key(y, x)) || currentFood.containsKey(key(y, x)));
+        gui.nextFrame[y][x] = (currentAlive.containsKey(key(y, x)) ||
+                                nest.inNest(key(y, x)) ||
+                                currentFood.containsKey(key(y, x)) ||
+                                currentTrailPheromones.containsKey(key(y, x))
+                            );
     }
 
     /**
@@ -423,6 +431,10 @@ public class AntSimulator implements Game {
         if (food != null) {
             return food.getColor();
         }
+        Pheromone phe = currentTrailPheromones.get(k);  // pheromones get shown by other means. See UI.GUI.paintPheromones
+        if (phe != null) {
+            return new Color(255, 255, 255);
+        }
         return new Color(200,0,0);
     }
 
@@ -435,6 +447,17 @@ public class AntSimulator implements Game {
      */
     public static boolean isAnt(Integer y, Integer x) {
         return (currentAlive.get(key(y, x)) != null);
+    }
+
+    /**
+     * called by UI.GUI paintLife to know whether to paint the life of an ant based on its age
+     * or to paint another object normally
+     * @param y the row number value
+     * @param x the column number value
+     * @return true if this position is currently occupied by a living ant, this is granted by {@code evolve()}
+     */
+    public static boolean isPheromone(Integer y, Integer x) {
+        return (currentTrailPheromones.get(key(y, x)) != null);
     }
 
     /**
@@ -467,6 +490,10 @@ public class AntSimulator implements Game {
 
     public static Map<Integer, Ant> getCurrentAlive() {
         return currentAlive;
+    }
+
+    public static Map<Integer, Pheromone> getCurrentTrailPheromones() {
+        return currentTrailPheromones;
     }
 
     public static Map<Integer, FoodSource> getCurrentFood() {

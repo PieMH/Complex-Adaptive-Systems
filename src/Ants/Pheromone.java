@@ -64,7 +64,7 @@ public class Pheromone {
         this.strength = strength;
     }
 
-    Color getColor() {
+    public Color getColor() {
         return color;
     }
 
@@ -73,5 +73,9 @@ public class Pheromone {
         if (strength < 1) {
             AntSimulator.erasePheromone(this);
         }
+    }
+
+    public Integer getStrength() {
+        return strength;
     }
 }

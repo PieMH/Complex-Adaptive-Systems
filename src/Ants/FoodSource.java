@@ -10,7 +10,7 @@ public class FoodSource {
     /**
      * the color for every food source
      */
-    public final Color color = new Color(95, 110, 0);
+    public final Color color = new Color(180, 80, 0);
 
     /**
      * the row number in the grid of this Food Source
@@ -51,7 +51,6 @@ public class FoodSource {
         minimal = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION * GUI.DIMENSION)), 1);   // minimal number of quantity of food in this source
         maximal = minimal * 5;
         amountLeft = random_seed.nextInt(minimal, maximal);
-        System.out.println(amountLeft);
     }
 
     Integer getAmountLeft() {
