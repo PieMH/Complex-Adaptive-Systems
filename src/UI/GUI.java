@@ -377,7 +377,7 @@ public class GUI {
                             else if (AntSimulator.isPheromone(i, j)) {
                                 Pheromone phe = AntSimulator.getCurrentTrailPheromones().get(AntSimulator.key(i, j));
                                 Color pheColor = phe.getColor();
-                                g.setColor(new Color(pheColor.getRed(), pheColor.getGreen(), pheColor.getBlue(), phe.getStrength() * 255 / 100));
+                                g.setColor(new Color(pheColor.getRed(), pheColor.getGreen(), pheColor.getBlue(), phe.getStrength() * 255 / Pheromone.maxStrength));
                             }
                             else {
                                 g.setColor(AntSimulator.getColor(i, j));

@@ -118,7 +118,6 @@ public class AntSimulator implements Game {
                 if (reset) {
                     if (random) {
                         setMapRandom();    // setMapRandom
-                        System.out.println(currentAlive.size());
                     }
                     else {
                         iterateMatrix(0);  // setMap
@@ -469,6 +468,9 @@ public class AntSimulator implements Game {
         currentFood = new Hashtable<>();
         currentTrailPheromones = new Hashtable<>();
         nest = new AntsNest();
+
+        // the following is the calculation of Pheromone.maxStrength, actually is derived from Ant calculation, in fact it is equal to = ceil(2 * Ant.minChange^2)
+        Pheromone.setMaxStrength( (int) Math.ceil( (2 * Math.pow( (int) Math.max( 2, Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1), 2))));
 
         reset = true;
 

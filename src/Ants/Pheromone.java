@@ -1,5 +1,7 @@
 package Ants;
 
+import UI.GUI;
+
 import java.awt.*;
 
 /**
@@ -52,6 +54,13 @@ public class Pheromone {
      */
     Ant ant;
 
+    /**
+     * maximum strength value for a pheromone trail, it depends on UI.GUI.DIMENSION
+     * It is final but can't say final because it must change between different Interfaces.Game instances
+     * It is used by {@code Ants.Ant(), Ants.Ant.pheromoneInteraction() and UI.GUI.paintPheromones(Graphics g)}
+     */
+    public static int maxStrength;
+
     Pheromone(Integer y, Integer x, Ant ant) {
         this(y, x, ant, pheType.Personal, 100);
     }
@@ -62,6 +71,10 @@ public class Pheromone {
         this.ant = ant;
         this.type = type;
         this.strength = strength;
+    }
+
+    public static void setMaxStrength(Integer strength) {
+        maxStrength = strength;
     }
 
     public Color getColor() {

@@ -53,7 +53,6 @@ public class SocialGameSystem implements Game {
                 if (reset) {
                     if (random) {
                         setMapRandom();    // setMapRandom
-                        System.out.println(currentAlive.size());
                     }
                     else {
                         scorriMatrice(0);  // setMap

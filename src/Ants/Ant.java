@@ -141,11 +141,12 @@ public class Ant {
         changeDirection = random_seed.nextInt(minChange, maxChange);
 
         int minTrail = 2 * minChange;
-        int maxTrail = (int) Math.ceil(minTrail * 3.0 / 2.0 * minTrail);
+        int maxTrail = (int) Math.ceil(3.0 / 2.0 * minTrail * minTrail);
         maxLeaveTrail = random_seed.nextInt(minTrail, maxTrail);
         leaveTrail = 0;
 
-        strengthOfNewTrailPheromone = random_seed.nextInt(minTrail * 2, Math.min(100, maxTrail * 2));
+        int minStrength = 3 * minChange;
+        strengthOfNewTrailPheromone = random_seed.nextInt(minStrength, Pheromone.maxStrength);
 
         countDir = changeDirection;
         onARandomPath = true;
@@ -169,6 +170,7 @@ public class Ant {
         search(true, false);
 
 //        decide();
+        //        chooseWhatToDo(o);  // update chosenDir // update countDir  // update onARandomPath
 
         movement();
     }
@@ -244,8 +246,6 @@ public class Ant {
         else if (element.getClass() == Pheromone.class) {
             pheromoneInteraction((Pheromone) element);
         }
-
-//        chooseWhatToDo(o);  // update chosenDir // update countDir  // update onARandomPath
     }
 
     void antInteraction(Ant otherAnt) {
@@ -276,8 +276,9 @@ public class Ant {
     void pheromoneInteraction(Pheromone phe) {
         // you came across a pheromone trail
         // if it is yours ignore it
-        if (phe.ant == this) {
-            if (Math.random() < 0.1) { // with a P of < 0.1
+        if (phe.ant == this) { return;}
+        else {
+            if (Math.random() < (phe.getStrength()) / (double) Pheromone.maxStrength) { // with a P of the strength of the pheromone found
                 // follow it
             }
             return;
@@ -379,6 +380,10 @@ public class Ant {
         // a food's source
         FoodSource food = AntSimulator.getCurrentFood().get(AntSimulator.key(yPos, xPos));
         if (food != null && food.getAmountLeft() > 0) return (E) food;
+
+        // a pheromone trail
+        Pheromone phe = AntSimulator.getCurrentTrailPheromones().get(AntSimulator.key(yPos, xPos));
+        if (phe != null && phe.getStrength() > 0) return (E) phe;
 
         return null;
     }
