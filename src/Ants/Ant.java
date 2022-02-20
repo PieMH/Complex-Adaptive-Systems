@@ -23,22 +23,40 @@ public class Ant {
      */
     public Integer life;
 
+    /*
     /**
-     * the hunger level of the ant, if it reaches zero it dies
+     * the hunger level of the ant, if it reaches zero the ant will starve
      */
-    Integer hunger;
+//    Double hunger;
+
+
+    /**
+     * increases its value when hunger = 0 every turn,
+     * turns to 0 if hunger > 0
+     */
+    private Integer starvingMultiplier;
+
+    private final Double foodToEatEveryDay;
+
+    private final Double transferingSpeed;
 
     /**
      * the first stomach of an ant. The food carried in the first stomach it is used to share it with other ants;
      * or it is passed to the second private stomach for foraging the single ant
      */
-    Integer sharedStomach;
+    Double sharedStomach;
 
     /**
-     * the second private stomach of an ant, the food stored in this stomach serves only to sustain its ant
+     * the second private stomach of an ant. The food stored in this stomach serves only to sustain its ant
      * If this is empty the ant will starve
      */
-    private Integer privateStomach;
+    private Double privateStomach;
+
+    /**
+     * my maximum capacity of food quantities I can carry with me.
+     * This maximum is the same for both of my stomachs.
+     */
+    private final Integer maxStomachCapacity;
 
     /**
      * the color used by UI.GUI to paint the GUI.innerPanel correctly
@@ -145,19 +163,34 @@ public class Ant {
         yPos = y;
         xPos = x;
 
+        // changeDirection random value extraction
         random_seed = new Random();
-        int minChange = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1, 2);
+        int minChange = (int) Math.max(2, Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1);
         int maxChange = (int) Math.ceil(minChange * Math.sqrt(minChange)) + 1;
         changeDirection = random_seed.nextInt(minChange, maxChange);
 
+        // maxLeaveTrail random value extraction
         int minTrail = 2 * minChange;
         int maxTrail = (int) Math.ceil(3.0 / 2.0 * minTrail * minTrail);
         maxLeaveTrail = random_seed.nextInt(minTrail, maxTrail);
         leaveTrail = 0;
 
+        // strengthOfNewTrailPheromone random value extraction
         int minStrength = 3 * minChange;
         // for Pheromone.maxStrength calculation see AntSimulator.resetMap()
         strengthOfNewTrailPheromone = random_seed.nextInt(minStrength, Pheromone.maxStrength);
+
+        // Stomachs capacities
+        int maxF = (int) Math.floor(2.2 * Math.max(1, Math.pow(GUI.DIMENSION, 1 / 4.0) - 1 ) );
+        maxStomachCapacity = random_seed.nextInt(minChange, maxF);
+        sharedStomach = maxStomachCapacity / 4.0;
+        privateStomach = 0.0;
+
+        // food related attributes
+        foodToEatEveryDay = Math.max(0.2, Math.random() * 1.2) / 2;
+        starvingMultiplier = 1;
+//        hunger = 10.0;
+        transferingSpeed = Math.max(0.04, Math.random()) / 2;
 
         countDir = changeDirection;
         onARandomPath = true;
@@ -178,12 +211,19 @@ public class Ant {
      * </ol>
      */
     void action() {
+
+        transferFood();
+
         search(true, false);
+
+        eat();
 
 //        decide();
         //        chooseWhatToDo(o);  // update chosenDir // update countDir  // update onARandomPath
 
         movement();
+
+        age();
     }
 
     /**
@@ -243,7 +283,7 @@ public class Ant {
     <E> void interact(Integer y, Integer x) {
         E element = whoIsThere(y, x);   // called on nextY and nextX
 
-        if (element == null) return;    // it there is no one
+        if (element == null) return;    // if there is no one
 
         if (element.getClass() == Ant.class) {
             antInteraction((Ant) element);
@@ -262,6 +302,29 @@ public class Ant {
     void antInteraction(Ant otherAnt) {
         // do action relative to meeting a new ant or a previously known ant
         // mating and pheromones sniffing
+
+        // Trophallaxis
+        double myDelta = this.maxStomachCapacity - this.sharedStomach;     // how much our stomach is empty
+        double yourDelta = otherAnt.maxStomachCapacity - otherAnt.sharedStomach;
+        if ((myDelta > yourDelta + 1) && (otherAnt.sharedStomach > 1)) {    // mine in emptier, so you shall give some food to me
+            if (Math.random() < ((myDelta - yourDelta) / (double) this.maxStomachCapacity )) {      // with a P of the difference of our deltas / mine maximum capacity (which is always greater than the difference)
+                System.out.println("myD:" + myDelta + " yourD:" + yourDelta + ". Mymaxcapacity:" + this.maxStomachCapacity + ". P:" + ((myDelta - yourDelta) / (double) this.maxStomachCapacity ));
+                this.sharedStomach += 1;
+                otherAnt.sharedStomach -= 1;
+            }
+            else {
+                System.out.println("myD:" + myDelta + " yourD:" + yourDelta + ". Mymaxcapacity:" + this.maxStomachCapacity + ". Failed trophallaxis with a P:" + ((myDelta - yourDelta) / (double) this.maxStomachCapacity ));
+            }
+        }
+        else if ((yourDelta > myDelta + 1) && (this.sharedStomach > 1)) {
+            if (Math.random() < ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity)) {
+                System.out.println("yourD:" + yourDelta + " myD:" + myDelta + ". Yoursmaxcapacity:" + otherAnt.maxStomachCapacity + ". P:" + ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity));
+                this.sharedStomach -= 1;
+                otherAnt.sharedStomach += 1;
+            } else {
+                System.out.println("yourD:" + yourDelta + " myD:" + myDelta + ". Yoursmaxcapacity:" + otherAnt.maxStomachCapacity + ". Failed trophallaxis with a P:" + ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity));
+            }
+        }
     }
 
     void nestInteraction(AntsNest nest) {
@@ -269,17 +332,38 @@ public class Ant {
         // do action relative to the nest encounter
         leaveTrail = maxLeaveTrail;
         // deposit eggs ??
-        // deposit food or eat its reserves ??
+
+        // deposit food or eat its reserves
+        // deposit an amount equal to a random value between this.sharedStomach - 1 and 0, with a continuous random variable that has exponential distribution
+        if (sharedStomach > 0.5) {
+            double expDistributionQuantity = Math.min(1, 1 * (Math.log(1 - Math.random()) / (- sharedStomach)));
+            System.out.println("expdistr:" + expDistributionQuantity);
+            System.out.println("sharedStomach:" + sharedStomach + " difference:" + (sharedStomach * expDistributionQuantity));
+            double foodKept = sharedStomach * expDistributionQuantity;
+            nest.addReserves(sharedStomach - foodKept);
+            sharedStomach = foodKept;
+            System.out.println("nest reservoirs " + nest.getReservoir());
+        }
+        else {
+            if (nest.getFoodFromReserves()) {
+                sharedStomach += 1;
+            }
+        }
     }
 
     void foodInteraction(FoodSource food) {
         // if you have already eaten the maximum food you can, AND you are carrying the maximum food you can ignore it
         // otherwise:
-        boolean gatheredFood = food.gatherFood();
-        if (gatheredFood) {
+//        System.out.println("sharedStomach:" + sharedStomach + "privateStomach:" + privateStomach);
+        if (food.gathering()) {
+//            System.out.println("there is food");
             // do action relative to gathering food and discovering a new food source
-//          gatherFood(gatheredFood);
-            leaveTrail = maxLeaveTrail;
+          if (!gatherFood()) {
+//              System.out.println("but i am already full");
+              food.reverseGathering();
+          }
+//          System.out.println("sharedStomach:" + sharedStomach + "privateStomach:" + privateStomach);
+          leaveTrail = maxLeaveTrail;
         }
         else AntSimulator.foodFinished(food);
     }
@@ -410,6 +494,23 @@ public class Ant {
     }
 
     /**
+     * control if the ant is full of food to carry or if it has some space left
+     * if there is some space adds a new quantity to the correct stomach
+     * @return true if the ant can carry more food
+     */
+    private boolean gatherFood() {
+        if (sharedStomach + 1 < maxStomachCapacity) {   // firstly try to full the shared stomach
+            sharedStomach += 1;
+            return true;
+        }
+        else if (privateStomach + 1 < maxStomachCapacity) {     // if it is already full, move one quantity from the shared food to the private one and then gather the new food
+            privateStomach += 1;
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * kills an ant, mainly called by {@code AntSimulator}
      */
     void die() {
@@ -418,13 +519,46 @@ public class Ant {
     }  // maybe a call to the Java Garbage Collector
 
     /**
-     * decrease the value of life of the ant, simulates aging
+     * decrease the value of life of the ant, simulates aging.
+     * If the ant is starving of food the multiplier will be greater the 2, and it will grow every turn.
+     * If the ant is not starving it is equal to 1, and it simulates simple aging
      */
     void age() {
-        life -= 1;
+        life -= starvingMultiplier;
+        System.out.println("life:" + life);
     }
 
-//    boolean eat()
+    /**
+     * eat some food you are carrying.
+     * First eat from the private stomach, if it is empty from the shared one
+     * If you don't have any food you start to starve
+     */
+    void eat() {
+        if (privateStomach - foodToEatEveryDay > 0) {   // firstly get your food from the private stomach
+            privateStomach -= foodToEatEveryDay;
+            starvingMultiplier = 1;
+        }
+        else if (sharedStomach - foodToEatEveryDay > 0) {   // if it is empty then try the shared one
+            sharedStomach -= foodToEatEveryDay;
+            starvingMultiplier = 1;
+        }
+        else {  // starve, increase the starvingMultiplier attribute
+            starvingMultiplier += 1;
+        }
+        System.out.println("starvingMultiplier:" + starvingMultiplier + " food to eat everyday:" + foodToEatEveryDay);
+    }
+
+    /**
+     * every turn transfer some food from the sharedStomach to the private one depending on the value of transferingSpeed
+     * This only if the private one doesn't exceed its maximum capacity and the shared one doesn't go below zero
+     */
+    void transferFood() {
+        if ((privateStomach + transferingSpeed < maxStomachCapacity) && (sharedStomach - transferingSpeed > 0)) {
+            privateStomach += transferingSpeed;
+            sharedStomach -= transferingSpeed;
+        }
+        System.out.println("shared:" + sharedStomach + " private:" + privateStomach + " speed:" + transferingSpeed);
+    }
 
     public Color getColor() {
         return color;

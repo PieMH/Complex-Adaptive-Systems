@@ -61,11 +61,15 @@ public class FoodSource {
         return color;
     }
 
-    boolean gatherFood() {
+    boolean gathering() {
         if (amountLeft > 1) {
            amountLeft -= 1;
            return true;
         }
         return false;
+    }
+
+    void reverseGathering() {
+        amountLeft += 1;
     }
 }

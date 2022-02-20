@@ -129,7 +129,7 @@ public class AntSimulator implements CASModel {
                     reset = false;
                 }
                 iterateCurrentAlive(0);  // evolve
-                if (Math.random() < 0.02) balanceFood();    // with a probability of 2% every turn add a food's source
+                if (Math.random() < 0.03) balanceFood();    // with a probability of 3% every turn add a food's source
                 agePheromones();
                 iterateMatrix(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;
@@ -142,18 +142,14 @@ public class AntSimulator implements CASModel {
     }
 
     /**
-     * main algorithm of the model.
+     * Activate an ant and keeps updated the currentAlive hashmap
      * @param hashKey the kye of the hashmap currentAlive
      */
     private void evolve(Integer hashKey) {
         Ant currentAnt = currentAlive.get(hashKey);
-        currentAnt.age();
-        if (currentAnt.getLife() < 1) {
-            death(hashKey);
-            return;
-        }
 
         currentAnt.action();
+
         Integer newKey = currentAnt.getPos();
         boolean moved = !(Objects.equals(newKey, hashKey));
         if (moved) {   // the ant may have moved !
@@ -436,7 +432,7 @@ public class AntSimulator implements CASModel {
         }
         Pheromone phe = currentTrailPheromones.get(k);  // pheromones get shown by other means. See UI.GUI.paintPheromones
         if (phe != null) {
-            return new Color(255, 255, 255);
+            return new Color(240, 240, 240);    // UI.GUI.innerPanel.GetBackground() not accessible from here as it should be
         }
         return new Color(200,0,0);
     }
