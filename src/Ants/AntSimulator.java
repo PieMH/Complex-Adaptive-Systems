@@ -357,7 +357,7 @@ public class AntSimulator implements CASModel {
     /**
      * Inverse function of the {@code key()} function.
      * @param chiave the key on the hashMap calculated by {@code key()}.
-     * @param columnOrRow 0 to know the column index on the 2 dimensional grid; 1 to know the row index on the 2 dimensional grid
+     * @param columnOrRow 0 to know the row index on the 2 dimensional grid; 1 to know the column index on the 2 dimensional grid
      * @return the column or row index based on {@code columnOrRow}.
      */
     public static int coordinates(Integer chiave, int columnOrRow) {

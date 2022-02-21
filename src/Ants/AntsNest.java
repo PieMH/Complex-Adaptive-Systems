@@ -87,9 +87,9 @@ public class AntsNest {
         reservoir += quantity;
     }
 
-    boolean getFoodFromReserves() {
-        if (reservoir - 1 > 1) {
-            reservoir -= 1;
+    boolean getFoodFromReserves(double howMuch) {
+        if (reservoir - howMuch > 1) {
+            reservoir -= howMuch;
             return true;
         }
         return false;
@@ -104,7 +104,7 @@ public class AntsNest {
             if (searchSpawnPoint()) {   // this call updates spawnY and spawnY, to am available spot on the grid next to the nest
 //                reservoir -= 10;
 //                System.out.println("reservoir left:" + reservoir + ". spawnY:" + spawnY + ", spawnX:" + spawnX);
-                return new Ant(spawnY, spawnX, this);
+                //return new Ant(spawnY, spawnX, this);
             }
 //        }
         return null;

@@ -127,6 +127,8 @@ public class Ant {
      */
     private boolean onARandomPath;
 
+    private boolean toTheNest;
+
     /**
      * a flag to let move() know whether to leave a trail of pheromones after encountering a food's source or the nest.
      * @see #move
@@ -148,6 +150,13 @@ public class Ant {
      */
     private final AntsNest nest;
 
+    private final int nestY;
+    private final int nestX;
+
+    private ArrayList<Double> closestNestDistances;
+
+    private HashMap<Integer, Direction> nestDirections;
+
     /**
      * my personal pheromone of type personal and strength 100
      */
@@ -168,12 +177,18 @@ public class Ant {
     Ant (Integer y, Integer x, AntsNest nest) {
         yPos = y;
         xPos = x;
+        onARandomPath = true;
+        toTheNest = false;
+        this.life = 100.0;
+        this.nest = nest;
+        this.personalPheromone = new Pheromone(yPos, xPos, this);
 
         // changeDirection random value extraction
         random_seed = new Random();
         int minChange = (int) Math.max(2, Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1);
         int maxChange = (int) Math.ceil(minChange * Math.sqrt(minChange)) + 1;
         changeDirection = random_seed.nextInt(minChange, maxChange);
+        countDir = changeDirection;
 
         // maxLeaveTrail random value extraction
         int minTrail = 2 * minChange;
@@ -189,31 +204,33 @@ public class Ant {
         // Stomachs capacities
         int maxF = (int) Math.floor(2.2 * Math.max(1, Math.pow(GUI.DIMENSION, 1 / 4.0) - 1 ) );
         maxStomachCapacity = random_seed.nextInt(minChange, maxF);
-        sharedStomach = maxStomachCapacity / 2.0;
+        sharedStomach = maxStomachCapacity * 0.5;
         privateStomach = 0.0;
 
         // food related attributes
-        foodToEatEveryDay = Math.max(0.2, Math.random() * 1.2) / 2;
+        foodToEatEveryDay = Math.max(0.1, Math.random() * 1.1) / 2;
         starvingMultiplier = 1.0;
 //        hunger = 10.0;
-        transferringSpeed = Math.max(0.04, Math.random()) / 2;
+        transferringSpeed = Math.max(0.06, Math.random()) / 2;
 
-        countDir = changeDirection;
-        onARandomPath = true;
-        this.life = 100.0;
-        this.nest = nest;
-        this.personalPheromone = new Pheromone(yPos, xPos, this);
+        // nest related attributes
+        nestY = AntSimulator.coordinates(nest.nestEntrance1, 0);
+        nestX = AntSimulator.coordinates(nest.nestEntrance1, 1);
+        System.out.println("nestY:" + nestY + " nestX:" + nestX + " key1:" + nest.nestEntrance1);
+        closestNestDistances = new ArrayList<>(3);
+        nestDirections = new HashMap<>();
     }
 
     /**
      * called by AntSimulator to activate an Ant.
      * The possible actions are:
      * <ol>
+     *     <li>transfer the food you have in the shared stomach to the private one</li>
      *     <li>search the 8 squares around you</li>
      *     <li>interact with something around you</li>
-     *     <li>decide if you want to follow something you found</li>
-     *     <li>follow your trail</li>
-     *     <li>after some time if you are on a random trail change it randomly>
+     *     <li>eat the food from your private stomach</li>
+     *     <li>decide what you want to do</li>
+     *     <li>try to move in the direction you have chosen</li>
      * </ol>
      */
     void action() {
@@ -222,7 +239,7 @@ public class Ant {
 
         leph = null;
 
-        search(true, false);
+        search(true, false, false);
 
         eat();
 
@@ -239,10 +256,11 @@ public class Ant {
      * It would break the little mind of the ant. If you call this method with both parameters at false it is simply useless.
      * @param something true if you want to find something around you
      * @param newDirection true if you want to search for a new random direction to follow
+     * @param nest
      * @see #interact
      * @see #findRandomDirection
      */
-    void search(boolean something, boolean newDirection) {
+    void search(boolean something, boolean newDirection, boolean nest) {
         random_seed = new Random();
         ArrayList<Direction> directionList = new ArrayList<>(List.of(Direction.values()));
         int index;
@@ -252,11 +270,16 @@ public class Ant {
             if (something) {
                 translateDirInPos(dir);     // updates nextY and nextX
                 interact(nextY, nextX);
+                return;
             }
             else if (newDirection) {
                 if (findRandomDirection(dir)) {
                     return;
                 }
+            }
+            else if (nest) {
+                translateDirInPos(dir);
+                computeNestDistance(nextY, nextX);
             }
         }
     }
@@ -279,7 +302,7 @@ public class Ant {
         }
 
         // otherwise, search a random path
-        search(false, true);
+        search(false, true, false);
 
         move(nextY, nextX);
 //        System.out.println("chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos);
@@ -346,7 +369,8 @@ public class Ant {
 
         // deposit food or eat its reserves
         // deposit an amount equal to a random value between this.sharedStomach - 1 and 0, with a continuous random variable that has exponential distribution
-        if (sharedStomach > 0.5) {
+        double threshold = maxStomachCapacity * 0.4;
+        if (sharedStomach > threshold) {    // give
             double expDistributionQuantity = Math.min(1, 1 * (Math.log(1 - Math.random()) / (- sharedStomach)));
 //            System.out.println("expdistr:" + expDistributionQuantity);
 //            System.out.println("sharedStomach:" + sharedStomach + " difference:" + (sharedStomach * expDistributionQuantity));
@@ -355,9 +379,10 @@ public class Ant {
             sharedStomach = foodKept;
 //            System.out.println("nest reservoirs " + nest.getReservoir());
         }
-        else {
-            if (nest.getFoodFromReserves()) {
-                sharedStomach += 1;
+        else {  // take
+            double howMuch = (threshold - (sharedStomach + privateStomach));
+            if (nest.getFoodFromReserves(howMuch)) {
+                sharedStomach += howMuch;
             }
         }
     }
@@ -393,10 +418,58 @@ public class Ant {
     }
 
     private void decide() {
-        // choose what to do  // update chosenDir // update countDir  // update onARandomPath
+
+        // First key AI logic of an ant:
+            // if I am starving or have little food go to you nest to feed
+            // at the opposite if I have plenty of food with me, it is useless to continue finding food in the ambient so come back to the nest
+            // if I have just enough quantity of food to go exploring then I will prefer to go outside and explore the ambient for food
+        double stomachSum = sharedStomach + privateStomach;
+        // remember that maxStomachCapacity it's the maximum capacity of a single stomach
+        if ((stomachSum < maxStomachCapacity * 0.33)  || (stomachSum > maxStomachCapacity * 1.66)) {    // little or much food condition
+            System.out.println("stomachSum" + stomachSum + " MaxCapacity:" + maxStomachCapacity);
+
+            // reinitialize the data structures for searching the nest
+            closestNestDistances.add ((double) GUI.WIDTH);
+            closestNestDistances.add ((double) GUI.WIDTH);
+            closestNestDistances.add ((double) GUI.WIDTH);
+            nestDirections.put(0, null);
+            nestDirections.put(1, null);
+            nestDirections.put(2, null);
+
+            search(false, false, true);     // this updates nestDirections hashmap
+
+            double p = Math.random();
+            if (p < 0.5) {
+                chosenDir = nestDirections.get(0);
+            }
+            else if (p < 0.85) {
+                chosenDir = nestDirections.get(1);
+            }
+            else {
+                chosenDir = nestDirections.get(2);
+            }
+            toTheNest = true;
+        }
+        else toTheNest = false;
+
+        // Second key AI logic of an ant:
+            // if I found a strong pheromone trail around me go to the lightest one, hopefully in the opposite direction of the strongest one
+            // this will lead me to a food' source or the nest
         if (leph != null) {
             if (Math.random() < ((Pheromone.maxStrength - leph.getStrength()) / (double) Pheromone.maxStrength) * 1.2) { // with a P of the strength of the strongest pheromone found
-                chosenDir = translatePosInDir(leph.yPos, leph.xPos);
+                Direction desirableDir = translatePosInDir(leph.yPos, leph.xPos);
+
+                if (toTheNest) {
+                    for (Direction dir : nestDirections.values()) {
+                        if (dir == desirableDir) {
+                            chosenDir = desirableDir;
+                            break;
+                        }
+                    }
+                }
+                else {
+                    chosenDir = desirableDir;
+                }
 //                System.out.println("chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos + " sephY:" + seph.yPos + " sephX:" + seph.xPos);
                 onARandomPath = false;
                 countDir = 0;
@@ -455,78 +528,6 @@ public class Ant {
     }
 
     /**
-     * simply translate a cardinal direction in a pair of coordinates relative to that of this ant.
-     * The translation is saved on the local attributes of this class called nextX and nextY,
-     * they are the nearby position on the grid relative to this.xPos and this.yPos, translation from a Direction
-     * @param direction the cardinal direction to translate
-     */
-    private void translateDirInPos(Direction direction) {
-        nextX = this.xPos;
-        nextY = this.yPos;
-        switch (direction) {
-            case N -> // Nord
-                nextY -= 1;
-            case NE -> {     // NordEst
-                nextY -= 1;
-                nextX += 1;
-            }
-            case E -> // Est
-                nextX += 1;
-            case SE -> {     // SudEst
-                nextY += 1;
-                nextX += 1;
-            }
-            case S -> // Sud
-                nextY += 1;
-            case SO -> {     // SudOvest
-                nextY += 1;
-                nextX -= 1;
-            }
-            case O -> // Ovest
-                nextX -= 1;
-            case NO -> {     // NordOvest
-                nextY -= 1;
-                nextX -= 1;
-            }
-        }
-    }
-
-    /**
-     * Tells, given a position next to you, what direction you should follow to reach that position
-     * @param y the row where do you want to go
-     * @param x the column where do you want to go
-     * @return the Direction you should follow to reach y,x
-     */
-    private Direction translatePosInDir(int y, int x) {
-             if ((yPos - 1 == y) && (xPos == x))     return Direction.N;
-        else if ((yPos - 1 == y) && (xPos + 1 == x)) return Direction.NE;
-        else if ((yPos == y)     && (xPos + 1 == x)) return Direction.E;
-        else if ((yPos + 1 == y) && (xPos + 1 == x)) return Direction.SE;
-        else if ((yPos + 1 == y) && (xPos == x))     return Direction.S;
-        else if ((yPos + 1 == y) && (xPos - 1 == x)) return Direction.SO;
-        else if ((yPos == y)     && (xPos - 1 == x)) return Direction.O;
-        else if ((yPos - 1 == y) && (xPos - 1 == x)) return Direction.NO;
-        return null;
-    }
-
-    /**
-     * tell to the caller method if the desired direction is actually the opposite direction of the currently chosen one
-     * @param desiredDir the direction you might want to go to
-     * @return true if they are not the exact opposite, false if they are
-     */
-    private boolean notOpposite(Direction desiredDir) {
-             if ((desiredDir == Direction.N)  && (chosenDir != Direction.S))  return true;
-        else if ((desiredDir == Direction.NE) && (chosenDir != Direction.SO)) return true;
-        else if ((desiredDir == Direction.E)  && (chosenDir != Direction.O))  return true;
-        else if ((desiredDir == Direction.SE) && (chosenDir != Direction.NO)) return true;
-        else if ((desiredDir == Direction.S)  && (chosenDir != Direction.N))  return true;
-        else if ((desiredDir == Direction.SO) && (chosenDir != Direction.NE)) return true;
-        else if ((desiredDir == Direction.O)  && (chosenDir != Direction.E))  return true;
-        else if ((desiredDir == Direction.NO) && (chosenDir != Direction.SE)) return true;
-        return false;
-    }
-
-    /**
      * An important method who controls if the given position is occupied or free.
      * @param yPos the row number
      * @param xPos the column number
@@ -552,6 +553,79 @@ public class Ant {
         return null;
     }
 
+
+    /**
+     * simply translate a cardinal direction in a pair of coordinates relative to that of this ant.
+     * The translation is saved on the local attributes of this class called nextX and nextY,
+     * they are the nearby position on the grid relative to this.xPos and this.yPos, translation from a Direction
+     * @param direction the cardinal direction to translate
+     */
+    private void translateDirInPos(Direction direction) {
+        nextX = this.xPos;
+        nextY = this.yPos;
+        switch (direction) {
+            case N -> // Nord
+                    nextY -= 1;
+            case NE -> {     // NordEst
+                nextY -= 1;
+                nextX += 1;
+            }
+            case E -> // Est
+                    nextX += 1;
+            case SE -> {     // SudEst
+                nextY += 1;
+                nextX += 1;
+            }
+            case S -> // Sud
+                    nextY += 1;
+            case SO -> {     // SudOvest
+                nextY += 1;
+                nextX -= 1;
+            }
+            case O -> // Ovest
+                    nextX -= 1;
+            case NO -> {     // NordOvest
+                nextY -= 1;
+                nextX -= 1;
+            }
+        }
+    }
+
+    /**
+     * Tells, given a position next to you, what direction you should follow to reach that position
+     * @param y the row where do you want to go
+     * @param x the column where do you want to go
+     * @return the Direction you should follow to reach y,x
+     */
+    private Direction translatePosInDir(int y, int x) {
+        if ((yPos - 1 == y) && (xPos == x))     return Direction.N;
+        else if ((yPos - 1 == y) && (xPos + 1 == x)) return Direction.NE;
+        else if ((yPos == y)     && (xPos + 1 == x)) return Direction.E;
+        else if ((yPos + 1 == y) && (xPos + 1 == x)) return Direction.SE;
+        else if ((yPos + 1 == y) && (xPos == x))     return Direction.S;
+        else if ((yPos + 1 == y) && (xPos - 1 == x)) return Direction.SO;
+        else if ((yPos == y)     && (xPos - 1 == x)) return Direction.O;
+        else if ((yPos - 1 == y) && (xPos - 1 == x)) return Direction.NO;
+        return null;
+    }
+
+    /**
+     * tell to the caller method if the desired direction is actually the opposite direction of the currently chosen one
+     * @param desiredDir the direction you might want to go to
+     * @return true if they are not the exact opposite, false if they are
+     */
+    private boolean notOpposite(Direction desiredDir) {
+        if ((desiredDir == Direction.N)  && (chosenDir != Direction.S))  return true;
+        else if ((desiredDir == Direction.NE) && (chosenDir != Direction.SO)) return true;
+        else if ((desiredDir == Direction.E)  && (chosenDir != Direction.O))  return true;
+        else if ((desiredDir == Direction.SE) && (chosenDir != Direction.NO)) return true;
+        else if ((desiredDir == Direction.S)  && (chosenDir != Direction.N))  return true;
+        else if ((desiredDir == Direction.SO) && (chosenDir != Direction.NE)) return true;
+        else if ((desiredDir == Direction.O)  && (chosenDir != Direction.E))  return true;
+        else if ((desiredDir == Direction.NO) && (chosenDir != Direction.SE)) return true;
+        return false;
+    }
+
     /**
      * to tell if the position given as a parameter is actually out of the bounds of the grid
      * @param xPos the column number
@@ -560,6 +634,25 @@ public class Ant {
      */
     private boolean inBounds(Integer yPos, Integer xPos) {
         return (xPos >= 0 && yPos >= 0 && xPos < GUI.WIDTH && yPos < GUI.HEIGHT);
+    }
+
+    private void computeNestDistance(int y, int x) {
+        System.out.println("nestY:" + nestY + " nestX:" + nestX);
+        System.out.println("y:" + y + " x:" + x);
+        double d = Math.sqrt(Math.pow(y - nestY, 2) + Math.pow(x - nestX, 2));
+        for (int i = 0; i < 3; i++) {
+            if (closestNestDistances.get(i) > d) {
+                // updates the data structures
+                closestNestDistances.add(i, d);
+                closestNestDistances.remove(3);
+                nestDirections.put(i, translatePosInDir(y, x));
+                break;
+            }
+        }
+        for (int i = 0; i < 3; i++) {
+            System.out.println("i:" + i + ", d:" + closestNestDistances.get(i));
+        }
+        System.out.println("******************************************");
     }
 
     /**
