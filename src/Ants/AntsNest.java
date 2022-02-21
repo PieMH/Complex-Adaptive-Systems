@@ -100,13 +100,13 @@ public class AntsNest {
     }
 
     Ant reproduction() {
-        if (reservoir > 12) {
+//        if (reservoir > 12) {
             if (searchSpawnPoint()) {   // this call updates spawnY and spawnY, to am available spot on the grid next to the nest
-                reservoir -= 10;
-                System.out.println("reservoir left:" + reservoir + ". spawnY:" + spawnY + ", spawnX:" + spawnX);
+//                reservoir -= 10;
+//                System.out.println("reservoir left:" + reservoir + ". spawnY:" + spawnY + ", spawnX:" + spawnX);
                 return new Ant(spawnY, spawnX, this);
             }
-        }
+//        }
         return null;
     }
 

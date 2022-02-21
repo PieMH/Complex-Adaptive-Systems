@@ -439,10 +439,6 @@ public class AntSimulator implements CASModel {
         if (food != null) {
             return food.getColor();
         }
-//        Pheromone phe = currentTrailPheromones.get(k);  // pheromones get shown by other means. See UI.GUI.paintPheromones
-//        if (phe != null) {
-//            return new Color(240, 240, 240);    // UI.GUI.innerPanel.GetBackground() not accessible from here as it should be
-//        }
         return new Color(200,0,0);
     }
 

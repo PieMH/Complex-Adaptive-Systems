@@ -22,7 +22,7 @@ public class Pheromone {
     /**
      * the color for every food source
      */
-    public final Color color = new Color(0, 90, 110);
+    public final Color color = new Color(0, 50, 120);
 
     /**
      * the row number in the grid of this Food Source

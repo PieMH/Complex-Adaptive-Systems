@@ -21,7 +21,7 @@ public class Ant {
     /**
      * total days of life expectancy of an ant
      */
-    public Integer life;
+    public Double life;
 
     /*
     /**
@@ -34,7 +34,7 @@ public class Ant {
      * increases its value when hunger = 0 every turn,
      * turns to 0 if hunger > 0
      */
-    private Integer starvingMultiplier;
+    private Double starvingMultiplier;
 
     private final Double foodToEatEveryDay;
 
@@ -61,7 +61,7 @@ public class Ant {
     /**
      * the color used by UI.GUI to paint the GUI.innerPanel correctly
      */
-    public final Color color = new Color(90, 90, 90);
+    public final Color color = new Color(180, 0, 0);
 
     /**
      * the column number in the grid of this ant
@@ -154,6 +154,12 @@ public class Ant {
     private Pheromone personalPheromone;
 
     /**
+     * seph stands for Lightest Encountered PHeromone
+     * every day it returns to null but get updated on the pheromones an ant sniff around it
+     */
+    private Pheromone leph;
+
+    /**
      * This constructor is called only by AntSimulator at the start of the simulation
      * For newborn ants ?? is called instead.
      * @param y the column number in the grid
@@ -183,18 +189,18 @@ public class Ant {
         // Stomachs capacities
         int maxF = (int) Math.floor(2.2 * Math.max(1, Math.pow(GUI.DIMENSION, 1 / 4.0) - 1 ) );
         maxStomachCapacity = random_seed.nextInt(minChange, maxF);
-        sharedStomach = maxStomachCapacity / 4.0;
+        sharedStomach = maxStomachCapacity / 2.0;
         privateStomach = 0.0;
 
         // food related attributes
         foodToEatEveryDay = Math.max(0.2, Math.random() * 1.2) / 2;
-        starvingMultiplier = 1;
+        starvingMultiplier = 1.0;
 //        hunger = 10.0;
         transferringSpeed = Math.max(0.04, Math.random()) / 2;
 
         countDir = changeDirection;
         onARandomPath = true;
-        this.life = 100;
+        this.life = 100.0;
         this.nest = nest;
         this.personalPheromone = new Pheromone(yPos, xPos, this);
     }
@@ -214,12 +220,13 @@ public class Ant {
 
         transferFood();
 
+        leph = null;
+
         search(true, false);
 
         eat();
 
-//        decide();
-        //        chooseWhatToDo(o);  // update chosenDir // update countDir  // update onARandomPath
+        decide();
 
         movement();
 
@@ -265,13 +272,17 @@ public class Ant {
         // follow your path
         if (countDir < changeDirection) {
             translateDirInPos(chosenDir);    // updates nextY and nextX
-            if (move(nextY, nextX)) return;
+            if (move(nextY, nextX)) {
+//                System.out.println("chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos);
+                return;
+            }
         }
 
         // otherwise, search a random path
         search(false, true);
 
         move(nextY, nextX);
+//        System.out.println("chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos);
     }
 
     /**
@@ -337,12 +348,12 @@ public class Ant {
         // deposit an amount equal to a random value between this.sharedStomach - 1 and 0, with a continuous random variable that has exponential distribution
         if (sharedStomach > 0.5) {
             double expDistributionQuantity = Math.min(1, 1 * (Math.log(1 - Math.random()) / (- sharedStomach)));
-            System.out.println("expdistr:" + expDistributionQuantity);
-            System.out.println("sharedStomach:" + sharedStomach + " difference:" + (sharedStomach * expDistributionQuantity));
+//            System.out.println("expdistr:" + expDistributionQuantity);
+//            System.out.println("sharedStomach:" + sharedStomach + " difference:" + (sharedStomach * expDistributionQuantity));
             double foodKept = sharedStomach * expDistributionQuantity;
             nest.addReserves(sharedStomach - foodKept);
             sharedStomach = foodKept;
-            System.out.println("nest reservoirs " + nest.getReservoir());
+//            System.out.println("nest reservoirs " + nest.getReservoir());
         }
         else {
             if (nest.getFoodFromReserves()) {
@@ -370,13 +381,26 @@ public class Ant {
 
     void pheromoneInteraction(Pheromone phe) {
         // you came across a pheromone trail
-        // if it is yours ignore it
-        if (phe.ant == this) { return;}
-        else {
-            if (Math.random() < (phe.getStrength()) / (double) Pheromone.maxStrength) { // with a P of the strength of the pheromone found
-                // follow it
+        if (phe.ant != this) {  // if it is yours ignore it
+            if (notOpposite(translatePosInDir(phe.yPos, phe.xPos))) {   // if it is from the opposite direction ignore it
+                if (leph != null) {
+                    if (phe.getStrength() < leph.getStrength()) {
+                        leph = phe;
+                    }
+                } else leph = phe;
             }
-            return;
+        }
+    }
+
+    private void decide() {
+        // choose what to do  // update chosenDir // update countDir  // update onARandomPath
+        if (leph != null) {
+            if (Math.random() < ((Pheromone.maxStrength - leph.getStrength()) / (double) Pheromone.maxStrength) * 1.2) { // with a P of the strength of the strongest pheromone found
+                chosenDir = translatePosInDir(leph.yPos, leph.xPos);
+//                System.out.println("chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos + " sephY:" + seph.yPos + " sephX:" + seph.xPos);
+                onARandomPath = false;
+                countDir = 0;
+            }
         }
         // else choose to follow it or not and in what direction
     }
@@ -390,15 +414,25 @@ public class Ant {
      * @see #movement
      * @see #translateDirInPos
      */
-    private boolean move(Integer y, Integer x) {
-        if (whoIsThere(y, x) == null && inBounds(y, x) && (!Objects.equals(yPos, y) || !Objects.equals(xPos, x))) {
-            if (leaveTrail > 1) {
-                AntSimulator.addPheromone(new Pheromone(yPos, xPos, this, Pheromone.pheType.Trail, strengthOfNewTrailPheromone));
-                leaveTrail -= 1;
+    private <E> boolean move(Integer y, Integer x) {
+        E element = whoIsThere(y, x);
+        if (element == null || element.getClass() == Pheromone.class) {
+            if ((inBounds(y, x)) && (!Objects.equals(yPos, y) || !Objects.equals(xPos, x))) {
+                if (leaveTrail > 1) {
+                    Pheromone pheHere = AntSimulator.getCurrentTrailPheromones().get(AntSimulator.key(y, x));
+                    if (pheHere != null) {  // then leave a trail with a strength the sum of mine new pheromone plus the strength of the one already here
+//                        System.out.println("maxStrength" + Pheromone.maxStrength + " mystrength:" + strengthOfNewTrailPheromone + " pheHerestrength:" + pheHere.getStrength());
+                        AntSimulator.addPheromone(new Pheromone(yPos, xPos, this, Pheromone.pheType.Trail, Math.min(Pheromone.maxStrength, strengthOfNewTrailPheromone + pheHere.getStrength())));
+                    }
+                    else {
+                        AntSimulator.addPheromone(new Pheromone(yPos, xPos, this, Pheromone.pheType.Trail, strengthOfNewTrailPheromone));
+                    }
+                    leaveTrail -= 1;
+                }
+                this.yPos = y;
+                this.xPos = x;
+                return true;
             }
-            this.yPos = y;
-            this.xPos = x;
-            return true;
         }
         else countDir = changeDirection;
         return false;
@@ -458,6 +492,41 @@ public class Ant {
     }
 
     /**
+     * Tells, given a position next to you, what direction you should follow to reach that position
+     * @param y the row where do you want to go
+     * @param x the column where do you want to go
+     * @return the Direction you should follow to reach y,x
+     */
+    private Direction translatePosInDir(int y, int x) {
+             if ((yPos - 1 == y) && (xPos == x))     return Direction.N;
+        else if ((yPos - 1 == y) && (xPos + 1 == x)) return Direction.NE;
+        else if ((yPos == y)     && (xPos + 1 == x)) return Direction.E;
+        else if ((yPos + 1 == y) && (xPos + 1 == x)) return Direction.SE;
+        else if ((yPos + 1 == y) && (xPos == x))     return Direction.S;
+        else if ((yPos + 1 == y) && (xPos - 1 == x)) return Direction.SO;
+        else if ((yPos == y)     && (xPos - 1 == x)) return Direction.O;
+        else if ((yPos - 1 == y) && (xPos - 1 == x)) return Direction.NO;
+        return null;
+    }
+
+    /**
+     * tell to the caller method if the desired direction is actually the opposite direction of the currently chosen one
+     * @param desiredDir the direction you might want to go to
+     * @return true if they are not the exact opposite, false if they are
+     */
+    private boolean notOpposite(Direction desiredDir) {
+             if ((desiredDir == Direction.N)  && (chosenDir != Direction.S))  return true;
+        else if ((desiredDir == Direction.NE) && (chosenDir != Direction.SO)) return true;
+        else if ((desiredDir == Direction.E)  && (chosenDir != Direction.O))  return true;
+        else if ((desiredDir == Direction.SE) && (chosenDir != Direction.NO)) return true;
+        else if ((desiredDir == Direction.S)  && (chosenDir != Direction.N))  return true;
+        else if ((desiredDir == Direction.SO) && (chosenDir != Direction.NE)) return true;
+        else if ((desiredDir == Direction.O)  && (chosenDir != Direction.E))  return true;
+        else if ((desiredDir == Direction.NO) && (chosenDir != Direction.SE)) return true;
+        return false;
+    }
+
+    /**
      * An important method who controls if the given position is occupied or free.
      * @param yPos the row number
      * @param xPos the column number
@@ -514,7 +583,7 @@ public class Ant {
      * kills an ant, mainly called by {@code AntSimulator}
      */
     void die() {
-        life = 0;
+        life = 0.0;
         personalPheromone = null;
     }  // maybe a call to the Java Garbage Collector
 
@@ -536,14 +605,14 @@ public class Ant {
     void eat() {
         if (privateStomach - foodToEatEveryDay > 0) {   // firstly get your food from the private stomach
             privateStomach -= foodToEatEveryDay;
-            starvingMultiplier = 1;
+            starvingMultiplier = 1.0;
         }
         else if (sharedStomach - foodToEatEveryDay > 0) {   // if it is empty then try the shared one
             sharedStomach -= foodToEatEveryDay;
-            starvingMultiplier = 1;
+            starvingMultiplier = 1.0;
         }
         else {  // starve, increase the starvingMultiplier attribute
-            starvingMultiplier += 1;
+            starvingMultiplier += 0.5;
         }
 //        System.out.println("starvingMultiplier:" + starvingMultiplier + " food to eat everyday:" + foodToEatEveryDay);
     }
@@ -564,7 +633,7 @@ public class Ant {
         return color;
     }
 
-    public Integer getLife() {
+    public Double getLife() {
         return life;
     }
 

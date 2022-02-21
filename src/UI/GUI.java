@@ -39,12 +39,12 @@ public class GUI {
     /**
      * number of horizontal cells, or of columns on the grid
      */
-    public static int WIDTH = 100;
+    public static int WIDTH = 60;
 
     /**
      * number of vertical cells, or of rows on the grid
      */
-    public static int HEIGHT = 50;
+    public static int HEIGHT = 30;
 
     /**
      * total number of cells int the grid
@@ -347,7 +347,7 @@ public class GUI {
                         if(currentFrame[i][j]) {
                             if (OptionsMenu.CAS_type == OptionsMenu.CAS.AntSimulator) {
                                 if (AntSimulator.isAnt(i, j)) {
-                                    g.setColor(new Color(0, 128, 0, ((AntSimulator.getCurrentAlive().get(AntSimulator.key(i, j)).getLife()) * 255 / 100)));
+                                    g.setColor(new Color(0, 128, 0, (int) Math.floor((AntSimulator.getCurrentAlive().get(AntSimulator.key(i, j)).getLife()) * 255 / 100.0)));
                                 }
                                 else {
                                     g.setColor(AntSimulator.getColor(i, j));
