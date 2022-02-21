@@ -130,6 +130,7 @@ public class AntSimulator implements CASModel {
                 }
                 iterateCurrentAlive(0);  // evolve
                 if (Math.random() < 0.03) balanceFood();    // with a probability of 3% every turn add a food's source
+                nestReproduction();
                 agePheromones();
                 iterateMatrix(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;
@@ -171,6 +172,15 @@ public class AntSimulator implements CASModel {
         Ant ant = currentAlive.remove(hashKey);
         if (ant != null) ant.die();
         dead += 1;
+    }
+
+    void nestReproduction() {
+        synchronized (lock) {
+            Ant newbornAnt = nest.reproduction();
+            if (newbornAnt != null) {
+                currentAlive.put(newbornAnt.getPos(), newbornAnt);
+            }
+        }
     }
 
     /**
@@ -226,9 +236,9 @@ public class AntSimulator implements CASModel {
      * <p>
      * Per un aspetto più realistico del gioco le chiavi del dizionario vengono accedute casualmente una per una, evitando
      * che i giocatori alla fine del dizionario sfruttino il vantaggio di subire più raramente gli effetti ambientali (carenza di cibo)
-     * @param scelta scelta di funzione di scorrimento del dizionario
+     * @param choice choice di funzione di scorrimento del dizionario
      */
-    private void iterateCurrentAlive(int scelta) {
+    private void iterateCurrentAlive(int choice) {
         Map<Integer, Ant> nextAlive;                      // dizionario di appoggio
         random_seed = new Random();
         synchronized (lock) {                                   // mutex tra il thread della gui e quello del gioco
@@ -243,10 +253,10 @@ public class AntSimulator implements CASModel {
                 }
                 Integer key = keylist.remove(index);
                 m -= 1;
-                if (scelta == 0) {
+                if (choice == 0) {
                     evolve(key);
                 }
-                else if (scelta == 1) {
+                else if (choice == 1) {
                     printHashMap(key);
                 }
             }
@@ -278,8 +288,7 @@ public class AntSimulator implements CASModel {
     private void updateFrame(int y, int x) {
         gui.nextFrame[y][x] = (currentAlive.containsKey(key(y, x)) ||
                                 nest.inNest(key(y, x)) ||
-                                currentFood.containsKey(key(y, x)) ||
-                                currentTrailPheromones.containsKey(key(y, x))
+                                currentFood.containsKey(key(y, x))
                             );
     }
 
@@ -298,7 +307,7 @@ public class AntSimulator implements CASModel {
                 y = random_seed.nextInt(GUI.HEIGHT);
                 x = random_seed.nextInt(GUI.WIDTH);
                 Integer k = key(y, x);
-                if (currentAlive.containsKey(k) || nest.inNest(k)) {    // if it is already occupied
+                if (currentAlive.containsKey(k) || nest.inNest(k) || currentFood.containsKey(k)) {    // if it is already occupied
                     n--;
                     continue;
                 }
@@ -320,7 +329,7 @@ public class AntSimulator implements CASModel {
         synchronized (lock) {
             Integer k = key(y, x);
             if (gui.currentFrame[y][x]) {
-                if (!currentAlive.containsKey(k) && !nest.inNest(k)) {     // only if it is empty
+                if (!currentAlive.containsKey(k) && !nest.inNest(k) && !currentFood.containsKey(k)) {     // only if it is empty
                     Ant ant = new Ant(y, x, nest);
                     currentAlive.put(k, ant);
                     born += 1;
@@ -351,7 +360,7 @@ public class AntSimulator implements CASModel {
      * @param columnOrRow 0 to know the column index on the 2 dimensional grid; 1 to know the row index on the 2 dimensional grid
      * @return the column or row index based on {@code columnOrRow}.
      */
-    private static int coordinates(Integer chiave, int columnOrRow) {
+    public static int coordinates(Integer chiave, int columnOrRow) {
         if (columnOrRow == 0) {
             return chiave / GUI.WIDTH;
         }
@@ -430,10 +439,10 @@ public class AntSimulator implements CASModel {
         if (food != null) {
             return food.getColor();
         }
-        Pheromone phe = currentTrailPheromones.get(k);  // pheromones get shown by other means. See UI.GUI.paintPheromones
-        if (phe != null) {
-            return new Color(240, 240, 240);    // UI.GUI.innerPanel.GetBackground() not accessible from here as it should be
-        }
+//        Pheromone phe = currentTrailPheromones.get(k);  // pheromones get shown by other means. See UI.GUI.paintPheromones
+//        if (phe != null) {
+//            return new Color(240, 240, 240);    // UI.GUI.innerPanel.GetBackground() not accessible from here as it should be
+//        }
         return new Color(200,0,0);
     }
 

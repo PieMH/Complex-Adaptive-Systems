@@ -27,7 +27,7 @@ import javax.swing.JLabel;
 /**
  * This is the class responsible for managing the UI.GUI for the simulation.
  * It is instantiated by UI.OptionsMenu and thus is strongly dependent by it.
- * Runs as a separate thread from UI.OptionsMenu and the CAS modelss it is displaying on the frame.
+ * Runs as a separate thread from UI.OptionsMenu and the CAS models it is displaying on the frame.
  * <p>
  * There are two panel, inner and outer. The most important is the centre where there is a rectangular frame, where the simulation is shown.
  * The bottom holds many control buttons and a slider.
@@ -371,21 +371,16 @@ public class GUI {
                 for(int i = 0; i < GUI.HEIGHT; i++) {
                     for(int j = 0; j < GUI.WIDTH; j++) {
                         if(currentFrame[i][j]) {
-                            if (AntSimulator.isAnt(i, j)) {
-                                g.setColor(AntSimulator.getColor(i, j));
-                            }
-                            else if (AntSimulator.isPheromone(i, j)) {
+                            g.setColor(AntSimulator.getColor(i, j));
+                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                        }
+                        else {
+                            if (AntSimulator.isPheromone(i, j)) {
                                 Pheromone phe = AntSimulator.getCurrentTrailPheromones().get(AntSimulator.key(i, j));
                                 Color pheColor = phe.getColor();
                                 g.setColor(new Color(pheColor.getRed(), pheColor.getGreen(), pheColor.getBlue(), phe.getStrength() * 255 / Pheromone.maxStrength));
                             }
-                            else {
-                                g.setColor(AntSimulator.getColor(i, j));
-                            }
-                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
-                        }
-                        else {
-                            g.setColor(innerPanel.getBackground());
+                            else g.setColor(innerPanel.getBackground());
                             g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         }
                     }

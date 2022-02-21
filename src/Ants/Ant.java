@@ -38,7 +38,7 @@ public class Ant {
 
     private final Double foodToEatEveryDay;
 
-    private final Double transferingSpeed;
+    private final Double transferringSpeed;
 
     /**
      * the first stomach of an ant. The food carried in the first stomach it is used to share it with other ants;
@@ -190,7 +190,7 @@ public class Ant {
         foodToEatEveryDay = Math.max(0.2, Math.random() * 1.2) / 2;
         starvingMultiplier = 1;
 //        hunger = 10.0;
-        transferingSpeed = Math.max(0.04, Math.random()) / 2;
+        transferringSpeed = Math.max(0.04, Math.random()) / 2;
 
         countDir = changeDirection;
         onARandomPath = true;
@@ -308,21 +308,21 @@ public class Ant {
         double yourDelta = otherAnt.maxStomachCapacity - otherAnt.sharedStomach;
         if ((myDelta > yourDelta + 1) && (otherAnt.sharedStomach > 1)) {    // mine in emptier, so you shall give some food to me
             if (Math.random() < ((myDelta - yourDelta) / (double) this.maxStomachCapacity )) {      // with a P of the difference of our deltas / mine maximum capacity (which is always greater than the difference)
-                System.out.println("myD:" + myDelta + " yourD:" + yourDelta + ". Mymaxcapacity:" + this.maxStomachCapacity + ". P:" + ((myDelta - yourDelta) / (double) this.maxStomachCapacity ));
+//                System.out.println("myD:" + myDelta + " yourD:" + yourDelta + ". Mymaxcapacity:" + this.maxStomachCapacity + ". P:" + ((myDelta - yourDelta) / (double) this.maxStomachCapacity ));
                 this.sharedStomach += 1;
                 otherAnt.sharedStomach -= 1;
             }
             else {
-                System.out.println("myD:" + myDelta + " yourD:" + yourDelta + ". Mymaxcapacity:" + this.maxStomachCapacity + ". Failed trophallaxis with a P:" + ((myDelta - yourDelta) / (double) this.maxStomachCapacity ));
+//                System.out.println("myD:" + myDelta + " yourD:" + yourDelta + ". Mymaxcapacity:" + this.maxStomachCapacity + ". Failed trophallaxis with a P:" + ((myDelta - yourDelta) / (double) this.maxStomachCapacity ));
             }
         }
         else if ((yourDelta > myDelta + 1) && (this.sharedStomach > 1)) {
             if (Math.random() < ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity)) {
-                System.out.println("yourD:" + yourDelta + " myD:" + myDelta + ". Yoursmaxcapacity:" + otherAnt.maxStomachCapacity + ". P:" + ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity));
+//                System.out.println("yourD:" + yourDelta + " myD:" + myDelta + ". Yoursmaxcapacity:" + otherAnt.maxStomachCapacity + ". P:" + ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity));
                 this.sharedStomach -= 1;
                 otherAnt.sharedStomach += 1;
             } else {
-                System.out.println("yourD:" + yourDelta + " myD:" + myDelta + ". Yoursmaxcapacity:" + otherAnt.maxStomachCapacity + ". Failed trophallaxis with a P:" + ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity));
+//                System.out.println("yourD:" + yourDelta + " myD:" + myDelta + ". Yoursmaxcapacity:" + otherAnt.maxStomachCapacity + ". Failed trophallaxis with a P:" + ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity));
             }
         }
     }
@@ -458,10 +458,10 @@ public class Ant {
     }
 
     /**
-     *
-     * @param xPos the column number
+     * An important method who controls if the given position is occupied or free.
      * @param yPos the row number
-     * @return ??
+     * @param xPos the column number
+     * @return the object who sits currently in the given position, if there is no one return null
      */
     private <E> E whoIsThere(Integer yPos, Integer xPos) {
 
@@ -525,7 +525,7 @@ public class Ant {
      */
     void age() {
         life -= starvingMultiplier;
-        System.out.println("life:" + life);
+//        System.out.println("life:" + life);
     }
 
     /**
@@ -545,19 +545,19 @@ public class Ant {
         else {  // starve, increase the starvingMultiplier attribute
             starvingMultiplier += 1;
         }
-        System.out.println("starvingMultiplier:" + starvingMultiplier + " food to eat everyday:" + foodToEatEveryDay);
+//        System.out.println("starvingMultiplier:" + starvingMultiplier + " food to eat everyday:" + foodToEatEveryDay);
     }
 
     /**
-     * every turn transfer some food from the sharedStomach to the private one depending on the value of transferingSpeed
+     * every turn transfer some food from the sharedStomach to the private one depending on the value of transferringSpeed
      * This only if the private one doesn't exceed its maximum capacity and the shared one doesn't go below zero
      */
     void transferFood() {
-        if ((privateStomach + transferingSpeed < maxStomachCapacity) && (sharedStomach - transferingSpeed > 0)) {
-            privateStomach += transferingSpeed;
-            sharedStomach -= transferingSpeed;
+        if ((privateStomach + transferringSpeed < maxStomachCapacity) && (sharedStomach - transferringSpeed > 0)) {
+            privateStomach += transferringSpeed;
+            sharedStomach -= transferringSpeed;
         }
-        System.out.println("shared:" + sharedStomach + " private:" + privateStomach + " speed:" + transferingSpeed);
+//        System.out.println("shared:" + sharedStomach + " private:" + privateStomach + " speed:" + transferringSpeed);
     }
 
     public Color getColor() {
