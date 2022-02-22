@@ -50,7 +50,7 @@ public class AntsNest {
         nestEntrance3 = nestEntrance1 + GUI.WIDTH; // the square on the left bottom corner, just add the width of the grid
         nestEntrance4 = nestEntrance3 + 1;
 
-        reservoir = 10.0;
+        reservoir = 30.0;
 
         spawnPositions = new ArrayList<>();
         // removing or adding a GUI.WIDTH is going respectively up or down a row in the grid

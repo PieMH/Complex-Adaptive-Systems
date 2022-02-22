@@ -155,7 +155,7 @@ public class Ant {
 
     private ArrayList<Double> closestNestDistances;
 
-    private HashMap<Integer, Direction> nestDirections;
+    private ArrayList<Direction> nestDirections;
 
     /**
      * my personal pheromone of type personal and strength 100
@@ -188,7 +188,7 @@ public class Ant {
         int minChange = (int) Math.max(2, Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1);
         int maxChange = (int) Math.ceil(minChange * Math.sqrt(minChange)) + 1;
         changeDirection = random_seed.nextInt(minChange, maxChange);
-        countDir = changeDirection;
+        countDir = 0;
 
         // maxLeaveTrail random value extraction
         int minTrail = 2 * minChange;
@@ -204,21 +204,27 @@ public class Ant {
         // Stomachs capacities
         int maxF = (int) Math.floor(2.2 * Math.max(1, Math.pow(GUI.DIMENSION, 1 / 4.0) - 1 ) );
         maxStomachCapacity = random_seed.nextInt(minChange, maxF);
-        sharedStomach = maxStomachCapacity * 0.5;
+        sharedStomach = maxStomachCapacity * 0.9;
         privateStomach = 0.0;
 
         // food related attributes
-        foodToEatEveryDay = Math.max(0.1, Math.random() * 1.1) / 2;
+        foodToEatEveryDay = Math.max(0.1, Math.random() * 1.2) / 4;
         starvingMultiplier = 1.0;
 //        hunger = 10.0;
-        transferringSpeed = Math.max(0.06, Math.random()) / 2;
+        transferringSpeed = Math.max(0.06, Math.random() * 1.1) / 2.8;
 
         // nest related attributes
         nestY = AntSimulator.coordinates(nest.nestEntrance1, 0);
         nestX = AntSimulator.coordinates(nest.nestEntrance1, 1);
-        System.out.println("nestY:" + nestY + " nestX:" + nestX + " key1:" + nest.nestEntrance1);
+//        System.out.println("nestY:" + nestY + " nestX:" + nestX + " key1:" + nest.nestEntrance1);
         closestNestDistances = new ArrayList<>(3);
-        nestDirections = new HashMap<>();
+        nestDirections = new ArrayList<>(3);
+        closestNestDistances.add((double) GUI.WIDTH);
+        closestNestDistances.add((double) GUI.WIDTH);
+        closestNestDistances.add((double) GUI.WIDTH);
+        nestDirections.add(null);
+        nestDirections.add(null);
+        nestDirections.add(null);
     }
 
     /**
@@ -226,28 +232,34 @@ public class Ant {
      * The possible actions are:
      * <ol>
      *     <li>transfer the food you have in the shared stomach to the private one</li>
+     *     <li>eat the food from your private stomach</li>
+     *     <li>orient yourself to know where is you nest</li>
      *     <li>search the 8 squares around you</li>
      *     <li>interact with something around you</li>
-     *     <li>eat the food from your private stomach</li>
      *     <li>decide what you want to do</li>
      *     <li>try to move in the direction you have chosen</li>
+     *     <li>get older</li>
      * </ol>
      */
     void action() {
 
         transferFood();
 
+        eat();
+
+        orientYourself();
+
         leph = null;
 
         search(true, false, false);
-
-        eat();
 
         decide();
 
         movement();
 
         age();
+
+        printStats(true);
     }
 
     /**
@@ -256,7 +268,7 @@ public class Ant {
      * It would break the little mind of the ant. If you call this method with both parameters at false it is simply useless.
      * @param something true if you want to find something around you
      * @param newDirection true if you want to search for a new random direction to follow
-     * @param nest
+     * @param nest true if you want to recompute the closest directions to follow to reach the nest
      * @see #interact
      * @see #findRandomDirection
      */
@@ -269,12 +281,16 @@ public class Ant {
             Direction dir = directionList.remove(index);
             if (something) {
                 translateDirInPos(dir);     // updates nextY and nextX
+//                System.out.println("dir:" + dir + " nextY:" + nextY + " nextX:" + nextX);
                 interact(nextY, nextX);
-                return;
             }
             else if (newDirection) {
                 if (findRandomDirection(dir)) {
                     return;
+                }
+                else {
+                    nextY = this.yPos;
+                    nextX = this.xPos;
                 }
             }
             else if (nest) {
@@ -293,9 +309,10 @@ public class Ant {
         }
 
         // follow your path
-        if (countDir < changeDirection) {
+        if (countDir < changeDirection && chosenDir != null) {   // I don't believe is it possible to reach changeDirection
             translateDirInPos(chosenDir);    // updates nextY and nextX
             if (move(nextY, nextX)) {
+//                System.out.println("random?" + onARandomPath + " count:" + countDir + " changeDir:" + changeDirection);
 //                System.out.println("chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos);
                 return;
             }
@@ -305,7 +322,7 @@ public class Ant {
         search(false, true, false);
 
         move(nextY, nextX);
-//        System.out.println("chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos);
+//        System.out.println("RandomDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos);
     }
 
     /**
@@ -318,6 +335,7 @@ public class Ant {
         E element = whoIsThere(y, x);   // called on nextY and nextX
 
         if (element == null) return;    // if there is no one
+//        System.out.println("elementClass:" + element.getClass());
 
         if (element.getClass() == Ant.class) {
             antInteraction((Ant) element);
@@ -362,25 +380,29 @@ public class Ant {
     }
 
     void nestInteraction(AntsNest nest) {
+//        System.out.println("nest nearby");
         // you have found your nest
         // do action relative to the nest encounter
         leaveTrail = maxLeaveTrail;
+        toTheNest = false;  // change state and objective
+        countDir = changeDirection; // change direction
         // deposit eggs ??
 
         // deposit food or eat its reserves
         // deposit an amount equal to a random value between this.sharedStomach - 1 and 0, with a continuous random variable that has exponential distribution
-        double threshold = maxStomachCapacity * 0.4;
+        double threshold = maxStomachCapacity * 0.7;
         if (sharedStomach > threshold) {    // give
             double expDistributionQuantity = Math.min(1, 1 * (Math.log(1 - Math.random()) / (- sharedStomach)));
 //            System.out.println("expdistr:" + expDistributionQuantity);
-//            System.out.println("sharedStomach:" + sharedStomach + " difference:" + (sharedStomach * expDistributionQuantity));
+            System.out.println("sharedStomach before:" + sharedStomach + " after:" + (sharedStomach * expDistributionQuantity));
             double foodKept = sharedStomach * expDistributionQuantity;
             nest.addReserves(sharedStomach - foodKept);
             sharedStomach = foodKept;
-//            System.out.println("nest reservoirs " + nest.getReservoir());
+            System.out.println("nest reservoirs " + nest.getReservoir());
         }
         else {  // take
             double howMuch = (threshold - (sharedStomach + privateStomach));
+            System.out.println("howmuch:" + howMuch);
             if (nest.getFoodFromReserves(howMuch)) {
                 sharedStomach += howMuch;
             }
@@ -388,6 +410,7 @@ public class Ant {
     }
 
     void foodInteraction(FoodSource food) {
+//        System.out.println("food nearby");
         // if you have already eaten the maximum food you can, AND you are carrying the maximum food you can ignore it
         // otherwise:
 //        System.out.println("sharedStomach:" + sharedStomach + "privateStomach:" + privateStomach);
@@ -407,50 +430,81 @@ public class Ant {
     void pheromoneInteraction(Pheromone phe) {
         // you came across a pheromone trail
         if (phe.ant != this) {  // if it is yours ignore it
-            if (notOpposite(translatePosInDir(phe.yPos, phe.xPos))) {   // if it is from the opposite direction ignore it
-                if (leph != null) {
-                    if (phe.getStrength() < leph.getStrength()) {
-                        leph = phe;
+            Direction possibleDir = translatePosInDir(phe.yPos, phe.xPos);
+            if (notOpposite(possibleDir)) {   // if it is from the opposite direction ignore it
+
+                if (toTheNest) {
+                    for (int i = 0; i < 3; i++) {   // go through the 3 directions closest to the nest
+                        if (nestDirections.get(i) == possibleDir) {    // I am going to the nest
+                            if (leph != null) {
+                                if (phe.getStrength() < leph.getStrength()) {
+                                    leph = phe;
+                                }
+                            } else leph = phe;
+                            return;
+                        }
                     }
-                } else leph = phe;
+                }
+                else {  // I am going away from the nest
+                    for (int i = 0; i < 3; i++) {   // go through the 3 directions closest to the nest
+                        if (nestDirections.get(i) == possibleDir) {
+                            return;
+                        }
+                    }
+                    if (leph != null) {
+                        if (phe.getStrength() < leph.getStrength()) {
+                            leph = phe;
+                        }
+                    } else leph = phe;
+                }
             }
         }
     }
 
-    private void decide() {
+    /**
+     *
+     */
+    private void orientYourself() {
+        // reinitialize the data structures for searching the nest
+        closestNestDistances.set(0, (double) GUI.WIDTH);
+        closestNestDistances.set(1, (double) GUI.WIDTH);
+        closestNestDistances.set(2, (double) GUI.WIDTH);
+        nestDirections.set(0, null);
+        nestDirections.set(1, null);
+        nestDirections.set(2, null);
 
+        search(false, false, true);     // this updates nestDirections hashmap
+    }
+
+    /**
+     *
+     */
+    private void decide() {
         // First key AI logic of an ant:
             // if I am starving or have little food go to you nest to feed
             // at the opposite if I have plenty of food with me, it is useless to continue finding food in the ambient so come back to the nest
             // if I have just enough quantity of food to go exploring then I will prefer to go outside and explore the ambient for food
+        boolean found = false;
         double stomachSum = sharedStomach + privateStomach;
         // remember that maxStomachCapacity it's the maximum capacity of a single stomach
-        if ((stomachSum < maxStomachCapacity * 0.33)  || (stomachSum > maxStomachCapacity * 1.66)) {    // little or much food condition
-            System.out.println("stomachSum" + stomachSum + " MaxCapacity:" + maxStomachCapacity);
-
-            // reinitialize the data structures for searching the nest
-            closestNestDistances.add ((double) GUI.WIDTH);
-            closestNestDistances.add ((double) GUI.WIDTH);
-            closestNestDistances.add ((double) GUI.WIDTH);
-            nestDirections.put(0, null);
-            nestDirections.put(1, null);
-            nestDirections.put(2, null);
-
-            search(false, false, true);     // this updates nestDirections hashmap
-
+//        System.out.println("stomachSum:" + stomachSum + " max*0.4:" + (maxStomachCapacity * 0.4) + " max*1.6:" + (maxStomachCapacity * 1.6));
+        // if I decided time ago to go to the nest don't change that decision until you come to the nest
+        if (toTheNest || (stomachSum < maxStomachCapacity * 0.4)  || (stomachSum > maxStomachCapacity * 1.6)) {    // little or much food condition
+//            System.out.println("stomachSum" + stomachSum + " MaxCapacity:" + maxStomachCapacity);
             double p = Math.random();
-            if (p < 0.5) {
+            if (p < 0.5) {  // with a P of 50% choose the closest direction
                 chosenDir = nestDirections.get(0);
             }
-            else if (p < 0.85) {
+            else if (p < 0.85) {    // with a P of 35% choose the second closest
                 chosenDir = nestDirections.get(1);
             }
-            else {
+            else {  // with a P of 15% the third closest
                 chosenDir = nestDirections.get(2);
             }
             toTheNest = true;
+            found = true;
         }
-        else toTheNest = false;
+//            System.out.println("tothenest:" + toTheNest + " chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos);
 
         // Second key AI logic of an ant:
             // if I found a strong pheromone trail around me go to the lightest one, hopefully in the opposite direction of the strongest one
@@ -460,21 +514,38 @@ public class Ant {
                 Direction desirableDir = translatePosInDir(leph.yPos, leph.xPos);
 
                 if (toTheNest) {
-                    for (Direction dir : nestDirections.values()) {
-                        if (dir == desirableDir) {
+                    for (int i = 0; i < 3; i++) {
+                        if (nestDirections.get(i) == desirableDir) {
                             chosenDir = desirableDir;
+                            found = true;
+//                            System.out.println("tothenest:" + toTheNest + " chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos + " lephY:" + leph.yPos + " lephX:" + leph.xPos);
                             break;
                         }
                     }
                 }
                 else {
-                    chosenDir = desirableDir;
+                    boolean ok = true;
+                    for (int i = 0; i < 3; i++) {
+                        if (nestDirections.get(i) == desirableDir) {
+                            ok = false;
+                            break;
+                        }
+                    }
+                    if (ok) {
+                        chosenDir = desirableDir;
+                        found = true;
+                    }
+//                            System.out.println("tothenest:" + toTheNest + " chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos + " lephY:" + leph.yPos + " lephX:" + leph.xPos);
                 }
-//                System.out.println("chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos + " sephY:" + seph.yPos + " sephX:" + seph.xPos);
-                onARandomPath = false;
-                countDir = 0;
+
             }
         }
+        if (found) {
+            onARandomPath = false;
+            countDir = 0;
+        }
+//        System.out.println("chosenDir:" + chosenDir + " onaRandomPath:" + onARandomPath + " countDir:" + countDir);
+
         // else choose to follow it or not and in what direction
     }
 
@@ -507,7 +578,6 @@ public class Ant {
                 return true;
             }
         }
-        else countDir = changeDirection;
         return false;
     }
 
@@ -515,14 +585,48 @@ public class Ant {
      * decide whether the direction given as a parameter can be a new direction to follow: it must be free.
      * @return true if it finds a new direction, false otherwise
      */
-    private boolean findRandomDirection(Direction dir) {
+    private <E> boolean findRandomDirection(Direction dir) {
+        //  ADD THE PROBABILITY TO FIND A DIRECTION BASED ON THE STATE "toTheNest"
         translateDirInPos(dir);     // updates nextY and nextX
+        E element = whoIsThere(nextY, nextX);
+        if (element == null || element.getClass() == Pheromone.class) {
+            if (inBounds(nextY, nextX) && (!Objects.equals(yPos, nextY) || !Objects.equals(xPos, nextX))) {
+                if (toTheNest) {
+                    for (int i = 0; i < 3; i++) {
+                        if (nestDirections.get(i) == dir) {
+                            chosenDir = dir;
+                            countDir = 0;
+                            onARandomPath = true;
+                            return true;
+                        }
+                    }
+                    if (Math.random() < 0.1) {
+                        chosenDir = dir;
+                        countDir = 0;
+                        onARandomPath = true;
+                        return true;
+                    }
+                    return false;
+                }
+                else {
+                    for (int i = 0; i < 3; i++) {
+                        if (nestDirections.get(i) == dir) {
+                            if (Math.random() < 0.1) {
+                                chosenDir = dir;
+                                countDir = 0;
+                                onARandomPath = true;
+                                return true;
+                            }
+                            return false;
+                        }
+                    }
+                    chosenDir = dir;
+                    countDir = 0;
+                    onARandomPath = true;
+                    return true;
+                }
 
-        if (whoIsThere(nextY, nextX) == null && inBounds(nextY, nextX) && (!Objects.equals(yPos, nextY) || !Objects.equals(xPos, nextX))) {
-            chosenDir = dir;
-            countDir = 0;
-            onARandomPath = true;
-            return true;
+            }
         }
         return false;
     }
@@ -637,22 +741,23 @@ public class Ant {
     }
 
     private void computeNestDistance(int y, int x) {
-        System.out.println("nestY:" + nestY + " nestX:" + nestX);
-        System.out.println("y:" + y + " x:" + x);
-        double d = Math.sqrt(Math.pow(y - nestY, 2) + Math.pow(x - nestX, 2));
+//        System.out.println("nestY:" + nestY + " nestX:" + nestX);
+//        System.out.println("y:" + y + " x:" + x);
+        double d = Math.sqrt(Math.pow(y - nestY, 2) + Math.pow(x - nestX, 2));  // two point distance equation
         for (int i = 0; i < 3; i++) {
             if (closestNestDistances.get(i) > d) {
                 // updates the data structures
                 closestNestDistances.add(i, d);
                 closestNestDistances.remove(3);
-                nestDirections.put(i, translatePosInDir(y, x));
+                nestDirections.add(i, translatePosInDir(y, x));
                 break;
             }
         }
-        for (int i = 0; i < 3; i++) {
-            System.out.println("i:" + i + ", d:" + closestNestDistances.get(i));
-        }
-        System.out.println("******************************************");
+//        for (int i = 0; i < 3; i++) {
+//            System.out.println("i:" + i + ", distance:" + closestNestDistances.get(i));
+//            System.out.println("i:" + i + ", direction:" + nestDirections.get(i));
+//        }
+//        System.out.println("******************************************");
     }
 
     /**
@@ -732,5 +837,30 @@ public class Ant {
 
     public Integer getPos() {
         return AntSimulator.key(yPos, xPos);
+    }
+
+    void printStats() {
+        System.out.println("ANT ID: " + this);
+        System.out.println("life:" + life + "  food in storage:" + (sharedStomach + privateStomach));
+        System.out.println("yPos:" + yPos + "  xPos:" + xPos + "  chosenDir:" + chosenDir);
+        System.out.println("toTheNest:" + toTheNest + "  onARandomPath:" + onARandomPath);
+    }
+
+    void printStats(boolean verbose) {
+        printStats();
+        if (verbose) {
+            System.out.println("stomachCapacity:" + maxStomachCapacity + "  eat everyday:" + foodToEatEveryDay);
+            System.out.println("threshold:" + (maxStomachCapacity * 0.7) + "  minToTheNest:" + (maxStomachCapacity * 0.4) + "  maxToTheNest:" + (maxStomachCapacity * 1.6));
+            System.out.println("maxLeaveTrail:" + maxLeaveTrail + "  strengthOfNewTrailPheromone:" + strengthOfNewTrailPheromone);
+            System.out.println("changeDirection:" + changeDirection + "  starvingMultiplier:" + starvingMultiplier);
+            System.out.println("nest reserves:" + nest.getReservoir());
+
+            if (leph != null) {
+                System.out.println("lephY:" + leph.yPos + "  lephX:" + leph.xPos);
+            }
+            else
+                System.out.println("leph is null");
+            System.out.println("_____________________________________________________________");
+        }
     }
 }
