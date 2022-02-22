@@ -228,9 +228,12 @@ public class GUI {
 
         JLabel labelStepDelay = new JLabel("Step delay in ms:");
 
-        JSlider slider = new JSlider(10, 300, 100);
-        slider.setMinorTickSpacing(15);
-        slider.setMajorTickSpacing(45);
+//        JSlider slider = new JSlider(10, 300, 100);
+//        slider.setMinorTickSpacing(15);
+//        slider.setMajorTickSpacing(45);
+        JSlider slider = new JSlider(10, 500, 450);
+        slider.setMinorTickSpacing(20);
+        slider.setMajorTickSpacing(60);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
         slider.addChangeListener(e -> {
