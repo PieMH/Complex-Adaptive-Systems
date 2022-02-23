@@ -44,13 +44,15 @@ public class AntsNest {
     private Integer spawnX;
     private Integer spawnY;
 
+    ArrayList<Double> antAttributes = new ArrayList<>(10);
+
     AntsNest() {
         nestEntrance1 = AntSimulator.key(Math.floorDiv(GUI.HEIGHT, 2), Math.floorDiv(GUI.WIDTH - 1, 2)); // the top left square in the centre of the grid
         nestEntrance2 = nestEntrance1 + 1;  // the square on the right has exactly the next value
         nestEntrance3 = nestEntrance1 + GUI.WIDTH; // the square on the left bottom corner, just add the width of the grid
         nestEntrance4 = nestEntrance3 + 1;
 
-        reservoir = 30.0;
+        reservoir = 100000.0;
 
         spawnPositions = new ArrayList<>();
         // removing or adding a GUI.WIDTH is going respectively up or down a row in the grid
@@ -68,6 +70,14 @@ public class AntsNest {
         spawnPositions.add(9, nestEntrance3 - 1 + GUI.WIDTH);
         spawnPositions.add(10, nestEntrance3 - 1);
         spawnPositions.add(11, nestEntrance1 - 1);
+
+        // E stands for Expected value
+        antAttributes.add(0, ); // E of ChangeDirection
+        antAttributes.add(1, ); // E of maxLeaveTrail
+        antAttributes.add(2, ); // E of strengthOfNewTrailPheromone
+        antAttributes.add(3, ); // E of maxStomachCapacity
+        antAttributes.add(4, ); // E of foodToEatEveryDay
+        antAttributes.add(5, ); // E of transferringSpeed
     }
 
     public Color getColor() {
@@ -100,14 +110,19 @@ public class AntsNest {
     }
 
     Ant reproduction() {
-//        if (reservoir > 12) {
             if (searchSpawnPoint()) {   // this call updates spawnY and spawnY, to am available spot on the grid next to the nest
-//                reservoir -= 10;
 //                System.out.println("reservoir left:" + reservoir + ". spawnY:" + spawnY + ", spawnX:" + spawnX);
-                //return new Ant(spawnY, spawnX, this);
+
             }
-//        }
         return null;
+    }
+
+    void getGeneticsInfo(ArrayList<Double> antAttr) {
+        // do some genetic algorithm code
+        // choose a crossover value
+        for (int i = 0; i < xover; i ++) {
+            antAttributes.set(i, antAttr.get(i));
+        }
     }
 
     boolean searchSpawnPoint() {

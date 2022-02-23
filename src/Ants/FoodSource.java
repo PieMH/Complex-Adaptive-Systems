@@ -62,7 +62,7 @@ public class FoodSource {
     }
 
     boolean gathering(double amount) {
-        if (amountLeft - amount > 1) {
+        if (amountLeft - amount >= 0) {
            amountLeft -= amount;
            return true;
         }

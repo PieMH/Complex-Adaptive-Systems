@@ -168,6 +168,8 @@ public class Ant {
      */
     private Pheromone leph;
 
+    ArrayList<Double> antAttributes = new ArrayList<>(10);
+
     /**
      * This constructor is called only by AntSimulator at the start of the simulation
      * For newborn ants ?? is called instead.
@@ -226,6 +228,13 @@ public class Ant {
         nestDirections.add(null);
         nestDirections.add(null);
         nestDirections.add(null);
+
+        antAttributes.add(0, (double) changeDirection);
+        antAttributes.add(1, (double) maxLeaveTrail);
+        antAttributes.add(2, (double) strengthOfNewTrailPheromone);
+        antAttributes.add(3, (double) maxStomachCapacity);
+        antAttributes.add(4, foodToEatEveryDay);
+        antAttributes.add(5, transferringSpeed);
     }
 
     /**
@@ -388,7 +397,11 @@ public class Ant {
         leaveTrail = maxLeaveTrail;
         toTheNest = false;  // change state and objective
         countDir = changeDirection; // change direction
+
         // deposit eggs ??
+        if (life < 80 && life > 30) {
+            nest.getGeneticsInfo(antAttributes);
+        }
 
         // deposit food or eat its reserves
         // deposit an amount equal to a random value between this.sharedStomach - 1 and 0, with a continuous random variable that has exponential distribution
@@ -416,14 +429,15 @@ public class Ant {
         // if you have already eaten the maximum food you can, AND you are carrying the maximum food you can ignore it
         // otherwise:
 //        System.out.println("sharedStomach:" + sharedStomach + "privateStomach:" + privateStomach);
-        double amount = Math.min((sharedStomach * 0.7), (maxStomachCapacity - sharedStomach));
+        double amount = (maxStomachCapacity - sharedStomach) * 0.8;
         if (food.gathering(amount)) {
 //            System.out.println("there is food");
             // do action relative to gathering food and discovering a new food source
-          if (!gatherFood(amount)) {
+            gatherFood(amount);
+//          if (!gatherFood(amount)) {
 //              System.out.println("but i am already full");
-              food.reverseGathering(amount);
-          }
+//              food.reverseGathering(amount);
+//          }
 //          System.out.println("sharedStomach:" + sharedStomach + "privateStomach:" + privateStomach);
           leaveTrail = maxLeaveTrail;
         }
@@ -492,7 +506,7 @@ public class Ant {
         // remember that maxStomachCapacity it's the maximum capacity of a single stomach
 //        System.out.println("stomachSum:" + stomachSum + " max*0.4:" + (maxStomachCapacity * 0.4) + " max*1.6:" + (maxStomachCapacity * 1.6));
         // if I decided time ago to go to the nest don't change that decision until you come to the nest
-        if (toTheNest || (stomachSum < maxStomachCapacity * 0.4)  || (stomachSum > maxStomachCapacity * 1.6)) {    // little or much food condition
+        if (toTheNest || (stomachSum < maxStomachCapacity * 0.5)  || (stomachSum > maxStomachCapacity * 1.6)) {    // little or much food condition
 //            System.out.println("stomachSum" + stomachSum + " MaxCapacity:" + maxStomachCapacity);
             translateDirInPos(nestDirections.get(0));
             E el = whoIsThere(nextY, nextX);
@@ -616,7 +630,7 @@ public class Ant {
                             return true;
                         }
                     }
-                    if (Math.random() < 0.1) {
+                    if (Math.random() < 0.2) {
                         chosenDir = dir;
                         countDir = 0;
                         onARandomPath = true;
@@ -627,7 +641,7 @@ public class Ant {
                 else {
                     for (int i = 0; i < 3; i++) {
                         if (nestDirections.get(i) == dir) {
-                            if (Math.random() < 0.1) {
+                            if (Math.random() < 0.2) {
                                 chosenDir = dir;
                                 countDir = 0;
                                 onARandomPath = true;
@@ -779,18 +793,17 @@ public class Ant {
     /**
      * control if the ant is full of food to carry or if it has some space left
      * if there is some space adds a new quantity to the correct stomach
-     * @return true if the ant can carry more food
      */
-    private boolean gatherFood(double amount) {
-        if (sharedStomach + amount <= maxStomachCapacity) {   // firstly try to full the shared stomach
+    private void gatherFood(double amount) {
+//        if (sharedStomach + amount <= maxStomachCapacity) {   // firstly try to full the shared stomach
             sharedStomach += amount;
-            return true;
-        }
-        else if (privateStomach + amount <= maxStomachCapacity) {     // if it is already full, move one quantity from the shared food to the private one and then gather the new food
-            privateStomach += amount;
-            return true;
-        }
-        return false;
+//            return true;
+//        }
+//        else if (privateStomach + amount <= maxStomachCapacity) {     // if it is already full, move one quantity from the shared food to the private one and then gather the new food
+//            privateStomach += amount;
+//            return true;
+//        }
+//        return false;
     }
 
     /**
@@ -858,6 +871,7 @@ public class Ant {
     void printStats() {
         System.out.println("ANT ID: " + this);
         System.out.println("life:" + life + "  food in storage:" + (sharedStomach + privateStomach));
+        System.out.println("sharedStomach:" + sharedStomach + "  privateStomach:" + privateStomach);
         System.out.println("yPos:" + yPos + "  xPos:" + xPos + "  chosenDir:" + chosenDir);
         System.out.println("toTheNest:" + toTheNest + "  onARandomPath:" + onARandomPath);
     }
@@ -866,7 +880,7 @@ public class Ant {
         printStats();
         if (verbose) {
             System.out.println("stomachCapacity:" + maxStomachCapacity + "  eat everyday:" + foodToEatEveryDay);
-            System.out.println("threshold:" + (maxStomachCapacity * 0.7) + "  minToTheNest:" + (maxStomachCapacity * 0.4) + "  maxToTheNest:" + (maxStomachCapacity * 1.6));
+            System.out.println("threshold:" + (maxStomachCapacity * 0.7) + "  minToTheNest:" + (maxStomachCapacity * 0.5) + "  maxToTheNest:" + (maxStomachCapacity * 1.6));
             System.out.println("maxLeaveTrail:" + maxLeaveTrail + "  strengthOfNewTrailPheromone:" + strengthOfNewTrailPheromone);
             System.out.println("changeDirection:" + changeDirection + "  starvingMultiplier:" + starvingMultiplier);
             System.out.println("nest reserves:" + nest.getReservoir());
