@@ -162,17 +162,21 @@ public class Ant {
      */
     private Pheromone personalPheromone;
 
+    private Ant child;
+
     /**
      * seph stands for Lightest Encountered PHeromone
      * every day it returns to null but get updated on the pheromones an ant sniff around it
      */
     private Pheromone leph;
 
-    ArrayList<Double> antAttributes = new ArrayList<>(10);
+    private final Integer nTraitsToTransmit;
+
+    ArrayList<Double> antAttributes = new ArrayList<>(7);
 
     /**
      * This constructor is called only by AntSimulator at the start of the simulation
-     * For newborn ants ?? is called instead.
+     * For newborn ants the next constructor is called instead.
      * @param y the column number in the grid
      * @param x the row number in the grid
      */
@@ -213,13 +217,11 @@ public class Ant {
         // food related attributes
         foodToEatEveryDay = Math.max(0.1, Math.random() * 1.2) / 4;
         starvingMultiplier = 1.0;
-//        hunger = 10.0;
         transferringSpeed = Math.max(0.06, Math.random() * 1.1) / 2.8;
 
         // nest related attributes
         nestY = AntSimulator.coordinates(nest.nestEntrance1, 0);
         nestX = AntSimulator.coordinates(nest.nestEntrance1, 1);
-//        System.out.println("nestY:" + nestY + " nestX:" + nestX + " key1:" + nest.nestEntrance1);
         closestNestDistances = new ArrayList<>(3);
         nestDirections = new ArrayList<>(3);
         closestNestDistances.add((double) GUI.WIDTH);
@@ -229,12 +231,68 @@ public class Ant {
         nestDirections.add(null);
         nestDirections.add(null);
 
-        antAttributes.add(0, (double) changeDirection);
-        antAttributes.add(1, (double) maxLeaveTrail);
-        antAttributes.add(2, (double) strengthOfNewTrailPheromone);
-        antAttributes.add(3, (double) maxStomachCapacity);
-        antAttributes.add(4, foodToEatEveryDay);
-        antAttributes.add(5, transferringSpeed);
+        // reproduction related attributes
+        nTraitsToTransmit = random_seed.nextInt(1, 8);
+        antAttributes.add(0, (double) nTraitsToTransmit);
+        antAttributes.add(1, (double) changeDirection);
+        antAttributes.add(2, (double) maxLeaveTrail);
+        antAttributes.add(3, (double) strengthOfNewTrailPheromone);
+        antAttributes.add(4, (double) maxStomachCapacity);
+        antAttributes.add(5, foodToEatEveryDay);
+        antAttributes.add(6, transferringSpeed);
+    }
+
+    Ant (Integer y, Integer x, AntsNest nest, ArrayList<Double> attributes) {
+        yPos = y;
+        xPos = x;
+        onARandomPath = true;
+        toTheNest = false;
+        this.life = 100.0;
+        this.nest = nest;
+        this.personalPheromone = new Pheromone(yPos, xPos, this);
+
+        // changeDirection random value extraction
+        changeDirection = (int) Math.floor(attributes.get(1));
+        countDir = 0;
+
+        // maxLeaveTrail random value extraction
+        maxLeaveTrail = (int) Math.floor(attributes.get(2));
+        leaveTrail = 0;
+
+        // strengthOfNewTrailPheromone random value extraction
+        strengthOfNewTrailPheromone = (int) Math.floor(attributes.get(3));
+
+        // Stomachs capacities
+        maxStomachCapacity = (int) Math.floor(attributes.get(4));
+        sharedStomach = maxStomachCapacity * 0.9;
+        privateStomach = 0.0;
+
+        // food related attributes
+        foodToEatEveryDay = attributes.get(5);
+        starvingMultiplier = 1.0;
+        transferringSpeed = attributes.get(6);
+
+        // nest related attributes
+        nestY = AntSimulator.coordinates(nest.nestEntrance1, 0);
+        nestX = AntSimulator.coordinates(nest.nestEntrance1, 1);
+        closestNestDistances = new ArrayList<>(3);
+        nestDirections = new ArrayList<>(3);
+        closestNestDistances.add((double) GUI.WIDTH);
+        closestNestDistances.add((double) GUI.WIDTH);
+        closestNestDistances.add((double) GUI.WIDTH);
+        nestDirections.add(null);
+        nestDirections.add(null);
+        nestDirections.add(null);
+
+        // reproduction related attributes
+        nTraitsToTransmit = (int) Math.floor(attributes.get(0));
+        antAttributes.add(0, (double) nTraitsToTransmit);
+        antAttributes.add(1, (double) changeDirection);
+        antAttributes.add(2, (double) maxLeaveTrail);
+        antAttributes.add(3, (double) strengthOfNewTrailPheromone);
+        antAttributes.add(4, (double) maxStomachCapacity);
+        antAttributes.add(5, foodToEatEveryDay);
+        antAttributes.add(6, transferringSpeed);
     }
 
     /**
@@ -250,8 +308,12 @@ public class Ant {
      *     <li>try to move in the direction you have chosen</li>
      *     <li>get older</li>
      * </ol>
+     * @return if the ant encountered the nest and gave it some of its food then the nest will
+     *         spawn an ant with some genetic code of this ant
      */
-    void action() {
+    Ant action() {
+
+        child = null;
 
         transferFood();
 
@@ -269,7 +331,9 @@ public class Ant {
 
         age();
 
-        printStats(true);
+//        printStats(false);
+
+        return child;
     }
 
     /**
@@ -398,26 +462,29 @@ public class Ant {
         toTheNest = false;  // change state and objective
         countDir = changeDirection; // change direction
 
-        // deposit eggs ??
-        if (life < 80 && life > 30) {
-            nest.getGeneticsInfo(antAttributes);
-        }
-
         // deposit food or eat its reserves
         // deposit an amount equal to a random value between this.sharedStomach - 1 and 0, with a continuous random variable that has exponential distribution
         double threshold = maxStomachCapacity * 0.7;
         if (sharedStomach > threshold) {    // give
             double expDistributionQuantity = Math.min(1, 1 * (Math.log(1 - Math.random()) / (- sharedStomach)));
 //            System.out.println("expdistr:" + expDistributionQuantity);
-            System.out.println("sharedStomach before:" + sharedStomach + " after:" + (sharedStomach * expDistributionQuantity));
+//            System.out.println("sharedStomach before:" + sharedStomach + " after:" + (sharedStomach * expDistributionQuantity));
             double foodKept = sharedStomach * expDistributionQuantity;
             nest.addReserves(sharedStomach - foodKept);
             sharedStomach = foodKept;
-            System.out.println("nest reservoirs " + nest.getReservoir());
+//            System.out.println("nest reservoirs " + nest.getReservoir());
+
+            // deposit eggs
+            if (life < 90) {
+                nest.transmitGenetics(antAttributes);
+                child = nest.reproduction();
+                System.out.println("child:" + child);
+            }
+
         }
         else {  // take
             double howMuch = (threshold - (sharedStomach + privateStomach));
-            System.out.println("howmuch:" + howMuch);
+//            System.out.println("howmuch:" + howMuch);
             if (nest.getFoodFromReserves(howMuch)) {
                 sharedStomach += howMuch;
             }
@@ -686,7 +753,6 @@ public class Ant {
 
         return null;
     }
-
 
     /**
      * simply translate a cardinal direction in a pair of coordinates relative to that of this ant.

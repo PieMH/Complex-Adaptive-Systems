@@ -90,6 +90,8 @@ public class AntSimulator implements CASModel {
      */
     static AntsNest nest;
 
+    List<Ant> newbornList = new ArrayList<>();
+
     /**
      * the minimal value of elements in the grid if generated randomly.
      * It follows a logarithmic growth proportional to the GUI.DIMENSION value,
@@ -128,9 +130,10 @@ public class AntSimulator implements CASModel {
                     }
                     reset = false;
                 }
+                newbornList = new ArrayList<>();
                 iterateCurrentAlive(0);  // evolve
-                if (Math.random() < 0.03) balanceFood();    // with a probability of 3% every turn add a food's source
                 nestReproduction();
+                if (Math.random() < 0.03) balanceFood();    // with a probability of 3% every turn add a food's source
                 agePheromones();
                 iterateMatrix(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;
@@ -149,7 +152,10 @@ public class AntSimulator implements CASModel {
     private void evolve(Integer hashKey) {
         Ant currentAnt = currentAlive.get(hashKey);
 
-        currentAnt.action();
+        Ant newborn = currentAnt.action();
+        if (newborn != null) {
+            newbornList.add(newborn);
+        }
 
         Integer newKey = currentAnt.getPos();
         boolean moved = !(Objects.equals(newKey, hashKey));
@@ -174,11 +180,12 @@ public class AntSimulator implements CASModel {
         dead += 1;
     }
 
-    void nestReproduction() {
+    private void nestReproduction() {
         synchronized (lock) {
-            Ant newbornAnt = nest.reproduction();
-            if (newbornAnt != null) {
-                currentAlive.put(newbornAnt.getPos(), newbornAnt);
+            for (Ant a : newbornList) {
+//                if (a != null) {    // redundant
+                    currentAlive.put(a.getPos(), a);
+//                }
             }
         }
     }
@@ -273,8 +280,6 @@ public class AntSimulator implements CASModel {
                     setMap(i, j);
                 } else if (scelta == 1) {
                     updateFrame(i, j);
-                } else if (scelta == 2) {
-//                    printArena(i, j);
                 }
             }
         }
@@ -289,7 +294,7 @@ public class AntSimulator implements CASModel {
         gui.nextFrame[y][x] = (currentAlive.containsKey(key(y, x)) ||
                                 nest.inNest(key(y, x)) ||
                                 currentFood.containsKey(key(y, x))
-                            );
+                              );
     }
 
     /**
@@ -365,25 +370,6 @@ public class AntSimulator implements CASModel {
             return chiave / GUI.WIDTH;
         }
         return chiave % GUI.WIDTH;
-    }
-
-    /**
-     * metodo di generazione di una coppia di numeri pseudo-casuali all'interno dei range passati in input
-     * inoltre sistema i numeri generati casualmente affinché rientrino all'interno della dimensione della gui
-     * @param lowerBound_i estremo inferiore di riga
-     * @param upperBound_i estremo superiore di riga
-     * @param lowerBound_j estremo inferiore di colonna
-     * @param upperBound_j estremo superiore di colonna
-     * @return la coppia di numeri casuali
-     */
-    private int [] posizioniRandom(int lowerBound_i, int upperBound_i, int lowerBound_j, int upperBound_j) {
-        random_seed = new Random();
-        int[] pos = new int[2];
-        pos[0] = random_seed.nextInt(upperBound_i - lowerBound_i) + lowerBound_i;
-        pos[1] = random_seed.nextInt(upperBound_j - lowerBound_j) + lowerBound_j;
-        pos[0] = Integer.max(Integer.min(pos[0], GUI.HEIGHT - 1), 0);
-        pos[1] = Integer.max(Integer.min(pos[1], GUI.WIDTH - 1), 0);
-        return pos;
     }
 
     /**

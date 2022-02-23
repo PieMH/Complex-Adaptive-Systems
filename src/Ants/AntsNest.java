@@ -44,7 +44,7 @@ public class AntsNest {
     private Integer spawnX;
     private Integer spawnY;
 
-    ArrayList<Double> antAttributes = new ArrayList<>(10);
+    ArrayList<Double> antAttributes = new ArrayList<>(7);
 
     AntsNest() {
         nestEntrance1 = AntSimulator.key(Math.floorDiv(GUI.HEIGHT, 2), Math.floorDiv(GUI.WIDTH - 1, 2)); // the top left square in the centre of the grid
@@ -71,13 +71,14 @@ public class AntsNest {
         spawnPositions.add(10, nestEntrance3 - 1);
         spawnPositions.add(11, nestEntrance1 - 1);
 
-        // E stands for Expected value
-        antAttributes.add(0, ); // E of ChangeDirection
-        antAttributes.add(1, ); // E of maxLeaveTrail
-        antAttributes.add(2, ); // E of strengthOfNewTrailPheromone
-        antAttributes.add(3, ); // E of maxStomachCapacity
-        antAttributes.add(4, ); // E of foodToEatEveryDay
-        antAttributes.add(5, ); // E of transferringSpeed
+        // the current ant traits from the Ant(y,x,nest) constructor. See that for reference.
+        antAttributes.add(0, null); // nTraitsToTransmit
+        antAttributes.add(1, null); // changeDirection
+        antAttributes.add(2, null); // maxLeaveTrail
+        antAttributes.add(3, null); // strengthOfNewTrailPheromone
+        antAttributes.add(4, null); // maxStomachCapacity
+        antAttributes.add(5, null); // foodToEatEveryDay
+        antAttributes.add(6, null); // transferringSpeed
     }
 
     public Color getColor() {
@@ -110,22 +111,32 @@ public class AntsNest {
     }
 
     Ant reproduction() {
-            if (searchSpawnPoint()) {   // this call updates spawnY and spawnY, to am available spot on the grid next to the nest
+        if (searchSpawnPoint()) {   // this call updates spawnY and spawnY, to am available spot on the grid next to the nest
 //                System.out.println("reservoir left:" + reservoir + ". spawnY:" + spawnY + ", spawnX:" + spawnX);
-
-            }
+            return new Ant(spawnY, spawnX, this, antAttributes);
+        }
         return null;
     }
 
-    void getGeneticsInfo(ArrayList<Double> antAttr) {
+
+    void transmitGenetics(ArrayList<Double> attributes) {
         // do some genetic algorithm code
-        // choose a crossover value
-        for (int i = 0; i < xover; i ++) {
-            antAttributes.set(i, antAttr.get(i));
+        // with the crossover value "nTraitsToTransmit" and a random point to start copying
+        Random r = new Random();
+        int start = r.nextInt(0, 7);  // where to start copying genetics values
+        for (int i = start; i < start + 7; i++) {
+            if (i - start < attributes.get(0)) {// nTraitsToTransmit
+                antAttributes.set(i % 7, attributes.get(i % 7));
+            }
+            // if it's the first ant than get its whole genetic code
+            else if (antAttributes.get(i % 7) == null) {
+                antAttributes.set(i % 7, attributes.get(i % 7));
+            }
         }
+
     }
 
-    boolean searchSpawnPoint() {
+    private boolean searchSpawnPoint() {
         Random r = new Random();
         ArrayList<Integer> spawnKeys = new ArrayList<>(spawnPositions);
         int n = spawnKeys.size();
