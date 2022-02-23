@@ -365,18 +365,19 @@ public class Ant {
                 this.sharedStomach += 1;
                 otherAnt.sharedStomach -= 1;
             }
-            else {
+//            else {
 //                System.out.println("myD:" + myDelta + " yourD:" + yourDelta + ". Mymaxcapacity:" + this.maxStomachCapacity + ". Failed trophallaxis with a P:" + ((myDelta - yourDelta) / (double) this.maxStomachCapacity ));
-            }
+//            }
         }
         else if ((yourDelta > myDelta + 1) && (this.sharedStomach > 1)) {
             if (Math.random() < ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity)) {
 //                System.out.println("yourD:" + yourDelta + " myD:" + myDelta + ". Yoursmaxcapacity:" + otherAnt.maxStomachCapacity + ". P:" + ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity));
                 this.sharedStomach -= 1;
                 otherAnt.sharedStomach += 1;
-            } else {
-//                System.out.println("yourD:" + yourDelta + " myD:" + myDelta + ". Yoursmaxcapacity:" + otherAnt.maxStomachCapacity + ". Failed trophallaxis with a P:" + ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity));
             }
+//            else {
+//                System.out.println("yourD:" + yourDelta + " myD:" + myDelta + ". Yoursmaxcapacity:" + otherAnt.maxStomachCapacity + ". Failed trophallaxis with a P:" + ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity));
+//            }
         }
     }
 
@@ -512,8 +513,11 @@ public class Ant {
             if (!found) {
                 translateDirInPos(nestDirections.get(2));
                 el = whoIsThere(nextY, nextX);
-                found = true;
-                toTheNest = true;
+                if (el == null || el.getClass() == Pheromone.class) {
+                    chosenDir = nestDirections.get(1);
+                    found = true;
+                    toTheNest = true;
+                }
             }
         }
 //            System.out.println("tothenest:" + toTheNest + " chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos);
@@ -778,11 +782,11 @@ public class Ant {
      * @return true if the ant can carry more food
      */
     private boolean gatherFood(double amount) {
-        if (sharedStomach + amount < maxStomachCapacity) {   // firstly try to full the shared stomach
+        if (sharedStomach + amount <= maxStomachCapacity) {   // firstly try to full the shared stomach
             sharedStomach += amount;
             return true;
         }
-        else if (privateStomach + amount < maxStomachCapacity) {     // if it is already full, move one quantity from the shared food to the private one and then gather the new food
+        else if (privateStomach + amount <= maxStomachCapacity) {     // if it is already full, move one quantity from the shared food to the private one and then gather the new food
             privateStomach += amount;
             return true;
         }
