@@ -202,8 +202,9 @@ public class Ant {
         strengthOfNewTrailPheromone = random_seed.nextInt(minStrength, Pheromone.maxStrength);
 
         // Stomachs capacities
-        int maxF = (int) Math.floor(2.2 * Math.max(1, Math.pow(GUI.DIMENSION, 1 / 4.0) - 1 ) );
-        maxStomachCapacity = random_seed.nextInt(minChange, maxF);
+        int minF = (int) Math.floor(minChange * 1.8);
+        int maxF = (int) Math.floor(2.4 * Math.max(1, Math.pow(GUI.DIMENSION, 1 / 4.0) - 1 ) );
+        maxStomachCapacity = random_seed.nextInt(minF, maxF);
         sharedStomach = maxStomachCapacity * 0.9;
         privateStomach = 0.0;
 
@@ -414,12 +415,13 @@ public class Ant {
         // if you have already eaten the maximum food you can, AND you are carrying the maximum food you can ignore it
         // otherwise:
 //        System.out.println("sharedStomach:" + sharedStomach + "privateStomach:" + privateStomach);
-        if (food.gathering()) {
+        double amount = Math.min((sharedStomach * 0.7), (maxStomachCapacity - sharedStomach));
+        if (food.gathering(amount)) {
 //            System.out.println("there is food");
             // do action relative to gathering food and discovering a new food source
-          if (!gatherFood()) {
+          if (!gatherFood(amount)) {
 //              System.out.println("but i am already full");
-              food.reverseGathering();
+              food.reverseGathering(amount);
           }
 //          System.out.println("sharedStomach:" + sharedStomach + "privateStomach:" + privateStomach);
           leaveTrail = maxLeaveTrail;
@@ -479,7 +481,7 @@ public class Ant {
     /**
      *
      */
-    private void decide() {
+    private <E> void decide() {
         // First key AI logic of an ant:
             // if I am starving or have little food go to you nest to feed
             // at the opposite if I have plenty of food with me, it is useless to continue finding food in the ambient so come back to the nest
@@ -491,18 +493,28 @@ public class Ant {
         // if I decided time ago to go to the nest don't change that decision until you come to the nest
         if (toTheNest || (stomachSum < maxStomachCapacity * 0.4)  || (stomachSum > maxStomachCapacity * 1.6)) {    // little or much food condition
 //            System.out.println("stomachSum" + stomachSum + " MaxCapacity:" + maxStomachCapacity);
-            double p = Math.random();
-            if (p < 0.5) {  // with a P of 50% choose the closest direction
+            translateDirInPos(nestDirections.get(0));
+            E el = whoIsThere(nextY, nextX);
+            if (el == null || el.getClass() == Pheromone.class) {
                 chosenDir = nestDirections.get(0);
+                found = true;
+                toTheNest = true;
             }
-            else if (p < 0.85) {    // with a P of 35% choose the second closest
-                chosenDir = nestDirections.get(1);
+            if (!found) {
+                translateDirInPos(nestDirections.get(1));
+                el = whoIsThere(nextY, nextX);
+                if (el == null || el.getClass() == Pheromone.class) {
+                    chosenDir = nestDirections.get(1);
+                    found = true;
+                    toTheNest = true;
+                }
             }
-            else {  // with a P of 15% the third closest
-                chosenDir = nestDirections.get(2);
+            if (!found) {
+                translateDirInPos(nestDirections.get(2));
+                el = whoIsThere(nextY, nextX);
+                found = true;
+                toTheNest = true;
             }
-            toTheNest = true;
-            found = true;
         }
 //            System.out.println("tothenest:" + toTheNest + " chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos);
 
@@ -765,13 +777,13 @@ public class Ant {
      * if there is some space adds a new quantity to the correct stomach
      * @return true if the ant can carry more food
      */
-    private boolean gatherFood() {
-        if (sharedStomach + 1 < maxStomachCapacity) {   // firstly try to full the shared stomach
-            sharedStomach += 1;
+    private boolean gatherFood(double amount) {
+        if (sharedStomach + amount < maxStomachCapacity) {   // firstly try to full the shared stomach
+            sharedStomach += amount;
             return true;
         }
-        else if (privateStomach + 1 < maxStomachCapacity) {     // if it is already full, move one quantity from the shared food to the private one and then gather the new food
-            privateStomach += 1;
+        else if (privateStomach + amount < maxStomachCapacity) {     // if it is already full, move one quantity from the shared food to the private one and then gather the new food
+            privateStomach += amount;
             return true;
         }
         return false;

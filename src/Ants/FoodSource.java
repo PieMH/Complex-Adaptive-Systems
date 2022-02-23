@@ -25,7 +25,7 @@ public class FoodSource {
     /**
      * the amount of food left available for the ants to gather
      */
-    private Integer amountLeft;
+    private Double amountLeft;
 
     /**
      * the minimal value of elements in the grid if generated randomly.
@@ -48,12 +48,12 @@ public class FoodSource {
           The logic is to ensure the growth of the minimal value is logarithmic proportional
           to that of the number of cells in the grid, that is GUI.DIMENSION.
          */
-        minimal = (int) Math.max(Math.floor(Math.log(GUI.DIMENSION * GUI.DIMENSION)), 1);   // minimal number of quantity of food in this source
-        maximal = minimal * 5;
-        amountLeft = random_seed.nextInt(minimal, maximal);
+        minimal = (int) Math.max(Math.floor(Math.sqrt(GUI.DIMENSION)), 1);   // minimal number of quantity of food in this source
+        maximal = minimal * 4;
+        amountLeft = (double) random_seed.nextInt(minimal, maximal);
     }
 
-    Integer getAmountLeft() {
+    Double getAmountLeft() {
         return amountLeft;
     }
 
@@ -61,15 +61,15 @@ public class FoodSource {
         return color;
     }
 
-    boolean gathering() {
-        if (amountLeft > 1) {
-           amountLeft -= 1;
+    boolean gathering(double amount) {
+        if (amountLeft - amount > 1) {
+           amountLeft -= amount;
            return true;
         }
         return false;
     }
 
-    void reverseGathering() {
-        amountLeft += 1;
+    void reverseGathering(double amount) {
+        amountLeft += amount;
     }
 }
