@@ -362,11 +362,11 @@ public class AntSimulator implements CASModel {
     /**
      * Inverse function of the {@code key()} function.
      * @param chiave the key on the hashMap calculated by {@code key()}.
-     * @param columnOrRow 0 to know the row index on the 2 dimensional grid; 1 to know the column index on the 2 dimensional grid
-     * @return the column or row index based on {@code columnOrRow}.
+     * @param rowOrColumn 0 to know the row index on the 2 dimensional grid; 1 to know the column index on the 2 dimensional grid
+     * @return the column or row index based on {@code rowOrColumn}.
      */
-    public static int coordinates(Integer chiave, int columnOrRow) {
-        if (columnOrRow == 0) {
+    public static int coordinates(Integer chiave, int rowOrColumn) {
+        if (rowOrColumn == 0) {
             return chiave / GUI.WIDTH;
         }
         return chiave % GUI.WIDTH;
@@ -468,6 +468,9 @@ public class AntSimulator implements CASModel {
 
         // the following is the calculation of Pheromone.maxStrength, actually is derived from Ant calculation, in fact it is equal to = ceil(2 * Ant.minChange^2)
         Pheromone.setMaxStrength( (int) Math.ceil( (2 * Math.pow( (int) Math.max( 2, Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1), 2))));
+
+        // two point distance function, the maximum distance of any ant it is from position (0,0) to nestEntrance1.y,nestEntrance1.x
+        Ant.setDMax(Math.sqrt(Math.pow(coordinates(nest.getNestEntrance1(), 0), 2) + Math.pow(coordinates(nest.getNestEntrance1(), 1), 2)));
 
         reset = true;
 

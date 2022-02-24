@@ -157,6 +157,8 @@ public class Ant {
 
     private ArrayList<Direction> nestDirections;
 
+    private static double dMax;
+
     /**
      * my personal pheromone of type personal and strength 100
      */
@@ -220,14 +222,12 @@ public class Ant {
         // nest related attributes
         nestY = AntSimulator.coordinates(nest.nestEntrance1, 0);
         nestX = AntSimulator.coordinates(nest.nestEntrance1, 1);
-        closestNestDistances = new ArrayList<>(3);
-        nestDirections = new ArrayList<>(3);
-        closestNestDistances.add((double) GUI.WIDTH);
-        closestNestDistances.add((double) GUI.WIDTH);
-        closestNestDistances.add((double) GUI.WIDTH);
-        nestDirections.add(null);
-        nestDirections.add(null);
-        nestDirections.add(null);
+        closestNestDistances = new ArrayList<>(8);
+        nestDirections = new ArrayList<>(8);
+        for (int i = 0; i < 8; i++) {
+            closestNestDistances.add((double) GUI.WIDTH);
+            nestDirections.add(null);
+        }
 
         // reproduction related attributes
         nTraitsToTransmit = random_seed.nextInt(1, 8);
@@ -275,12 +275,10 @@ public class Ant {
         nestX = AntSimulator.coordinates(nest.nestEntrance1, 1);
         closestNestDistances = new ArrayList<>(3);
         nestDirections = new ArrayList<>(3);
-        closestNestDistances.add((double) GUI.WIDTH);
-        closestNestDistances.add((double) GUI.WIDTH);
-        closestNestDistances.add((double) GUI.WIDTH);
-        nestDirections.add(null);
-        nestDirections.add(null);
-        nestDirections.add(null);
+        for (int i = 0; i < 8; i++) {
+            closestNestDistances.add((double) GUI.WIDTH);
+            nestDirections.add(null);
+        }
 
         // reproduction related attributes
         nTraitsToTransmit = (int) Math.floor(attributes.get(0));
@@ -321,7 +319,7 @@ public class Ant {
 
         leph = null;
 
-        search(true, false, false);
+        search(true, false);
 
         decide();
 
@@ -341,12 +339,11 @@ public class Ant {
      * This depends upon the value of two parameters. <b>NEVER CALL THIS METHOD WITH BOTH OF THEM AT TRUE</b>.
      * It would break the little mind of the ant. If you call this method with both parameters at false it is simply useless.
      * @param interact true if you want to interact with something around you
-     * @param newDirection true if you want to search for a new random direction to follow
      * @param nest true if you want to recompute the closest directions to follow to reach the nest
      * @see #interact
      * @see #findRandomDirection
      */
-    void search(boolean interact, boolean newDirection, boolean nest) {
+    void search(boolean interact, boolean nest) {
         random_seed = new Random();
         ArrayList<Direction> directionList = new ArrayList<>(List.of(Direction.values()));
         int index;
@@ -357,15 +354,6 @@ public class Ant {
                 translateDirInPos(dir);     // updates nextY and nextX
 //                System.out.println("dir:" + dir + " nextY:" + nextY + " nextX:" + nextX);
                 interact(nextY, nextX);
-            }
-            else if (newDirection) {
-                if (findRandomDirection(dir)) {
-                    return;
-                }
-                else {
-                    nextY = this.yPos;
-                    nextX = this.xPos;
-                }
             }
             else if (nest) {
                 translateDirInPos(dir);
@@ -421,7 +409,7 @@ public class Ant {
         }
 
         // otherwise, search a random path
-        search(false, true, false);
+        findRandomDirection();
 
         move(nextY, nextX);
 //        System.out.println("RandomDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos);
@@ -578,14 +566,12 @@ public class Ant {
      */
     private void orientYourself() {
         // reinitialize the data structures for searching the nest
-        closestNestDistances.set(0, (double) GUI.WIDTH);
-        closestNestDistances.set(1, (double) GUI.WIDTH);
-        closestNestDistances.set(2, (double) GUI.WIDTH);
-        nestDirections.set(0, null);
-        nestDirections.set(1, null);
-        nestDirections.set(2, null);
+        for (int i = 0; i < 8; i++) {
+            closestNestDistances.set(i, (double) GUI.WIDTH);
+            nestDirections.set(i, null);
+        }
 
-        search(false, false, true);     // this updates nestDirections hashmap
+        search(false, true);     // this updates nestDirections hashmap
     }
 
     /**
@@ -697,11 +683,12 @@ public class Ant {
         return false;
     }
 
+    /*
     /**
      * decide whether the direction given as a parameter can be a new direction to follow: it must be free.
      * @return true if it finds a new direction, false otherwise
      */
-    private <E> boolean findRandomDirection(Direction dir) {
+   /* private <E> boolean findRandomDirection(Direction dir) {
         //  ADD THE PROBABILITY TO FIND A DIRECTION BASED ON THE STATE "toTheNest"
         translateDirInPos(dir);     // updates nextY and nextX
         E element = whoIsThere(nextY, nextX);
@@ -746,6 +733,61 @@ public class Ant {
         }
         return false;
     }
+    */
+
+    // TO BE TESTED
+    private <E> void findRandomDirection() {
+        random_seed = new Random();
+        double [] probabilities = new double[8];
+        double sumP = 0;
+        E obstacle;
+
+        if (toTheNest) {
+            for (int i = 0; i < 8; i++) {
+                probabilities[i] = 1 - closestNestDistances.get(i) / dMax;
+                sumP += probabilities[i];
+            }
+            double alpha = 1 / sumP;
+
+            for (int i = 0; i < 8; i++) {
+                Direction possibleDir = nestDirections.get(i);
+                translateDirInPos(possibleDir);
+                obstacle = whoIsThere(nextY, nextX);
+                if (obstacle == null || obstacle.getClass() == Pheromone.class) {
+                    if (notOpposite(possibleDir)) {
+                        if (random_seed.nextDouble() < (probabilities[i] * alpha) ) {
+                            chosenDir = possibleDir;
+                            countDir = 0;
+                            onARandomPath = true;
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            for (int i = 7; i >= 0; i--) {
+                probabilities[i] = closestNestDistances.get(i) / dMax;
+                sumP += probabilities[i];
+            }
+            double alpha = 1 / sumP;
+
+            for (int i = 7; i >= 0; i--) {
+                Direction possibleDir = nestDirections.get(i);
+                translateDirInPos(possibleDir);
+                obstacle = whoIsThere(nextY, nextX);
+                if (obstacle == null || obstacle.getClass() == Pheromone.class) {
+                    if (notOpposite(possibleDir)) {
+                        if (random_seed.nextDouble() < (probabilities[i] * alpha) ) {
+                            chosenDir = possibleDir;
+                            countDir = 0;
+                            onARandomPath = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     /**
      * An important method who controls if the given position is occupied or free.
@@ -859,20 +901,20 @@ public class Ant {
 //        System.out.println("nestY:" + nestY + " nestX:" + nestX);
 //        System.out.println("y:" + y + " x:" + x);
         double d = Math.sqrt(Math.pow(y - nestY, 2) + Math.pow(x - nestX, 2));  // two point distance equation
-        for (int i = 0; i < 3; i++) {
-            if (closestNestDistances.get(i) > d) {
+        for (int i = 0; i < 8; i++) {
+            if (d < closestNestDistances.get(i)) {
                 // updates the data structures
                 closestNestDistances.add(i, d);
-                closestNestDistances.remove(3);
+                closestNestDistances.remove(8);
                 nestDirections.add(i, translatePosInDir(y, x));
                 break;
             }
         }
-//        for (int i = 0; i < 3; i++) {
-//            System.out.println("i:" + i + ", distance:" + closestNestDistances.get(i));
-//            System.out.println("i:" + i + ", direction:" + nestDirections.get(i));
-//        }
-//        System.out.println("******************************************");
+        for (int i = 0; i < 8; i++) {
+            System.out.println("i:" + i + ", distance:" + closestNestDistances.get(i));
+            System.out.println("i:" + i + ", direction:" + nestDirections.get(i));
+        }
+        System.out.println("******************************************");
     }
 
     /**
@@ -951,6 +993,10 @@ public class Ant {
 
     public Integer getPos() {
         return AntSimulator.key(yPos, xPos);
+    }
+
+    static void setDMax(double value) {
+        dMax = value;
     }
 
     void printStats() {

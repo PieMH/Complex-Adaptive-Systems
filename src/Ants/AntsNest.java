@@ -86,9 +86,6 @@ public class AntsNest {
     }
 
     Integer getNestEntrance1() {return nestEntrance1;}
-    Integer getNestEntrance2() {return nestEntrance2;}
-    Integer getNestEntrance3() {return nestEntrance3;}
-    Integer getNestEntrance4() {return nestEntrance4;}
 
     boolean inNest(Integer key) {
         return (key.equals(nestEntrance1) || key.equals(nestEntrance2) || key.equals(nestEntrance3) || key.equals(nestEntrance4));
