@@ -39,12 +39,12 @@ public class GUI {
     /**
      * number of horizontal cells, or of columns on the grid
      */
-    public static int WIDTH = 60;
+    public static int WIDTH = 50;
 
     /**
      * number of vertical cells, or of rows on the grid
      */
-    public static int HEIGHT = 30;
+    public static int HEIGHT = 50;
 
     /**
      * total number of cells int the grid
@@ -228,12 +228,9 @@ public class GUI {
 
         JLabel labelStepDelay = new JLabel("Step delay in ms:");
 
-//        JSlider slider = new JSlider(10, 300, 100);
-//        slider.setMinorTickSpacing(15);
-//        slider.setMajorTickSpacing(45);
-        JSlider slider = new JSlider(10, 500, 450);
+        JSlider slider = new JSlider(20, 500, 100);
         slider.setMinorTickSpacing(20);
-        slider.setMajorTickSpacing(60);
+        slider.setMajorTickSpacing(80);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
         slider.addChangeListener(e -> {
