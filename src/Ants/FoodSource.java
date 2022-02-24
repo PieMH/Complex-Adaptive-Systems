@@ -48,7 +48,7 @@ public class FoodSource {
           The logic is to ensure the growth of the minimal value is logarithmic proportional
           to that of the number of cells in the grid, that is GUI.DIMENSION.
          */
-        minimal = (int) Math.max(Math.floor(Math.sqrt(GUI.DIMENSION)), 1);   // minimal number of quantity of food in this source
+        minimal = (int) Math.max(Math.floor(Math.sqrt(1.5 * GUI.DIMENSION)), 1);   // minimal number of quantity of food in this source
         maximal = minimal * 4;
         amountLeft = (double) random_seed.nextInt(minimal, maximal);
     }

@@ -197,9 +197,7 @@ public class Ant {
         countDir = 0;
 
         // maxLeaveTrail random value extraction
-        int minTrail = 2 * minChange;
-        int maxTrail = (int) Math.ceil(3.0 / 2.0 * minTrail * minTrail);
-        maxLeaveTrail = random_seed.nextInt(minTrail, maxTrail);
+        maxLeaveTrail = random_seed.nextInt(maxChange, 2 * maxChange);
         leaveTrail = 0;
 
         // strengthOfNewTrailPheromone random value extraction
@@ -327,33 +325,35 @@ public class Ant {
 
         decide();
 
+        searchFood();
+
         movement();
 
         age();
 
-//        printStats(false);
+        printStats(true);
 
         return child;
     }
 
     /**
-     * Searches in the 8 nearby position for something to interact with or just for an empty space to go to.
+     * Searches in the 8 nearby position for interact to interact with or just for an empty space to go to.
      * This depends upon the value of two parameters. <b>NEVER CALL THIS METHOD WITH BOTH OF THEM AT TRUE</b>.
      * It would break the little mind of the ant. If you call this method with both parameters at false it is simply useless.
-     * @param something true if you want to find something around you
+     * @param interact true if you want to interact with something around you
      * @param newDirection true if you want to search for a new random direction to follow
      * @param nest true if you want to recompute the closest directions to follow to reach the nest
      * @see #interact
      * @see #findRandomDirection
      */
-    void search(boolean something, boolean newDirection, boolean nest) {
+    void search(boolean interact, boolean newDirection, boolean nest) {
         random_seed = new Random();
         ArrayList<Direction> directionList = new ArrayList<>(List.of(Direction.values()));
         int index;
         for (int i = 0; i < 8; i++) {
             index = random_seed.nextInt(directionList.size());
             Direction dir = directionList.remove(index);
-            if (something) {
+            if (interact) {
                 translateDirInPos(dir);     // updates nextY and nextX
 //                System.out.println("dir:" + dir + " nextY:" + nextY + " nextX:" + nextX);
                 interact(nextY, nextX);
@@ -371,6 +371,34 @@ public class Ant {
                 translateDirInPos(dir);
                 computeNestDistance(nextY, nextX);
             }
+        }
+    }
+
+    void searchFood() {
+        random_seed = new Random();
+        ArrayList<Direction> directionList = new ArrayList<>(List.of(Direction.values()));
+        int index;
+        for (int i = 0; i < 8; i++) {
+            index = random_seed.nextInt(directionList.size());
+            Direction dir = directionList.remove(index);
+            translateDirInPos(dir);     // updates nextY and nextX
+//                System.out.println("dir:" + dir + " nextY:" + nextY + " nextX:" + nextX);
+            int deltaY = nextY - yPos;
+            int deltaX = nextX - xPos;
+            boolean found = false;
+            FoodSource food = AntSimulator.getCurrentFood().get(AntSimulator.key(nextY + deltaY, nextX + deltaX));
+            if (food != null && notOpposite(dir)) {
+                chosenDir = dir;
+                found = true;
+            }
+            if (!found && !toTheNest && notOpposite(dir)) {
+                food = AntSimulator.getCurrentFood().get(AntSimulator.key(nextY + (2 * deltaY), nextX + (2 * deltaX)));
+                if (food != null) {
+                    chosenDir = dir;
+                    found = true;
+                }
+            }
+            if (found) break;
         }
     }
 
@@ -458,7 +486,7 @@ public class Ant {
 //        System.out.println("nest nearby");
         // you have found your nest
         // do action relative to the nest encounter
-        leaveTrail = maxLeaveTrail;
+//        leaveTrail = maxLeaveTrail;
         toTheNest = false;  // change state and objective
         countDir = changeDirection; // change direction
 
@@ -475,7 +503,7 @@ public class Ant {
 //            System.out.println("nest reservoirs " + nest.getReservoir());
 
             // deposit eggs
-            if (life < 90) {
+            if (life < 85) {
                 nest.transmitGenetics(antAttributes);
                 child = nest.reproduction();
                 System.out.println("child:" + child);
@@ -575,29 +603,20 @@ public class Ant {
         // if I decided time ago to go to the nest don't change that decision until you come to the nest
         if (toTheNest || (stomachSum < maxStomachCapacity * 0.5)  || (stomachSum > maxStomachCapacity * 1.6)) {    // little or much food condition
 //            System.out.println("stomachSum" + stomachSum + " MaxCapacity:" + maxStomachCapacity);
-            translateDirInPos(nestDirections.get(0));
-            E el = whoIsThere(nextY, nextX);
-            if (el == null || el.getClass() == Pheromone.class) {
-                chosenDir = nestDirections.get(0);
-                found = true;
-                toTheNest = true;
-            }
-            if (!found) {
-                translateDirInPos(nestDirections.get(1));
-                el = whoIsThere(nextY, nextX);
-                if (el == null || el.getClass() == Pheromone.class) {
-                    chosenDir = nestDirections.get(1);
-                    found = true;
-                    toTheNest = true;
-                }
-            }
-            if (!found) {
-                translateDirInPos(nestDirections.get(2));
-                el = whoIsThere(nextY, nextX);
-                if (el == null || el.getClass() == Pheromone.class) {
-                    chosenDir = nestDirections.get(1);
-                    found = true;
-                    toTheNest = true;
+            double p = random_seed.nextDouble();
+            int start;
+            if (p < 0.6) start = 0;
+            else if (p < 0.9) start = 1;
+            else start = 2;
+            for (int i = start; i < start + 3; i++) {
+                if (!found) {
+                    translateDirInPos(nestDirections.get(i % 3));
+                    E el = whoIsThere(nextY, nextX);
+                    if (el == null || el.getClass() == Pheromone.class) {
+                        chosenDir = nestDirections.get(i % 3);
+                        found = true;
+                        toTheNest = true;
+                    }
                 }
             }
         }

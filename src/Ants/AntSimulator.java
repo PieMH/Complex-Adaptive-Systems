@@ -133,7 +133,7 @@ public class AntSimulator implements CASModel {
                 newbornList = new ArrayList<>();
                 iterateCurrentAlive(0);  // evolve
                 nestReproduction();
-                if (Math.random() < 0.03) balanceFood();    // with a probability of 3% every turn add a food's source
+                if (Math.random() < 0.04) balanceFood();    // with a probability of 3% every turn add a food's source
                 agePheromones();
                 iterateMatrix(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;
