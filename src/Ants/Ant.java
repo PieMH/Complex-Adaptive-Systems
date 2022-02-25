@@ -329,7 +329,7 @@ public class Ant {
 
         age();
 
-        printStats(true);
+        printStats(false);
 
         return child;
     }
@@ -341,7 +341,7 @@ public class Ant {
      * @param interact true if you want to interact with something around you
      * @param nest true if you want to recompute the closest directions to follow to reach the nest
      * @see #interact
-     * @see #findRandomDirection
+     * @see #computeNestDistance
      */
     void search(boolean interact, boolean nest) {
         random_seed = new Random();
@@ -363,6 +363,7 @@ public class Ant {
     }
 
     void searchFood() {
+        // cerca cibo solo se hai spazio nello stomaco !!!!
         random_seed = new Random();
         ArrayList<Direction> directionList = new ArrayList<>(List.of(Direction.values()));
         int index;
@@ -759,6 +760,8 @@ public class Ant {
                             chosenDir = possibleDir;
                             countDir = 0;
                             onARandomPath = true;
+                            System.out.println("dir:" + chosenDir + " P:" + (probabilities[i] * alpha));
+                            break;
                         }
                     }
                 }
@@ -781,6 +784,8 @@ public class Ant {
                             chosenDir = possibleDir;
                             countDir = 0;
                             onARandomPath = true;
+                            System.out.println("dir:" + chosenDir + " P:" + (probabilities[i] * alpha));
+                            break;
                         }
                     }
                 }
