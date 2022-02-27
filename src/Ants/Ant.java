@@ -172,6 +172,8 @@ public class Ant {
      */
     private Pheromone leph;
 
+    private int pheromoneCounter;
+
     private final Integer nTraitsToTransmit;
 
     ArrayList<Double> antAttributes = new ArrayList<>(7);
@@ -310,14 +312,14 @@ public class Ant {
     Ant action() {
 
         child = null;
+        leph = null;
+        pheromoneCounter = 0;
 
         transferFood();
 
         eat();
 
         orientYourself();
-
-        leph = null;
 
         search(true, false);
 
@@ -329,7 +331,7 @@ public class Ant {
 
         age();
 
-        printStats(false);
+//        printStats(false);
 
         return child;
     }
@@ -360,34 +362,41 @@ public class Ant {
                 computeNestDistance(nextY, nextX);
             }
         }
+//        if (nest) {
+//            for (int i = 0; i < 8; i++) {
+//                System.out.println("i:" + i + ", dist:" + closestNestDistances.get(i) + ", dir:" + nestDirections.get(i));
+//            }
+//            System.out.println("******************************************");
+//        }
     }
 
     void searchFood() {
-        // cerca cibo solo se hai spazio nello stomaco !!!!
-        random_seed = new Random();
-        ArrayList<Direction> directionList = new ArrayList<>(List.of(Direction.values()));
-        int index;
-        for (int i = 0; i < 8; i++) {
-            index = random_seed.nextInt(directionList.size());
-            Direction dir = directionList.remove(index);
-            translateDirInPos(dir);     // updates nextY and nextX
+        if ((sharedStomach + privateStomach) < (maxStomachCapacity * 1.5)) {    // search food only if you are not already full
+            random_seed = new Random();
+            ArrayList<Direction> directionList = new ArrayList<>(List.of(Direction.values()));
+            int index;
+            for (int i = 0; i < 8; i++) {
+                index = random_seed.nextInt(directionList.size());
+                Direction dir = directionList.remove(index);
+                translateDirInPos(dir);     // updates nextY and nextX
 //                System.out.println("dir:" + dir + " nextY:" + nextY + " nextX:" + nextX);
-            int deltaY = nextY - yPos;
-            int deltaX = nextX - xPos;
-            boolean found = false;
-            FoodSource food = AntSimulator.getCurrentFood().get(AntSimulator.key(nextY + deltaY, nextX + deltaX));
-            if (food != null && notOpposite(dir)) {
-                chosenDir = dir;
-                found = true;
-            }
-            if (!found && !toTheNest && notOpposite(dir)) {
-                food = AntSimulator.getCurrentFood().get(AntSimulator.key(nextY + (2 * deltaY), nextX + (2 * deltaX)));
-                if (food != null) {
+                int deltaY = nextY - yPos;
+                int deltaX = nextX - xPos;
+                boolean found = false;
+                FoodSource food = AntSimulator.getCurrentFood().get(AntSimulator.key(nextY + deltaY, nextX + deltaX));
+                if (food != null && notOpposite(dir)) {
                     chosenDir = dir;
                     found = true;
                 }
+                if (!found && !toTheNest && notOpposite(dir)) {
+                    food = AntSimulator.getCurrentFood().get(AntSimulator.key(nextY + (2 * deltaY), nextX + (2 * deltaX)));
+                    if (food != null) {
+                        chosenDir = dir;
+                        found = true;
+                    }
+                }
+                if (found) break;
             }
-            if (found) break;
         }
     }
 
@@ -514,16 +523,14 @@ public class Ant {
         // otherwise:
 //        System.out.println("sharedStomach:" + sharedStomach + "privateStomach:" + privateStomach);
         double amount = (maxStomachCapacity - sharedStomach) * 0.8;
-        if (food.gathering(amount)) {
+        double available = food.gathering(amount);
+        if (available > 0) {
 //            System.out.println("there is food");
             // do action relative to gathering food and discovering a new food source
-            gatherFood(amount);
-//          if (!gatherFood(amount)) {
-//              System.out.println("but i am already full");
-//              food.reverseGathering(amount);
-//          }
+            double left = gatherFood(available);
+            food. reverseGathering(left);
 //          System.out.println("sharedStomach:" + sharedStomach + "privateStomach:" + privateStomach);
-          leaveTrail = maxLeaveTrail;
+            leaveTrail = maxLeaveTrail;
         }
         else AntSimulator.foodFinished(food);
     }
@@ -531,6 +538,7 @@ public class Ant {
     void pheromoneInteraction(Pheromone phe) {
         // you came across a pheromone trail
         if (phe.ant != this) {  // if it is yours ignore it
+            pheromoneCounter += 1;
             Direction possibleDir = translatePosInDir(phe.yPos, phe.xPos);
             if (notOpposite(possibleDir)) {   // if it is from the opposite direction ignore it
 
@@ -612,35 +620,36 @@ public class Ant {
         // Second key AI logic of an ant:
             // if I found a strong pheromone trail around me go to the lightest one, hopefully in the opposite direction of the strongest one
             // this will lead me to a food' source or the nest
-        if (leph != null) {
-            if (Math.random() < ((Pheromone.maxStrength - leph.getStrength()) / (double) Pheromone.maxStrength) * 1.2) { // with a P of the strength of the strongest pheromone found
-                Direction desirableDir = translatePosInDir(leph.yPos, leph.xPos);
+        if (pheromoneCounter < 4) { // if there are too many pheromones around you, you'll get very confused, so ignore them
+            if (leph != null) {
+                if (Math.random() < ((Pheromone.maxStrength - leph.getStrength()) / (double) Pheromone.maxStrength) * 1.2) { // with a P of the strength of the strongest pheromone found
+                    Direction desirableDir = translatePosInDir(leph.yPos, leph.xPos);
 
-                if (toTheNest) {
-                    for (int i = 0; i < 3; i++) {
-                        if (nestDirections.get(i) == desirableDir) {
+                    if (toTheNest) {
+                        for (int i = 0; i < 3; i++) {
+                            if (nestDirections.get(i) == desirableDir) {
+                                chosenDir = desirableDir;
+                                found = true;
+//                            System.out.println("tothenest:" + toTheNest + " chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos + " lephY:" + leph.yPos + " lephX:" + leph.xPos);
+                                break;
+                            }
+                        }
+                    } else {
+                        boolean ok = true;
+                        for (int i = 0; i < 3; i++) {
+                            if (nestDirections.get(i) == desirableDir) {
+                                ok = false;
+                                break;
+                            }
+                        }
+                        if (ok) {
                             chosenDir = desirableDir;
                             found = true;
-//                            System.out.println("tothenest:" + toTheNest + " chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos + " lephY:" + leph.yPos + " lephX:" + leph.xPos);
-                            break;
                         }
-                    }
-                }
-                else {
-                    boolean ok = true;
-                    for (int i = 0; i < 3; i++) {
-                        if (nestDirections.get(i) == desirableDir) {
-                            ok = false;
-                            break;
-                        }
-                    }
-                    if (ok) {
-                        chosenDir = desirableDir;
-                        found = true;
-                    }
 //                            System.out.println("tothenest:" + toTheNest + " chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos + " lephY:" + leph.yPos + " lephX:" + leph.xPos);
-                }
+                    }
 
+                }
             }
         }
         if (found) {
@@ -738,53 +747,95 @@ public class Ant {
 
     // TO BE TESTED
     private <E> void findRandomDirection() {
+//        System.out.println("FIND RANDOM DIRECTION");
         random_seed = new Random();
-        double [] probabilities = new double[8];
-        double sumP = 0;
         E obstacle;
+        double halfDMax = dMax / 2;
+        boolean found = false;
+//        System.out.println("D:" + dMax + " D/2:" + halfDMax);
 
-        if (toTheNest) {
-            for (int i = 0; i < 8; i++) {
-                probabilities[i] = 1 - closestNestDistances.get(i) / dMax;
-                sumP += probabilities[i];
-            }
-            double alpha = 1 / sumP;
-
-            for (int i = 0; i < 8; i++) {
+        // inside the halfway circle of ray = halfDMax
+        if (closestNestDistances.get(4) < halfDMax) {
+            for (int i = 7; i >= 0; i--) {
+                double p = -((closestNestDistances.get(i) - halfDMax) / (2 * Math.log(GUI.DIMENSION) * (halfDMax) / (i + 1))) + 1 / 8.0;
                 Direction possibleDir = nestDirections.get(i);
                 translateDirInPos(possibleDir);
                 obstacle = whoIsThere(nextY, nextX);
                 if (obstacle == null || obstacle.getClass() == Pheromone.class) {
                     if (notOpposite(possibleDir)) {
-                        if (random_seed.nextDouble() < (probabilities[i] * alpha) ) {
+                        if (random_seed.nextDouble() < p) {
+                            if (inBounds(nextY, nextX)) {
+                                chosenDir = possibleDir;
+                                countDir = 0;
+                                onARandomPath = true;
+                                found = true;
+//                                System.out.println("Inside of the midway circle");
+//                                System.out.println("Within if blocks");
+//                                System.out.println("dir:" + chosenDir + " P:" + p);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!found) {   // re iterate but without the two inner if blocks, so that you will find a direction for sure, unless you don't have space to move at all
+                for (int i = 7; i >= 0; i--) {
+                    double p = -((closestNestDistances.get(i) - halfDMax) / (2 * Math.log(GUI.DIMENSION) * (halfDMax) / (i + 1))) + 1 / 8.0;
+                    Direction possibleDir = nestDirections.get(i);
+                    translateDirInPos(possibleDir);
+                    obstacle = whoIsThere(nextY, nextX);
+                    if (obstacle == null || obstacle.getClass() == Pheromone.class) {
+                        if (inBounds(nextY, nextX)) {
                             chosenDir = possibleDir;
                             countDir = 0;
                             onARandomPath = true;
-                            System.out.println("dir:" + chosenDir + " P:" + (probabilities[i] * alpha));
+//                            System.out.println("Inside of the midway circle");
+//                            System.out.println("Without if blocks");
+//                            System.out.println("dir:" + chosenDir + " P:" + p);
                             break;
                         }
                     }
                 }
             }
         }
-        else {
-            for (int i = 7; i >= 0; i--) {
-                probabilities[i] = closestNestDistances.get(i) / dMax;
-                sumP += probabilities[i];
-            }
-            double alpha = 1 / sumP;
-
-            for (int i = 7; i >= 0; i--) {
+        // outside the halfway circle of ray = halfDMax
+        else { // closestNestDistances.get(4) >= halfDMax
+            for (int i = 0; i < 8; i++) {
+                double p = ((closestNestDistances.get(i) - halfDMax) / (2 * Math.log(GUI.DIMENSION) * (halfDMax) / (8 - i))) + 1 / 8.0;
                 Direction possibleDir = nestDirections.get(i);
                 translateDirInPos(possibleDir);
                 obstacle = whoIsThere(nextY, nextX);
                 if (obstacle == null || obstacle.getClass() == Pheromone.class) {
                     if (notOpposite(possibleDir)) {
-                        if (random_seed.nextDouble() < (probabilities[i] * alpha) ) {
+                        if (random_seed.nextDouble() < p) {
+                            if (inBounds(nextY, nextX)) {
+                                chosenDir = possibleDir;
+                                countDir = 0;
+                                onARandomPath = true;
+                                found = true;
+//                                System.out.println("Out of the midway circle");
+//                                System.out.println("Within if blocks");
+//                                System.out.println("dir:" + chosenDir + " P:" + p);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (!found) {   // re iterate but without the two inner if blocks, so that you will find a direction for sure, unless you don't have space to move at all
+                for (int i = 0; i < 8; i++) {
+                    double p = ((closestNestDistances.get(i) - halfDMax) / (2 * Math.log(GUI.DIMENSION) * (halfDMax) / (8 - i))) + 1 / 8.0;
+                    Direction possibleDir = nestDirections.get(i);
+                    translateDirInPos(possibleDir);
+                    obstacle = whoIsThere(nextY, nextX);
+                    if (obstacle == null || obstacle.getClass() == Pheromone.class) {
+                        if (inBounds(nextY, nextX)) {
                             chosenDir = possibleDir;
                             countDir = 0;
                             onARandomPath = true;
-                            System.out.println("dir:" + chosenDir + " P:" + (probabilities[i] * alpha));
+//                            System.out.println("Out of the midway circle");
+//                            System.out.println("Without if blocks");
+//                            System.out.println("dir:" + chosenDir + " P:" + p);
                             break;
                         }
                     }
@@ -915,27 +966,27 @@ public class Ant {
                 break;
             }
         }
-        for (int i = 0; i < 8; i++) {
-            System.out.println("i:" + i + ", distance:" + closestNestDistances.get(i));
-            System.out.println("i:" + i + ", direction:" + nestDirections.get(i));
-        }
-        System.out.println("******************************************");
     }
 
     /**
      * control if the ant is full of food to carry or if it has some space left
      * if there is some space adds a new quantity to the correct stomach
      */
-    private void gatherFood(double amount) {
-//        if (sharedStomach + amount <= maxStomachCapacity) {   // firstly try to full the shared stomach
-            sharedStomach += amount;
-//            return true;
-//        }
-//        else if (privateStomach + amount <= maxStomachCapacity) {     // if it is already full, move one quantity from the shared food to the private one and then gather the new food
-//            privateStomach += amount;
-//            return true;
-//        }
-//        return false;
+    private double gatherFood(double amount) {
+        double delta = maxStomachCapacity - sharedStomach;
+        double add = Math.max(0, Math.min(amount, delta));
+        double left = amount;
+
+        // firstly try to full the shared stomach
+        sharedStomach += add;
+        left -= add;
+        if (left > 0) {     // if it is already full, move one quantity from the shared food to the private one and then gather the new food
+            double delta2 = maxStomachCapacity - privateStomach;
+            double add2 = Math.max(0, Math.min(left, delta2));
+            privateStomach += add2;
+            left -= add2;
+        }
+        return left;
     }
 
     /**

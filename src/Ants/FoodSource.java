@@ -61,12 +61,15 @@ public class FoodSource {
         return color;
     }
 
-    boolean gathering(double amount) {
-        if (amountLeft - amount >= 0) {
-           amountLeft -= amount;
-           return true;
-        }
-        return false;
+    /**
+     * called by an ant interacting with this food's source
+     * @param amount the amount of food requested
+     * @return the amount of food currently available in this source, if you request too much simply returns zero
+     */
+    double gathering(double amount) {
+        double available = Math.min(amount, amountLeft);
+        amountLeft -= available;
+        return available;
     }
 
     void reverseGathering(double amount) {
