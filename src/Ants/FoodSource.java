@@ -10,7 +10,7 @@ public class FoodSource {
     /**
      * the color for every food source
      */
-    public final Color color = new Color(230, 110, 0);
+    public final Color color = new Color(255, 210, 0);
 
     /**
      * the row number in the grid of this Food Source

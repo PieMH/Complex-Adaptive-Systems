@@ -39,12 +39,12 @@ public class GUI {
     /**
      * number of horizontal cells, or of columns on the grid
      */
-    public static int WIDTH = 50;
+    public static int WIDTH = 60;
 
     /**
      * number of vertical cells, or of rows on the grid
      */
-    public static int HEIGHT = 50;
+    public static int HEIGHT = 60;
 
     /**
      * total number of cells int the grid
