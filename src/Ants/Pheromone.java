@@ -1,7 +1,5 @@
 package Ants;
 
-import UI.GUI;
-
 import java.awt.*;
 
 /**
@@ -37,7 +35,7 @@ public class Pheromone {
     /**
      *
      */
-    enum pheType {Trail, Personal}   // only Trail and Personal are used atm (18/02/22)
+    enum pheType {Trail}   // only Trail and Personal are used atm (18/02/22)
 
     /**
      *
@@ -60,10 +58,6 @@ public class Pheromone {
      * It is used by {@code Ants.Ant(), Ants.Ant.pheromoneInteraction() and UI.GUI.paintPheromones(Graphics g)}
      */
     public static int maxStrength;
-
-    Pheromone(Integer y, Integer x, Ant ant) {
-        this(y, x, ant, pheType.Personal, 100);
-    }
 
     Pheromone(Integer y, Integer x, Ant ant, pheType type, Integer strength) {
         this.yPos = y;

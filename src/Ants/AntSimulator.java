@@ -411,7 +411,7 @@ public class AntSimulator implements CASModel {
     }
 
     private void printFood() {
-        currentFood.forEach((key, value) -> { System.out.println(key + " " + value); });
+        currentFood.forEach((key, value) -> System.out.println(key + " " + value));
         System.out.println("_________________________________________________________");
     }
 
