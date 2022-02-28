@@ -9,21 +9,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4a50146c-a566-48d9-a6cd-1712c4465f29" name="Changes" comment="colors and size refactoring">
-      <change afterPath="$PROJECT_DIR$/out/artifacts/CAS_jar/CAS.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/production/CAS/CAS.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/production/CAS/META-INF/MANIFEST.MF" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/production/CAS/artifacts/CAS_jar.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/production/CAS/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/production/CAS/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/production/CAS/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/production/CAS/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/out/production/CAS/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ants/Ant.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/Ant.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ants/AntSimulator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/AntSimulator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ants/Pheromone.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/Pheromone.java" afterDir="false" />
-    </list>
+    <list default="true" id="4a50146c-a566-48d9-a6cd-1712c4465f29" name="Changes" comment="out directory" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -95,7 +81,7 @@
       <recent name="" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Launcher.Launcher">
+  <component name="RunManager" selected="JAR Application.CAS.jar">
     <configuration name="CAS.jar" type="JarApplication" temporary="true">
       <option name="JAR_PATH" value="$PROJECT_DIR$/out/artifacts/CAS_jar/CAS.jar" />
       <method v="2" />
@@ -409,7 +395,35 @@
       <option name="project" value="LOCAL" />
       <updated>1646084476583</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="gitignore update">
+      <created>1646087287101</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1646087287101</updated>
+    </task>
+    <task id="LOCAL-00044" summary="warnings partial removal">
+      <created>1646087335527</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1646087335527</updated>
+    </task>
+    <task id="LOCAL-00045" summary="added an executable jar">
+      <created>1646087423013</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1646087423013</updated>
+    </task>
+    <task id="LOCAL-00046" summary="out directory">
+      <created>1646087524635</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1646087524635</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -424,10 +438,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Working food spawning and ant code REALLY refactored totally" />
-    <MESSAGE value="adding trail pheromones code" />
-    <MESSAGE value="pheromones trail leaved on the grid and btnShowPheromones working" />
-    <MESSAGE value="fixed Pheromone.maxStrength" />
     <MESSAGE value="names re-factorization and new javadocs" />
     <MESSAGE value="total food management" />
     <MESSAGE value="new images folder" />
@@ -449,7 +459,11 @@
     <MESSAGE value="Last key update:&#10;- Ant AI v5.0 now ant will not go back to the nest before some turns have passed&#10;- Some bug fixing&#10;- latest adding of ant's genetic code" />
     <MESSAGE value="colors refactoring" />
     <MESSAGE value="colors and size refactoring" />
-    <option name="LAST_COMMIT_MESSAGE" value="colors and size refactoring" />
+    <MESSAGE value="gitignore update" />
+    <MESSAGE value="warnings partial removal" />
+    <MESSAGE value="added an executable jar" />
+    <MESSAGE value="out directory" />
+    <option name="LAST_COMMIT_MESSAGE" value="out directory" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
