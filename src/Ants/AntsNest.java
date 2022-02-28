@@ -44,7 +44,7 @@ public class AntsNest {
     private Integer spawnX;
     private Integer spawnY;
 
-    ArrayList<Double> antAttributes = new ArrayList<>(7);
+    ArrayList<Double> antAttributes = new ArrayList<>(8);
 
     AntsNest() {
         nestEntrance1 = AntSimulator.key(Math.floorDiv(GUI.HEIGHT, 2), Math.floorDiv(GUI.WIDTH - 1, 2)); // the top left square in the centre of the grid
@@ -79,6 +79,7 @@ public class AntsNest {
         antAttributes.add(4, null); // maxStomachCapacity
         antAttributes.add(5, null); // foodToEatEveryDay
         antAttributes.add(6, null); // transferringSpeed
+        antAttributes.add(7, null); // MaxRoaming
     }
 
     public Color getColor() {
@@ -120,14 +121,14 @@ public class AntsNest {
         // do some genetic algorithm code
         // with the crossover value "nTraitsToTransmit" and a random point to start copying
         Random r = new Random();
-        int start = r.nextInt(0, 7);  // where to start copying genetics values
-        for (int i = start; i < start + 7; i++) {
-            if (i - start < attributes.get(0)) {// nTraitsToTransmit
-                antAttributes.set(i % 7, attributes.get(i % 7));
+        int start = r.nextInt(0, 8);  // where to start copying genetics values
+        for (int i = start; i < start + 8; i++) {
+            if (i - start < attributes.get(0)) {    // nTraitsToTransmit
+                antAttributes.set(i % 8, attributes.get(i % 8));
             }
             // if it's the first ant than get its whole genetic code
-            else if (antAttributes.get(i % 7) == null) {
-                antAttributes.set(i % 7, attributes.get(i % 7));
+            else if (antAttributes.get(i % 8) == null) {
+                antAttributes.set(i % 8, attributes.get(i % 8));
             }
         }
 

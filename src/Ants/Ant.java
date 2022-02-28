@@ -159,6 +159,10 @@ public class Ant {
 
     private static double dMax;
 
+    private final int MaxRoaming;
+
+    private int roaming;
+
     /**
      * my personal pheromone of type personal and strength 100
      */
@@ -176,7 +180,7 @@ public class Ant {
 
     private final Integer nTraitsToTransmit;
 
-    ArrayList<Double> antAttributes = new ArrayList<>(7);
+    ArrayList<Double> antAttributes = new ArrayList<>(8);
 
     /**
      * This constructor is called only by AntSimulator at the start of the simulation
@@ -192,9 +196,9 @@ public class Ant {
         this.life = 100.0;
         this.nest = nest;
         this.personalPheromone = new Pheromone(yPos, xPos, this);
+        random_seed = new Random();
 
         // changeDirection random value extraction
-        random_seed = new Random();
         int minChange = (int) Math.max(2, Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1);
         int maxChange = (int) Math.ceil(minChange * Math.sqrt(minChange)) + 1;
         changeDirection = random_seed.nextInt(minChange, maxChange);
@@ -213,7 +217,7 @@ public class Ant {
         int minF = (int) Math.floor(minChange * 1.8);
         int maxF = (int) Math.floor(2.4 * Math.max(1, Math.pow(GUI.DIMENSION, 1 / 4.0) - 1 ) );
         maxStomachCapacity = random_seed.nextInt(minF, maxF);
-        sharedStomach = maxStomachCapacity * 0.9;
+        sharedStomach = maxStomachCapacity * 0.99;
         privateStomach = 0.0;
 
         // food related attributes
@@ -230,9 +234,11 @@ public class Ant {
             closestNestDistances.add((double) GUI.WIDTH);
             nestDirections.add(null);
         }
+        MaxRoaming = (int) random_seed.nextDouble(life * 0.25, life * 0.40);
+        roaming = 0;
 
         // reproduction related attributes
-        nTraitsToTransmit = random_seed.nextInt(1, 8);
+        nTraitsToTransmit = random_seed.nextInt(1, 9);
         antAttributes.add(0, (double) nTraitsToTransmit);
         antAttributes.add(1, (double) changeDirection);
         antAttributes.add(2, (double) maxLeaveTrail);
@@ -240,6 +246,7 @@ public class Ant {
         antAttributes.add(4, (double) maxStomachCapacity);
         antAttributes.add(5, foodToEatEveryDay);
         antAttributes.add(6, transferringSpeed);
+        antAttributes.add(7, (double) MaxRoaming);
     }
 
     Ant (Integer y, Integer x, AntsNest nest, ArrayList<Double> attributes) {
@@ -250,6 +257,7 @@ public class Ant {
         this.life = 100.0;
         this.nest = nest;
         this.personalPheromone = new Pheromone(yPos, xPos, this);
+        random_seed = new Random();
 
         // changeDirection random value extraction
         changeDirection = (int) Math.floor(attributes.get(1));
@@ -264,7 +272,7 @@ public class Ant {
 
         // Stomachs capacities
         maxStomachCapacity = (int) Math.floor(attributes.get(4));
-        sharedStomach = maxStomachCapacity * 0.9;
+        sharedStomach = maxStomachCapacity * 0.99;
         privateStomach = 0.0;
 
         // food related attributes
@@ -281,6 +289,8 @@ public class Ant {
             closestNestDistances.add((double) GUI.WIDTH);
             nestDirections.add(null);
         }
+        MaxRoaming = (int) random_seed.nextDouble(life * 0.25, life * 0.40);
+        roaming = 0;
 
         // reproduction related attributes
         nTraitsToTransmit = (int) Math.floor(attributes.get(0));
@@ -291,6 +301,7 @@ public class Ant {
         antAttributes.add(4, (double) maxStomachCapacity);
         antAttributes.add(5, foodToEatEveryDay);
         antAttributes.add(6, transferringSpeed);
+        antAttributes.add(7, (double) MaxRoaming);
     }
 
     /**
@@ -314,6 +325,7 @@ public class Ant {
         child = null;
         leph = null;
         pheromoneCounter = 0;
+        roaming += 1;
 
         transferFood();
 
@@ -487,29 +499,32 @@ public class Ant {
 //        leaveTrail = maxLeaveTrail;
         toTheNest = false;  // change state and objective
         countDir = changeDirection; // change direction
+        roaming = 0;
+
+        // deposit eggs
+        if (life < 90) {
+            nest.transmitGenetics(antAttributes);
+            child = nest.reproduction();
+//            System.out.println("child:" + child);
+        }
 
         // deposit food or eat its reserves
         // deposit an amount equal to a random value between this.sharedStomach - 1 and 0, with a continuous random variable that has exponential distribution
-        double threshold = maxStomachCapacity * 0.7;
-        if (sharedStomach > threshold) {    // give
-            double expDistributionQuantity = Math.min(1, 1 * (Math.log(1 - Math.random()) / (- sharedStomach)));
+        double stomachsSum = sharedStomach  + privateStomach;
+        double threshold = maxStomachCapacity * 0.99;
+        if (stomachsSum > threshold) {    // give
+//            double expDistributionQuantity = Math.min(1, 1 * (Math.log(1 - Math.random()) / (- sharedStomach)));
 //            System.out.println("expdistr:" + expDistributionQuantity);
 //            System.out.println("sharedStomach before:" + sharedStomach + " after:" + (sharedStomach * expDistributionQuantity));
-            double foodKept = sharedStomach * expDistributionQuantity;
-            nest.addReserves(sharedStomach - foodKept);
-            sharedStomach = foodKept;
+//            double foodKept = sharedStomach * expDistributionQuantity;
+
+            double howMuch = (stomachsSum - threshold);
+            nest.addReserves(howMuch);
+            sharedStomach -= howMuch;
 //            System.out.println("nest reservoirs " + nest.getReservoir());
-
-            // deposit eggs
-            if (life < 85) {
-                nest.transmitGenetics(antAttributes);
-                child = nest.reproduction();
-                System.out.println("child:" + child);
-            }
-
         }
         else {  // take
-            double howMuch = (threshold - (sharedStomach + privateStomach));
+            double howMuch = (threshold - stomachsSum);
 //            System.out.println("howmuch:" + howMuch);
             if (nest.getFoodFromReserves(howMuch)) {
                 sharedStomach += howMuch;
@@ -522,13 +537,14 @@ public class Ant {
         // if you have already eaten the maximum food you can, AND you are carrying the maximum food you can ignore it
         // otherwise:
 //        System.out.println("sharedStomach:" + sharedStomach + "privateStomach:" + privateStomach);
-        double amount = (maxStomachCapacity - sharedStomach) * 0.8;
+        double amount = maxStomachCapacity * 0.7;
         double available = food.gathering(amount);
+//        System.out.println("foodID:" + food + ", available: " + available);
         if (available > 0) {
 //            System.out.println("there is food");
             // do action relative to gathering food and discovering a new food source
             double left = gatherFood(available);
-            food. reverseGathering(left);
+            food.reverseGathering(left);
 //          System.out.println("sharedStomach:" + sharedStomach + "privateStomach:" + privateStomach);
             leaveTrail = maxLeaveTrail;
         }
@@ -596,7 +612,7 @@ public class Ant {
         // remember that maxStomachCapacity it's the maximum capacity of a single stomach
 //        System.out.println("stomachSum:" + stomachSum + " max*0.4:" + (maxStomachCapacity * 0.4) + " max*1.6:" + (maxStomachCapacity * 1.6));
         // if I decided time ago to go to the nest don't change that decision until you come to the nest
-        if (toTheNest || (stomachSum < maxStomachCapacity * 0.5)  || (stomachSum > maxStomachCapacity * 1.6)) {    // little or much food condition
+        if (roaming > MaxRoaming && (toTheNest || ((stomachSum < maxStomachCapacity * 0.5)  || (stomachSum > maxStomachCapacity * 1.5)))) {    // little or much food condition
 //            System.out.println("stomachSum" + stomachSum + " MaxCapacity:" + maxStomachCapacity);
             double p = random_seed.nextDouble();
             int start;
@@ -862,7 +878,7 @@ public class Ant {
 
         // a food's source
         FoodSource food = AntSimulator.getCurrentFood().get(AntSimulator.key(yPos, xPos));
-        if (food != null && food.getAmountLeft() > 0) return (E) food;
+        if (food != null) return (E) food;
 
         // a pheromone trail
         Pheromone phe = AntSimulator.getCurrentTrailPheromones().get(AntSimulator.key(yPos, xPos));

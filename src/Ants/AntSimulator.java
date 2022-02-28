@@ -133,8 +133,9 @@ public class AntSimulator implements CASModel {
                 newbornList = new ArrayList<>();
                 iterateCurrentAlive(0);  // evolve
                 nestReproduction();
-                if (Math.random() < 0.04) balanceFood();    // with a probability of 3% every turn add a food's source
+                if (Math.random() < 0.05) balanceFood();    // with a probability of 5% every turn add a food's source
                 agePheromones();
+//                printStats(2);
                 iterateMatrix(1);     // updateFrame
                 gui.currentFrame = gui.nextFrame;
                 gui.nextFrame = new boolean[GUI.HEIGHT][GUI.WIDTH];
@@ -394,6 +395,9 @@ public class AntSimulator implements CASModel {
         else if (choice == 1) {
             iterateCurrentAlive(1);
         }
+        else if (choice == 2) {
+            printFood();
+        }
     }
 
     /**
@@ -404,6 +408,11 @@ public class AntSimulator implements CASModel {
         int i = coordinates(hashKey, 0);
         int j = coordinates(hashKey, 1);
         System.out.println("K:" + i + "," + j + " V:" + currentAlive.get(hashKey));
+    }
+
+    private void printFood() {
+        currentFood.forEach((key, value) -> { System.out.println(key + " " + value); });
+        System.out.println("_________________________________________________________");
     }
 
     /**

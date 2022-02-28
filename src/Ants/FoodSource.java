@@ -67,6 +67,7 @@ public class FoodSource {
      * @return the amount of food currently available in this source, if you request too much simply returns zero
      */
     double gathering(double amount) {
+//        System.out.println("amountLeft:" + amountLeft);
         double available = Math.min(amount, amountLeft);
         amountLeft -= available;
         return available;
