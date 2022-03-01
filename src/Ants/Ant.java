@@ -150,6 +150,8 @@ public class Ant {
      */
     private final AntsNest nest;
 
+    private boolean nestAlreadyEncountered = false;
+
     private final int nestY;
     private final int nestX;
 
@@ -162,8 +164,6 @@ public class Ant {
     private final int MaxRoaming;
 
     private int roaming;
-
-    private Ant child;
 
     /**
      * seph stands for Lightest Encountered PHeromone
@@ -313,12 +313,12 @@ public class Ant {
      * @return if the ant encountered the nest and gave it some of its food then the nest will
      *         spawn an ant with some genetic code of this ant
      */
-    Ant action() {
+    void action() {
 
-        child = null;
         leph = null;
         pheromoneCounter = 0;
         roaming += 1;
+        nestAlreadyEncountered = false;
 
         transferFood();
 
@@ -337,8 +337,6 @@ public class Ant {
         age();
 
 //        printStats(false);
-
-        return child;
     }
 
     /**
@@ -486,6 +484,8 @@ public class Ant {
     }
 
     void nestInteraction(AntsNest nest) {
+        if (nestAlreadyEncountered) return;
+        nestAlreadyEncountered = true;
 //        System.out.println("nest nearby");
         // you have found your nest
         // do action relative to the nest encounter
@@ -495,9 +495,9 @@ public class Ant {
         roaming = 0;
 
         // deposit eggs
-        if (life < 90) {
+        if (life < 80 && life > 20) {   // if not too young and not too old
             nest.transmitGenetics(antAttributes);
-            child = nest.reproduction();
+            nest.triggerReproduction();
 //            System.out.println("child:" + child);
         }
 

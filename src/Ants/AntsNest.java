@@ -5,6 +5,7 @@ import UI.GUI;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.List;
 
 public class AntsNest {
 
@@ -41,6 +42,8 @@ public class AntsNest {
 
     private final ArrayList<Integer> spawnPositions;
 
+    int newBorn;
+
     private Integer spawnX;
     private Integer spawnY;
 
@@ -53,6 +56,8 @@ public class AntsNest {
         nestEntrance4 = nestEntrance3 + 1;
 
         reservoir = 100000.0;
+
+        newBorn = 0;
 
         spawnPositions = new ArrayList<>();
         // removing or adding a GUI.WIDTH is going respectively up or down a row in the grid
@@ -108,9 +113,14 @@ public class AntsNest {
         return reservoir;
     }
 
+    void triggerReproduction() {
+        newBorn += 1;
+    }
+
     Ant reproduction() {
         if (searchSpawnPoint()) {   // this call updates spawnY and spawnY, to am available spot on the grid next to the nest
 //                System.out.println("reservoir left:" + reservoir + ". spawnY:" + spawnY + ", spawnX:" + spawnX);
+            newBorn -= 1;
             return new Ant(spawnY, spawnX, this, antAttributes);
         }
         return null;
@@ -167,7 +177,7 @@ public class AntsNest {
 
         // a food's source
         FoodSource food = AntSimulator.getCurrentFood().get(AntSimulator.key(yPos, xPos));
-        if (food != null && food.getAmountLeft() > 0) return false;
+        if (food != null) return false;
 
         return true;
     }

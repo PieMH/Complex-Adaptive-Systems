@@ -90,8 +90,6 @@ public class AntSimulator implements CASModel {
      */
     static AntsNest nest;
 
-    List<Ant> newbornList = new ArrayList<>();
-
     /**
      * the minimal value of elements in the grid if generated randomly.
      * It follows a logarithmic growth proportional to the GUI.DIMENSION value,
@@ -130,7 +128,6 @@ public class AntSimulator implements CASModel {
                     }
                     reset = false;
                 }
-                newbornList = new ArrayList<>();
                 iterateCurrentAlive(0);  // evolve
                 nestReproduction();
                 if (Math.random() < 0.05) balanceFood();    // with a probability of 5% every turn add a food's source
@@ -153,10 +150,7 @@ public class AntSimulator implements CASModel {
     private void evolve(Integer hashKey) {
         Ant currentAnt = currentAlive.get(hashKey);
 
-        Ant newborn = currentAnt.action();
-        if (newborn != null) {
-            newbornList.add(newborn);
-        }
+        currentAnt.action();
 
         Integer newKey = currentAnt.getPos();
         boolean moved = !(Objects.equals(newKey, hashKey));
@@ -182,11 +176,12 @@ public class AntSimulator implements CASModel {
     }
 
     private void nestReproduction() {
-        synchronized (lock) {
-            for (Ant a : newbornList) {
-//                if (a != null) {    // redundant
-                    currentAlive.put(a.getPos(), a);
-//                }
+        int i = nest.newBorn;
+        for (; i > 0; i--) {
+            Ant a = nest.reproduction();
+            if (a != null) {    // redundant
+                currentAlive.put(a.getPos(), a);
+                born += 1;
             }
         }
     }
