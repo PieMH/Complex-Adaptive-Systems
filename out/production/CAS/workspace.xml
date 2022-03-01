@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ArtifactsWorkspaceSettings">
     <artifacts-to-build>
-      <artifact name="CAS:jar" />
+      <artifact name="CAS:jar2" />
     </artifacts-to-build>
   </component>
   <component name="AutoImportSettings">
@@ -10,7 +10,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4a50146c-a566-48d9-a6cd-1712c4465f29" name="Changes" comment="updated gitignore for log an csv files">
-      <change beforePath="$PROJECT_DIR$/out/artifacts/CAS_jar/CAS.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/CAS_jar/CAS.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/out/artifacts/CAS_jar/CAS.jar" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/CAS/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/CAS/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Ants/AntSimulator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/AntSimulator.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Ants/OutputManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/OutputManager.java" afterDir="false" />
@@ -90,7 +90,7 @@
       <recent name="" />
     </key>
   </component>
-  <component name="RunManager" selected="JAR Application.CAS.jar">
+  <component name="RunManager" selected="Application.Launcher.Launcher">
     <configuration name="OutputManager" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Ants.OutputManager" />
       <module name="CAS" />
@@ -104,12 +104,17 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="CAS.jar (1)" type="JarApplication" temporary="true">
+      <option name="JAR_PATH" value="$PROJECT_DIR$/out/artifacts/CAS_jar2/CAS.jar" />
+      <method v="2" />
+    </configuration>
     <configuration name="CAS.jar" type="JarApplication" temporary="true">
       <option name="JAR_PATH" value="$PROJECT_DIR$/out/artifacts/CAS_jar/CAS.jar" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JAR Application.CAS.jar (1)" />
         <item itemvalue="JAR Application.CAS.jar" />
         <item itemvalue="Application.OutputManager" />
       </list>

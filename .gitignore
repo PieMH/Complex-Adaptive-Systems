@@ -7,7 +7,9 @@ out/
 
 # Log and data files
 *.log
-*.xls;xlsx;csv
+*.xls
+*.xlsx
+*.csv
 
 # BlueJ files
 *.ctxt
