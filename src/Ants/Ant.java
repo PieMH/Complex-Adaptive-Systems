@@ -199,7 +199,7 @@ public class Ant {
         countDir = 0;
 
         // maxLeaveTrail random value extraction
-        maxLeaveTrail = random_seed.nextInt(maxChange, 2 * maxChange);
+        maxLeaveTrail = random_seed.nextInt(maxChange + 2, 2 * (maxChange + 2));
         leaveTrail = 0;
 
         // strengthOfNewTrailPheromone random value extraction
