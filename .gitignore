@@ -1,6 +1,6 @@
 # Default ignored directories
 .idea/
-out/
+out/production
 
 # Compiled class file
 *.class
