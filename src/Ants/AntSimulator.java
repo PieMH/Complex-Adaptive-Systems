@@ -76,16 +76,6 @@ public class AntSimulator implements CASModel {
     private final Object lock = new Object();
 
     /**
-     * total number of ants born in the simulation
-     */
-    private int born = 0;
-
-    /**
-     * total number of dead ants in the simulation
-     */
-    private int dead = 0;
-
-    /**
      * the nest of the ants
      */
     static AntsNest nest;
@@ -102,13 +92,32 @@ public class AntSimulator implements CASModel {
      */
     int maximal;
 
-//    private int statsDelayCounter = 0;
+    //  Stats carrying variables to be passed to OutputManager
+
+    OutputManager outputManager;
+
+    /**
+     * total number of ants born in the simulation
+     */
+    static int totBorn = 0;
+
+    /**
+     * total number of dead ants in the simulation
+     */
+    static int totDead = 0;
+
+    static int newBorn = 0;
+
+    static int newDead = 0;
+
+    static int newFood = 0;
+
+    static int finishedFood = 0;
 
     public AntSimulator(GUI gui) {
         this.gui = gui;
-        n_starting_agents = Math.floorDiv(GUI.DIMENSION, 20);
+        outputManager = new OutputManager();
         resetMap();
-        resetStats();
         iterateMatrix(1);     // updateFrame
     }
 
@@ -134,6 +143,8 @@ public class AntSimulator implements CASModel {
                 agePheromones();
 //                printStats(2);
                 iterateMatrix(1);     // updateFrame
+                callsOutputManager();
+                resetNewStats();
                 gui.currentFrame = gui.nextFrame;
                 gui.nextFrame = new boolean[GUI.HEIGHT][GUI.WIDTH];
                 gui.getPanel().repaint();
@@ -172,7 +183,8 @@ public class AntSimulator implements CASModel {
     private void death(Integer hashKey) {
         Ant ant = currentAlive.remove(hashKey);
         if (ant != null) ant.die();
-        dead += 1;
+        totDead += 1;
+        newDead += 1;
     }
 
     private void nestReproduction() {
@@ -181,7 +193,8 @@ public class AntSimulator implements CASModel {
             Ant a = nest.reproduction();
             if (a != null) {    // redundant
                 currentAlive.put(a.getPos(), a);
-                born += 1;
+                totBorn += 1;
+                newBorn += 1;
             }
         }
     }
@@ -192,6 +205,7 @@ public class AntSimulator implements CASModel {
      */
     static void foodFinished(FoodSource food) {
         currentFood.remove(key(food.yPos, food.xPos));
+        finishedFood += 1;
     }
 
     /**
@@ -207,6 +221,7 @@ public class AntSimulator implements CASModel {
             if (!currentAlive.containsKey(k) && !nest.inNest(k)) {  // if it is a free spot ok, otherwise we'll try on the next frame
                 FoodSource food = new FoodSource(y, x);
                 currentFood.put(k, food);
+                newFood += 1;
             }
         }
     }
@@ -314,7 +329,8 @@ public class AntSimulator implements CASModel {
                 }
                 Ant ant = new Ant(y, x, nest);
                 currentAlive.put(k, ant);
-                born += 1;
+                totBorn += 1;
+                newBorn += 1;
             }
         }
     }
@@ -333,13 +349,15 @@ public class AntSimulator implements CASModel {
                 if (!currentAlive.containsKey(k) && !nest.inNest(k) && !currentFood.containsKey(k)) {     // only if it is empty
                     Ant ant = new Ant(y, x, nest);
                     currentAlive.put(k, ant);
-                    born += 1;
+                    totBorn += 1;
+                    newBorn += 1;
                 }
             } else {
                 Ant ant = currentAlive.remove(k);     // se la chiave già non c'è remove non fa nulla
                 if (ant != null) {
                     ant.die();
-                    dead += 1;
+                    totDead += 1;
+                    newDead += 1;
                 }
             }
         }
@@ -371,9 +389,20 @@ public class AntSimulator implements CASModel {
     /**
      * reset the stats of the simulation
      */
-    private void resetStats() {
-        born = 0;
-        dead = 0;
+    private void resetAllStats() {
+        totBorn = 0;
+        totDead = 0;
+        newBorn = 0;
+        newDead = 0;
+        finishedFood = 0;
+        newFood = 0;
+    }
+
+    private void resetNewStats() {
+        newBorn = 0;
+        newDead = 0;
+        finishedFood = 0;
+        newFood = 0;
     }
 
     /**
@@ -384,8 +413,8 @@ public class AntSimulator implements CASModel {
      */
     private void printStats(int choice) {
         if (choice == 0) {
-            System.out.println("Total born is" + born);
-            System.out.println("Total dead is" + dead);
+            System.out.println("Total born is" + totBorn);
+            System.out.println("Total dead is" + totDead);
         }
         else if (choice == 1) {
             iterateCurrentAlive(1);
@@ -469,6 +498,9 @@ public class AntSimulator implements CASModel {
         currentFood = new Hashtable<>();
         currentTrailPheromones = new Hashtable<>();
         nest = new AntsNest();
+        n_starting_agents = Math.floorDiv(GUI.DIMENSION, 20);
+
+        resetAllStats();
 
         // the following is the calculation of Pheromone.maxStrength, actually is derived from Ant calculation, in fact it is equal to = ceil(2 * Ant.minChange^2)
         Pheromone.setMaxStrength( (int) Math.ceil( (2 * Math.pow( (int) Math.max( 2, Math.floor(Math.log(GUI.DIMENSION / 5.0)) - 1), 2))));
@@ -489,8 +521,21 @@ public class AntSimulator implements CASModel {
             if (!currentAlive.containsKey(k) && !nest.inNest(k)) { // balanceFood() will add food's sources to the environment eventually
                 FoodSource food = new FoodSource(y, x);
                 currentFood.put(k, food);
+                newFood += 1;
             }
         }
+    }
+
+    private void callsOutputManager() {
+        String[] header1 = {"TotalBorn", "TotalDead", "newBorn", "newDead", "newFood", "finishedFood"};
+        String[] record1 = {String.valueOf(totBorn), String.valueOf(totDead), String.valueOf(newBorn), String.valueOf(newDead), String.valueOf(newFood), String.valueOf(finishedFood)};
+
+        List<String[]> list = new ArrayList<>();
+        list.add(header1);
+        list.add(record1);
+
+        outputManager.writeCSV(list);
+        outputManager.writeLog();
     }
 
     public static Map<Integer, Ant> getCurrentAlive() {

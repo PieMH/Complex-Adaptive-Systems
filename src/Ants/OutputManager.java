@@ -1,64 +1,60 @@
 package Ants;
 
 import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class OutputManager {
 
-    AntSimulator antSim;
+    private final String outputFileName;
 
-    OutputManager(AntSimulator antSim) {
+    private final String logFileName;
 
-        this.antSim = antSim;
+    private FileWriter outputFileWriter;
 
-    }
+    private FileWriter logFileWriter;
+
+    private FileReader outputFileReader;
 
     OutputManager() {
+        String cwd = System.getProperty("user.dir");  // Getting absolute path
+        outputFileName = cwd + "\\src\\Ants\\output.csv";
+        logFileName = cwd + "\\src\\Ants\\log.log";
+    }
+
+    void writeCSV(List<String[]> data) {
+        // default all fields are enclosed in double quotes
+        // default separator is a comma
+        try (CSVWriter writer = new CSVWriter(new FileWriter(outputFileName))) {
+            writer.writeAll(data);
+        }
+        catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
-    public static void main(String[] args) {
-        OutputManager man = new OutputManager();
-        man.dataToCSV();
-    }
+    void writeLog() {
+        try (CSVReader reader = new CSVReader(new FileReader(outputFileName));
+             FileWriter logWriter = new FileWriter(logFileName, true);
+             BufferedWriter b = new BufferedWriter(logWriter);
+             PrintWriter p = new PrintWriter(b);
+             ) {
 
-    void dataToCSV() {
+            for (String[] line : reader) {
+                p.println(Arrays.toString(line));
+            }
 
-        String fileName = "src\\Ants\\country.csv";
-        try (CSVReader reader = new CSVReader(new FileReader(fileName))) {
             List<String[]> r = reader.readAll();
             r.forEach(x -> System.out.println(Arrays.toString(x)));
+
         } catch (IOException | CsvException e) {
             e.printStackTrace();
         }
-    }
-
-    private void setOutputValue() {
-
-
-//        outValues.setName("mkyong");
-//        outValues.setAge(38);
-//        outValues.setPosition(new String[]{"Founder", "CTO", "Writer"});
-//        Map<String, String> salary = new HashMap() {{
-//            put("2010", new BigDecimal(10000));
-//        }};
-//        outValues.setSalary(salary);
-//        outValues.setSkills(Arrays.asList("java", "python", "node", "kotlin"));
-
-        HashMap <String, Double> somemap = new HashMap<>() {{
-            put("Total Born", 100.0);
-            put("Total Dead", 10.0);
-        }};
-
     }
 }
 
