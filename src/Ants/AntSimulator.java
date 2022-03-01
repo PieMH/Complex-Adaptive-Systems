@@ -96,6 +96,8 @@ public class AntSimulator implements CASModel {
 
     OutputManager outputManager;
 
+    static int day = 0;
+
     /**
      * total number of ants born in the simulation
      */
@@ -110,9 +112,21 @@ public class AntSimulator implements CASModel {
 
     static int newDead = 0;
 
+    static int totNewFood = 0;
+
+    static int totFinishedFood = 0;
+
     static int newFood = 0;
 
     static int finishedFood = 0;
+
+    static int totCreatedPheromones = 0;
+
+    static int totDecayedPheromones = 0;
+
+    static int newPheromones = 0;
+
+    static int decayedPheromones = 0;
 
     public AntSimulator(GUI gui) {
         this.gui = gui;
@@ -137,6 +151,7 @@ public class AntSimulator implements CASModel {
                     }
                     reset = false;
                 }
+                day += 1;
                 iterateCurrentAlive(0);  // evolve
                 nestReproduction();
                 if (Math.random() < 0.05) balanceFood();    // with a probability of 5% every turn add a food's source
@@ -205,6 +220,7 @@ public class AntSimulator implements CASModel {
      */
     static void foodFinished(FoodSource food) {
         currentFood.remove(key(food.yPos, food.xPos));
+        totFinishedFood += 1;
         finishedFood += 1;
     }
 
@@ -222,6 +238,7 @@ public class AntSimulator implements CASModel {
                 FoodSource food = new FoodSource(y, x);
                 currentFood.put(k, food);
                 newFood += 1;
+                totNewFood += 1;
             }
         }
     }
@@ -238,10 +255,14 @@ public class AntSimulator implements CASModel {
 
     static void erasePheromone(Pheromone trailPhe) {
         currentTrailPheromones.remove(key(trailPhe.yPos, trailPhe.xPos));
+        decayedPheromones += 1;
+        totDecayedPheromones += 1;
     }
 
     static void addPheromone(Pheromone trailPhe) {
         currentTrailPheromones.put(key(trailPhe.yPos, trailPhe.xPos), trailPhe);
+        newPheromones += 1;
+        totCreatedPheromones += 1;
     }
 
     /**
@@ -387,59 +408,6 @@ public class AntSimulator implements CASModel {
     }
 
     /**
-     * reset the stats of the simulation
-     */
-    private void resetAllStats() {
-        totBorn = 0;
-        totDead = 0;
-        newBorn = 0;
-        newDead = 0;
-        finishedFood = 0;
-        newFood = 0;
-    }
-
-    private void resetNewStats() {
-        newBorn = 0;
-        newDead = 0;
-        finishedFood = 0;
-        newFood = 0;
-    }
-
-    /**
-     * the debugger function responsible for printing to stdout the stats of the simulation
-     * @param choice which kind of prints do you want:
-     *               0 is for displaying only the total ants born and dead;
-     *               1 is for displaying the whole hashMap keys and values associated
-     */
-    private void printStats(int choice) {
-        if (choice == 0) {
-            System.out.println("Total born is" + totBorn);
-            System.out.println("Total dead is" + totDead);
-        }
-        else if (choice == 1) {
-            iterateCurrentAlive(1);
-        }
-        else if (choice == 2) {
-            printFood();
-        }
-    }
-
-    /**
-     * the auxiliary function of printStats, called by it when choice is on 1
-     * @param hashKey the kye of the hashmap currentAlive
-     */
-    private void printHashMap(Integer hashKey) {
-        int i = coordinates(hashKey, 0);
-        int j = coordinates(hashKey, 1);
-        System.out.println("K:" + i + "," + j + " V:" + currentAlive.get(hashKey));
-    }
-
-    private void printFood() {
-        currentFood.forEach((key, value) -> System.out.println(key + " " + value));
-        System.out.println("_________________________________________________________");
-    }
-
-    /**
      * called by UI.GUI paintLife and UI.GUI paintAnts
      * @param y the row number value
      * @param x the column number value
@@ -526,13 +494,92 @@ public class AntSimulator implements CASModel {
         }
     }
 
+    /**
+     * reset the stats of the simulation
+     */
+    private void resetAllStats() {
+        day = 0;
+
+        totBorn = 0;
+        totDead = 0;
+        newBorn = 0;
+        newDead = 0;
+
+        totNewFood = 0;
+        totFinishedFood = 0;
+        newFood = 0;
+        finishedFood = 0;
+
+        totCreatedPheromones = 0;
+        totDecayedPheromones = 0;
+        newPheromones = 0;
+        decayedPheromones = 0;
+    }
+
+    private void resetNewStats() {
+        newBorn = 0;
+        newDead = 0;
+
+        newFood = 0;
+        finishedFood = 0;
+
+        newPheromones = 0;
+        decayedPheromones = 0;
+    }
+
+    /**
+     * the auxiliary function of printStats, called by it when choice is on 1
+     * @param hashKey the kye of the hashmap currentAlive
+     */
+    private void printHashMap(Integer hashKey) {
+        int i = coordinates(hashKey, 0);
+        int j = coordinates(hashKey, 1);
+        System.out.println("K:" + i + "," + j + " V:" + currentAlive.get(hashKey));
+    }
+
+    private void printFood() {
+        currentFood.forEach((key, value) -> System.out.println(key + " " + value));
+        System.out.println("_________________________________________________________");
+    }
+
+    /**
+     * the debugger function responsible for printing to stdout the stats of the simulation
+     * @param choice which kind of prints do you want:
+     *               0 is for displaying only the total ants born and dead;
+     *               1 is for displaying the whole hashMap keys and values associated
+     */
+    private void printStats(int choice) {
+        if (choice == 0) {
+            System.out.println("Total born is" + totBorn);
+            System.out.println("Total dead is" + totDead);
+        }
+        else if (choice == 1) {
+            iterateCurrentAlive(1);
+        }
+        else if (choice == 2) {
+            printFood();
+        }
+    }
+
     private void callsOutputManager() {
-        String[] header1 = {"TotalBorn", "TotalDead", "newBorn", "newDead", "newFood", "finishedFood"};
-        String[] record1 = {String.valueOf(totBorn), String.valueOf(totDead), String.valueOf(newBorn), String.valueOf(newDead), String.valueOf(newFood), String.valueOf(finishedFood)};
+        String[] space = {""};
+        String[] dayHeader = {"Day", String.valueOf(day)};
+        String[] antGeneralHeader = {"Total born ants", "Total dead ants", "Newborn ants", "New dead ants"};
+        String[] antGeneralRecords = {String.valueOf(totBorn), String.valueOf(totDead), String.valueOf(newBorn), String.valueOf(newDead)};
+        String[] foodGeneralHeader = {"Total food's sources created", "Total food's sources finished", "New food's sources", "Finished food's sources"};
+        String[] foodGeneralRecords = {String.valueOf(totNewFood), String.valueOf(totFinishedFood), String.valueOf(newFood), String.valueOf(finishedFood)};
+        String[] pheromonesGeneralHeader = {"Total trail pheromones created", "Total trail pheromones decayed", "New pheromones", "Decayed pheromones"};
+        String[] pheromonesGeneralRecords = {String.valueOf(totCreatedPheromones), String.valueOf(totDecayedPheromones), String.valueOf(newPheromones), String.valueOf(decayedPheromones)};
 
         List<String[]> list = new ArrayList<>();
-        list.add(header1);
-        list.add(record1);
+        list.add(dayHeader);
+        list.add(antGeneralHeader);
+        list.add(antGeneralRecords);
+        list.add(foodGeneralHeader);
+        list.add(foodGeneralRecords);
+        list.add(pheromonesGeneralHeader);
+        list.add(pheromonesGeneralRecords);
+        list.add(space);
 
         outputManager.writeCSV(list);
         outputManager.writeLog();

@@ -46,7 +46,8 @@ public class OutputManager {
              ) {
 
             for (String[] line : reader) {
-                p.println(Arrays.toString(line));
+                if (Arrays.equals(line, new String[]{""})) p.println("\n");
+                else p.println(Arrays.toString(line));
             }
 
             List<String[]> r = reader.readAll();
