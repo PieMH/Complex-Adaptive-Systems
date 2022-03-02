@@ -9,6 +9,7 @@ out/production
 *.log
 *.xls
 *.xlsx
+*.xlsm
 *.csv
 
 # BlueJ files
