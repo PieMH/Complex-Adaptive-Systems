@@ -23,13 +23,6 @@ public class Ant {
      */
     public Double life;
 
-    /*
-    /**
-     * the hunger level of the ant, if it reaches zero the ant will starve
-     */
-//    Double hunger;
-
-
     /**
      * increases its value when hunger = 0 every turn,
      * turns to 0 if hunger > 0
@@ -51,6 +44,8 @@ public class Ant {
      * If this is empty the ant will starve
      */
     private Double privateStomach;
+
+    private Double stomachSum;
 
     /**
      * my maximum capacity of food quantities I can carry with me.
@@ -161,7 +156,7 @@ public class Ant {
 
     private static double dMax;
 
-    private final int MaxRoaming;
+    private final int maxRoaming;
 
     private int roaming;
 
@@ -213,6 +208,7 @@ public class Ant {
         maxStomachCapacity = random_seed.nextInt(minF, maxF);
         sharedStomach = maxStomachCapacity * 0.99;
         privateStomach = 0.0;
+        stomachSum = sharedStomach + privateStomach;
 
         // food related attributes
         foodToEatEveryDay = Math.max(0.1, Math.random() * 1.2) / 4;
@@ -228,7 +224,7 @@ public class Ant {
             closestNestDistances.add((double) GUI.WIDTH);
             nestDirections.add(null);
         }
-        MaxRoaming = (int) random_seed.nextDouble(life * 0.25, life * 0.40);
+        maxRoaming = (int) random_seed.nextDouble(life * 0.25, life * 0.40);
         roaming = 0;
 
         // reproduction related attributes
@@ -240,7 +236,7 @@ public class Ant {
         antAttributes.add(4, (double) maxStomachCapacity);
         antAttributes.add(5, foodToEatEveryDay);
         antAttributes.add(6, transferringSpeed);
-        antAttributes.add(7, (double) MaxRoaming);
+        antAttributes.add(7, (double) maxRoaming);
     }
 
     Ant (Integer y, Integer x, AntsNest nest, ArrayList<Double> attributes) {
@@ -267,6 +263,7 @@ public class Ant {
         maxStomachCapacity = (int) Math.floor(attributes.get(4));
         sharedStomach = maxStomachCapacity * 0.99;
         privateStomach = 0.0;
+        stomachSum = sharedStomach + privateStomach;
 
         // food related attributes
         foodToEatEveryDay = attributes.get(5);
@@ -282,7 +279,7 @@ public class Ant {
             closestNestDistances.add((double) GUI.WIDTH);
             nestDirections.add(null);
         }
-        MaxRoaming = (int) random_seed.nextDouble(life * 0.25, life * 0.40);
+        maxRoaming = (int) Math.floor(attributes.get(7));
         roaming = 0;
 
         // reproduction related attributes
@@ -294,7 +291,7 @@ public class Ant {
         antAttributes.add(4, (double) maxStomachCapacity);
         antAttributes.add(5, foodToEatEveryDay);
         antAttributes.add(6, transferringSpeed);
-        antAttributes.add(7, (double) MaxRoaming);
+        antAttributes.add(7, (double) maxRoaming);
     }
 
     /**
@@ -319,6 +316,7 @@ public class Ant {
         pheromoneCounter = 0;
         roaming += 1;
         nestAlreadyEncountered = false;
+        stomachSum = sharedStomach + privateStomach;
 
         transferFood();
 
@@ -503,21 +501,20 @@ public class Ant {
 
         // deposit food or eat its reserves
         // deposit an amount equal to a random value between this.sharedStomach - 1 and 0, with a continuous random variable that has exponential distribution
-        double stomachsSum = sharedStomach  + privateStomach;
         double threshold = maxStomachCapacity * 0.99;
-        if (stomachsSum > threshold) {    // give
+        if (stomachSum > threshold) {    // give
 //            double expDistributionQuantity = Math.min(1, 1 * (Math.log(1 - Math.random()) / (- sharedStomach)));
 //            System.out.println("expDistribution:" + expDistributionQuantity);
 //            System.out.println("sharedStomach before:" + sharedStomach + " after:" + (sharedStomach * expDistributionQuantity));
 //            double foodKept = sharedStomach * expDistributionQuantity;
 
-            double howMuch = (stomachsSum - threshold);
+            double howMuch = (stomachSum - threshold);
             nest.addReserves(howMuch);
             sharedStomach -= howMuch;
 //            System.out.println("nest reservoirs " + nest.getReservoir());
         }
         else {  // take
-            double howMuch = (threshold - stomachsSum);
+            double howMuch = (threshold - stomachSum);
 //            System.out.println("howMuch:" + howMuch);
             if (nest.getFoodFromReserves(howMuch)) {
                 sharedStomach += howMuch;
@@ -601,11 +598,10 @@ public class Ant {
             // at the opposite if I have plenty of food with me, it is useless to continue finding food in the ambient so come back to the nest
             // if I have just enough quantity of food to go exploring then I will prefer to go outside and explore the ambient for food
         boolean found = false;
-        double stomachSum = sharedStomach + privateStomach;
         // remember that maxStomachCapacity it's the maximum capacity of a single stomach
 //        System.out.println("stomachSum:" + stomachSum + " max*0.4:" + (maxStomachCapacity * 0.4) + " max*1.6:" + (maxStomachCapacity * 1.6));
         // if I decided time ago to go to the nest don't change that decision until you come to the nest
-        if (roaming > MaxRoaming && (toTheNest || ((stomachSum < maxStomachCapacity * 0.5)  || (stomachSum > maxStomachCapacity * 1.5)))) {    // little or much food condition
+        if (roaming > maxRoaming && (toTheNest || ((stomachSum < maxStomachCapacity * 0.5)  || (stomachSum > maxStomachCapacity * 1.5)))) {    // little or much food condition
 //            System.out.println("stomachSum" + stomachSum + " MaxCapacity:" + maxStomachCapacity);
             double p = random_seed.nextDouble();
             int start;
