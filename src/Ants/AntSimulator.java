@@ -6,6 +6,8 @@ import Interfaces.CASModel;
 import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
 
@@ -151,7 +153,6 @@ public class AntSimulator implements CASModel {
                     }
                     reset = false;
                 }
-                day += 1;
                 iterateCurrentAlive(0);  // evolve
                 nestReproduction();
                 if (Math.random() < 0.05) balanceFood();    // with a probability of 5% every turn add a food's source
@@ -160,6 +161,7 @@ public class AntSimulator implements CASModel {
                 iterateMatrix(1);     // updateFrame
                 callsOutputManager();
                 resetNewStats();
+                day += 1;
                 gui.currentFrame = gui.nextFrame;
                 gui.nextFrame = new boolean[GUI.HEIGHT][GUI.WIDTH];
                 gui.getPanel().repaint();
@@ -490,41 +492,9 @@ public class AntSimulator implements CASModel {
                 FoodSource food = new FoodSource(y, x);
                 currentFood.put(k, food);
                 newFood += 1;
+                totNewFood += 1;
             }
         }
-    }
-
-    /**
-     * reset the stats of the simulation
-     */
-    private void resetAllStats() {
-        day = 0;
-
-        totBorn = 0;
-        totDead = 0;
-        newBorn = 0;
-        newDead = 0;
-
-        totNewFood = 0;
-        totFinishedFood = 0;
-        newFood = 0;
-        finishedFood = 0;
-
-        totCreatedPheromones = 0;
-        totDecayedPheromones = 0;
-        newPheromones = 0;
-        decayedPheromones = 0;
-    }
-
-    private void resetNewStats() {
-        newBorn = 0;
-        newDead = 0;
-
-        newFood = 0;
-        finishedFood = 0;
-
-        newPheromones = 0;
-        decayedPheromones = 0;
     }
 
     /**
@@ -561,28 +531,269 @@ public class AntSimulator implements CASModel {
         }
     }
 
+    /**
+     * reset the stats of the simulation
+     */
+    private void resetAllStats() {
+        day = 0;
+
+        totBorn = 0;
+        totDead = 0;
+        newBorn = 0;
+        newDead = 0;
+
+        totNewFood = 0;
+        totFinishedFood = 0;
+        newFood = 0;
+        finishedFood = 0;
+
+        totCreatedPheromones = 0;
+        totDecayedPheromones = 0;
+        newPheromones = 0;
+        decayedPheromones = 0;
+    }
+
+    private void resetNewStats() {
+        newBorn = 0;
+        newDead = 0;
+
+        newFood = 0;
+        finishedFood = 0;
+
+        newPheromones = 0;
+        decayedPheromones = 0;
+    }
+
+    private double[] doStats(Collection<?> dataset, String attribute) {
+        if (dataset.isEmpty()) return null;
+
+        Double [] values = new Double[dataset.size()];
+        try {
+            int i = 0;
+            for (Object d : dataset) {
+                Field field = d.getClass().getDeclaredField(attribute);
+                field.setAccessible(true);
+                double value = Double.parseDouble(field.get(d).toString());
+                values[i] = value;
+                i++;
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        Arrays.sort(values);
+
+        double [] stats = new double[4];
+
+        // min
+        stats[0] = values[0];
+
+        // max
+        stats[1] = values[values.length - 1];
+
+        // mean
+        double sum = 0;
+        for (double val : values) {
+            sum += val;
+        }
+        stats[2] = sum / values.length;
+
+        // median
+        if (values.length % 2 == 0) {   // even
+            int mid = values.length / 2;
+            stats[3] = (values[mid - 1] + values[mid]) / 2;
+        }
+        else {  // odd
+            stats[3] = values[((values.length + 1) / 2) - 1];
+        }
+        return stats;
+    }
+
     private void callsOutputManager() {
-        String[] space = {""};
+
+        double [] lifeStats       = doStats(currentAlive.values(), "life");
+        double [] starvingStats   = doStats(currentAlive.values(), "starvingMultiplier");
+        double [] stomachSumStats = doStats(currentAlive.values(), "stomachSum");
+        double [] roamingStats    = doStats(currentAlive.values(), "roaming");
+        double [] amountLeftStats = doStats(currentFood.values(), "amountLeft");
+        double [] strengthStats   = doStats(currentTrailPheromones.values(), "strength");
+
+        double [] dna1 = doStats(currentAlive.values(), "nTraitsToTransmit");
+        double [] dna2 = doStats(currentAlive.values(), "changeDirection");
+        double [] dna3 = doStats(currentAlive.values(), "maxLeaveTrail");
+        double [] dna4 = doStats(currentAlive.values(), "strengthOfNewTrailPheromone");
+        double [] dna5 = doStats(currentAlive.values(), "maxStomachCapacity");
+        double [] dna6 = doStats(currentAlive.values(), "foodToEatEveryDay");
+        double [] dna7 = doStats(currentAlive.values(), "transferringSpeed");
+        double [] dna8 = doStats(currentAlive.values(), "maxRoaming");
+//        if (lifeStats !=  null) {
+//            System.out.println("life" + Arrays.toString(lifeStats));
+//        }
+
         String[] dayHeader = {"Day", String.valueOf(day)};
-        String[] antGeneralHeader = {"Total born ants", "Total dead ants", "Newborn ants", "New dead ants"};
-        String[] antGeneralRecords = {String.valueOf(totBorn), String.valueOf(totDead), String.valueOf(newBorn), String.valueOf(newDead)};
-        String[] foodGeneralHeader = {"Total food's sources created", "Total food's sources finished", "New food's sources", "Finished food's sources"};
-        String[] foodGeneralRecords = {String.valueOf(totNewFood), String.valueOf(totFinishedFood), String.valueOf(newFood), String.valueOf(finishedFood)};
-        String[] pheromonesGeneralHeader = {"Total trail pheromones created", "Total trail pheromones decayed", "New pheromones", "Decayed pheromones"};
-        String[] pheromonesGeneralRecords = {String.valueOf(totCreatedPheromones), String.valueOf(totDecayedPheromones), String.valueOf(newPheromones), String.valueOf(decayedPheromones)};
+
+        String[] title1 = {"FoodSource statistics"};
+        String[] foodGeneralHeader = {"Total food's sources created", "Total food's sources finished", "Current number of food's sources", "New food's sources", "Finished food's sources"};
+        String[] foodGeneralRecords = {String.valueOf(totNewFood), String.valueOf(totFinishedFood), String.valueOf(currentFood.size()), String.valueOf(newFood), String.valueOf(finishedFood)};
+        String[] foodSpecificHeader1 = {"min amountLeft", "max amountLeft", "mean amountLeft", "median amountLeft"};
+        String[] foodSpecificRecords1 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (amountLeftStats != null) foodSpecificRecords1[i] = String.valueOf(amountLeftStats[i]);
+            else foodSpecificRecords1[i] = "null";
+        }
+
+        String[] title2 = {"Pheromone statistics"};
+        String[] pheromonesGeneralHeader = {"Total trail pheromones created", "Total trail pheromones decayed", "Current number of trail pheromones", "New pheromones", "Decayed pheromones"};
+        String[] pheromonesGeneralRecords = {String.valueOf(totCreatedPheromones), String.valueOf(totDecayedPheromones), String.valueOf(currentTrailPheromones.size()), String.valueOf(newPheromones), String.valueOf(decayedPheromones)};
+        String[] pheromonesSpecificHeader1 = {"min strength", "max strength", "mean strength", "median strength"};
+        String[] pheromonesSpecificRecords1 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (strengthStats != null) pheromonesSpecificRecords1[i] = String.valueOf(strengthStats[i]);
+            else pheromonesSpecificRecords1[i] = "null";
+        }
+
+        String[] title3 = {"Nest statistics"};
+        String[] nestGeneralHeader = {"Nest reservoirs", "Nest newborn queue"};
+        String[] nestGeneralRecords = {String.valueOf(nest.getReservoir()), String.valueOf(nest.newBorn)};
+        String[] title4 = {"Nest DNA code to give to the next newborn ant"};
+        String[] nestDNAHeader = {"nTraitsToTransmit", "changeDirection", "maxLeaveTrail", "strengthOfNewTrailPheromone", "maxStomachCapacity", "foodToEatEveryDay", "transferringSpeed", "maxRoaming"};
+        String[] nestDNARecord = {String.valueOf(nest.antAttributes.get(0)), String.valueOf(nest.antAttributes.get(1)), String.valueOf(nest.antAttributes.get(2)), String.valueOf(nest.antAttributes.get(3)), String.valueOf(nest.antAttributes.get(4)), String.valueOf(nest.antAttributes.get(5)), String.valueOf(nest.antAttributes.get(6)), String.valueOf(nest.antAttributes.get(7))};
+
+        String[] title5 = {"Ant statistics"};
+        String[] antGeneralHeader = {"Total born ants", "Total dead ants", "Current living ants", "Newborn ants", "New dead ants"};
+        String[] antGeneralRecords = {String.valueOf(totBorn), String.valueOf(totDead), String.valueOf(currentAlive.size()), String.valueOf(newBorn), String.valueOf(newDead)};
+        String[] antSpecificHeader1 = {"min life", "max life", "mean life", "median life"};
+        String[] antSpecificRecords1 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (lifeStats != null) antSpecificRecords1[i] = String.valueOf(lifeStats[i]);
+            else antSpecificRecords1[i] = "null";
+        }
+        String[] antSpecificHeader2 = {"min starvingMultiplier", "max starvingMultiplier", "mean starvingMultiplier", "median starvingMultiplier"};
+        String[] antSpecificRecords2 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (starvingStats != null) antSpecificRecords2[i] = String.valueOf(starvingStats[i]);
+            else antSpecificRecords2[i] = "null";
+        }
+        String[] antSpecificHeader3 = {"min stomachSum", "max stomachSum", "mean stomachSum", "median stomachSum"};
+        String[] antSpecificRecords3 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (stomachSumStats != null) antSpecificRecords3[i] = String.valueOf(stomachSumStats[i]);
+            else antSpecificRecords3[i] = "null";
+        }
+        String[] antSpecificHeader4 = {"min roaming", "max roaming", "mean roaming", "median roaming"};
+        String[] antSpecificRecords4 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (roamingStats != null) antSpecificRecords4[i] = String.valueOf(roamingStats[i]);
+            else antSpecificRecords4[i] = "null";
+        }
+        String[] title6 = {"Ant DNA code statistics:"};
+        String[] antDNAHeader1 = {"min nTraitsToTransmit", "max nTraitsToTransmit", "mean nTraitsToTransmit", "median nTraitsToTransmit"};
+        String[] antDNARecords1 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (dna1 != null) antDNARecords1[i] = String.valueOf(dna1[i]);
+            else antDNARecords1[i] = "null";
+        }
+        String[] antDNAHeader2 = {"min changeDirection", "max changeDirection", "mean changeDirection", "median changeDirection"};
+        String[] antDNARecords2 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (dna2 != null) antDNARecords2[i] = String.valueOf(dna2[i]);
+            else antDNARecords2[i] = "null";
+        }
+        String[] antDNAHeader3 = {"min maxLeaveTrail", "max maxLeaveTrail", "mean maxLeaveTrail", "median maxLeaveTrail"};
+        String[] antDNARecords3 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (dna3 != null) antDNARecords3[i] = String.valueOf(dna3[i]);
+            else antDNARecords3[i] = "null";
+        }
+        String[] antDNAHeader4 = {"min strengthOfNewTrailPheromone", "max strengthOfNewTrailPheromone", "mean strengthOfNewTrailPheromone", "median strengthOfNewTrailPheromone"};
+        String[] antDNARecords4 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (dna4 != null) antDNARecords4[i] = String.valueOf(dna4[i]);
+            else antDNARecords4[i] = "null";
+        }
+        String[] antDNAHeader5 = {"min maxStomachCapacity", "max maxStomachCapacity", "mean maxStomachCapacity", "median maxStomachCapacity"};
+        String[] antDNARecords5 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (dna5 != null) antDNARecords5[i] = String.valueOf(dna5[i]);
+            else antDNARecords5[i] = "null";
+        }
+        String[] antDNAHeader6 = {"min foodToEatEveryDay", "max foodToEatEveryDay", "mean foodToEatEveryDay", "median foodToEatEveryDay"};
+        String[] antDNARecords6 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (dna6 != null) antDNARecords6[i] = String.valueOf(dna6[i]);
+            else antDNARecords6[i] = "null";
+        }
+        String[] antDNAHeader7 = {"min transferringSpeed", "max transferringSpeed", "mean transferringSpeed", "median transferringSpeed"};
+        String[] antDNARecords7 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (dna7 != null) antDNARecords7[i] = String.valueOf(dna7[i]);
+            else antDNARecords7[i] = "null";
+        }
+        String[] antDNAHeader8 = {"min maxRoaming", "max maxRoaming", "mean maxRoaming", "median maxRoaming"};
+        String[] antDNARecords8 = new String[4];
+        for (int i = 0; i < 4; i++) {
+            if (dna8 != null) antDNARecords8[i] = String.valueOf(dna8[i]);
+            else antDNARecords8[i] = "null";
+        }
+        String[] end = {"____________________________________________________________________________________________"};
+        String[] space = {""};
+
 
         List<String[]> list = new ArrayList<>();
         list.add(dayHeader);
-        list.add(antGeneralHeader);
-        list.add(antGeneralRecords);
+        list.add(title1);
         list.add(foodGeneralHeader);
         list.add(foodGeneralRecords);
+        list.add(foodSpecificHeader1);
+        list.add(foodSpecificRecords1);
+        list.add(space);
+        list.add(title2);
         list.add(pheromonesGeneralHeader);
         list.add(pheromonesGeneralRecords);
+        list.add(pheromonesSpecificHeader1);
+        list.add(pheromonesSpecificRecords1);
+        list.add(space);
+        list.add(title3);
+        list.add(nestGeneralHeader);
+        list.add(nestGeneralRecords);
+        list.add(title4);
+        list.add(nestDNAHeader);
+        list.add(nestDNARecord);
+        list.add(space);
+        list.add(title5);
+        list.add(antGeneralHeader);
+        list.add(antGeneralRecords);
+        list.add(antSpecificHeader1);
+        list.add(antSpecificRecords1);
+        list.add(antSpecificHeader2);
+        list.add(antSpecificRecords2);
+        list.add(antSpecificHeader3);
+        list.add(antSpecificRecords3);
+        list.add(antSpecificHeader4);
+        list.add(antSpecificRecords4);
+        list.add(space);
+        list.add(title6);
+        list.add(antDNAHeader1);
+        list.add(antDNARecords1);
+        list.add(antDNAHeader2);
+        list.add(antDNARecords2);
+        list.add(antDNAHeader3);
+        list.add(antDNARecords3);
+        list.add(antDNAHeader4);
+        list.add(antDNARecords4);
+        list.add(antDNAHeader5);
+        list.add(antDNARecords5);
+        list.add(antDNAHeader6);
+        list.add(antDNARecords6);
+        list.add(antDNAHeader7);
+        list.add(antDNARecords7);
+        list.add(antDNAHeader8);
+        list.add(antDNARecords8);
+        list.add(end);
         list.add(space);
 
-        outputManager.writeCSV(list);
-        outputManager.writeLog();
+        if (day % 10 == 0) outputManager.writeCSV(list);
+        outputManager.writeLog(list);
     }
 
     public static Map<Integer, Ant> getCurrentAlive() {

@@ -2,18 +2,15 @@
 <project version="4">
   <component name="ArtifactsWorkspaceSettings">
     <artifacts-to-build>
-      <artifact name="CAS:jar2" />
+      <artifact name="CAS:jar" />
     </artifacts-to-build>
   </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4a50146c-a566-48d9-a6cd-1712c4465f29" name="Changes" comment="updated gitignore for log an csv files">
-      <change beforePath="$PROJECT_DIR$/out/artifacts/CAS_jar/CAS.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/CAS/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/CAS/workspace.xml" afterDir="false" />
+    <list default="true" id="4a50146c-a566-48d9-a6cd-1712c4465f29" name="Changes" comment="gitignore update">
       <change beforePath="$PROJECT_DIR$/src/Ants/AntSimulator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/AntSimulator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ants/OutputManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/OutputManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -114,8 +111,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JAR Application.CAS.jar (1)" />
         <item itemvalue="JAR Application.CAS.jar" />
+        <item itemvalue="JAR Application.CAS.jar (1)" />
         <item itemvalue="Application.OutputManager" />
       </list>
     </recent_temporary>
@@ -128,27 +125,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1643556854115</updated>
-    </task>
-    <task id="LOCAL-00004" summary="added Thesis pdf&#10;updated README&#10;refactored GUITest.java in Launcher.java&#10;added a run config file">
-      <created>1644429234731</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1644429234731</updated>
-    </task>
-    <task id="LOCAL-00005" summary="updated README">
-      <created>1644429339087</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1644429339087</updated>
-    </task>
-    <task id="LOCAL-00006" summary="changed meeting distance logic">
-      <created>1644534592103</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1644534592103</updated>
     </task>
     <task id="LOCAL-00007" summary="Creation of structure&#10;&#10;change access modifier to let methods call each other&#10;&#10;clean code">
       <created>1644617478290</created>
@@ -472,7 +448,28 @@
       <option name="project" value="LOCAL" />
       <updated>1646171749383</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="more data to display to the csv, better log and a new working jar">
+      <created>1646177985144</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1646177985144</updated>
+    </task>
+    <task id="LOCAL-00054" summary="better file organization">
+      <created>1646178438444</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1646178438444</updated>
+    </task>
+    <task id="LOCAL-00055" summary="gitignore update">
+      <created>1646178611584</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1646178611584</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -487,8 +484,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="the ants will go to the nest if starving or full of food" />
-    <MESSAGE value="gui adjustments" />
     <MESSAGE value="MEGA update, Ant AI v2.1&#10;now they have an objective to follow that depends on a state &quot;toTheNest&quot;" />
     <MESSAGE value="little updates" />
     <MESSAGE value="thesis grammatical update" />
@@ -502,7 +497,6 @@
     <MESSAGE value="Last key update:&#10;- Ant AI v5.0 now ant will not go back to the nest before some turns have passed&#10;- Some bug fixing&#10;- latest adding of ant's genetic code" />
     <MESSAGE value="colors refactoring" />
     <MESSAGE value="colors and size refactoring" />
-    <MESSAGE value="gitignore update" />
     <MESSAGE value="warnings partial removal" />
     <MESSAGE value="added an executable jar" />
     <MESSAGE value="out directory" />
@@ -512,7 +506,10 @@
     <MESSAGE value="ant reproduction bug fixed of newborn ants overwriting living ant next to the nest&#10;fixed encountering the nest two times a day" />
     <MESSAGE value="created support for writing and reading CSV files to dump the data from the simulation and creating a log for the data" />
     <MESSAGE value="updated gitignore for log an csv files" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated gitignore for log an csv files" />
+    <MESSAGE value="more data to display to the csv, better log and a new working jar" />
+    <MESSAGE value="better file organization" />
+    <MESSAGE value="gitignore update" />
+    <option name="LAST_COMMIT_MESSAGE" value="gitignore update" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
