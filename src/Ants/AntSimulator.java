@@ -6,7 +6,6 @@ import Interfaces.CASModel;
 import javax.swing.Timer;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.List;
@@ -626,9 +625,6 @@ public class AntSimulator implements CASModel {
         double [] dna6 = doStats(currentAlive.values(), "foodToEatEveryDay");
         double [] dna7 = doStats(currentAlive.values(), "transferringSpeed");
         double [] dna8 = doStats(currentAlive.values(), "maxRoaming");
-//        if (lifeStats !=  null) {
-//            System.out.println("life" + Arrays.toString(lifeStats));
-//        }
 
         String[] dayHeader = {"Day", String.valueOf(day)};
 

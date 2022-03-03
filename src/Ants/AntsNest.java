@@ -113,8 +113,8 @@ public class AntsNest {
     }
 
     void triggerReproduction() {
-        newBorn += 1;
-    }
+        newBorn += 2;
+    } // V1 ADDS 1, V2 ADDS 2
 
     Ant reproduction() {
         if (searchSpawnPoint()) {   // this call updates spawnY and spawnY, to am available spot on the grid next to the nest

@@ -56,7 +56,7 @@ public class Ant {
     /**
      * the color used by UI.GUI to paint the GUI.innerPanel correctly
      */
-    public final Color color = new Color(0, 120, 0);
+    public final Color color = new Color(0, 93, 0);
 
     /**
      * the column number in the grid of this ant
@@ -150,9 +150,9 @@ public class Ant {
     private final int nestY;
     private final int nestX;
 
-    private ArrayList<Double> closestNestDistances;
+    private final ArrayList<Double> closestNestDistances;
 
-    private ArrayList<Direction> nestDirections;
+    private final ArrayList<Direction> nestDirections;
 
     private static double dMax;
 
@@ -224,7 +224,7 @@ public class Ant {
             closestNestDistances.add((double) GUI.WIDTH);
             nestDirections.add(null);
         }
-        maxRoaming = (int) random_seed.nextDouble(life * 0.25, life * 0.40);
+        maxRoaming = (int) random_seed.nextDouble(life * 0.3, life * 0.5);
         roaming = 0;
 
         // reproduction related attributes
@@ -307,8 +307,6 @@ public class Ant {
      *     <li>try to move in the direction you have chosen</li>
      *     <li>get older</li>
      * </ol>
-     * @return if the ant encountered the nest and gave it some of its food then the nest will
-     *         spawn an ant with some genetic code of this ant
      */
     void action() {
 
@@ -363,12 +361,6 @@ public class Ant {
                 computeNestDistance(nextY, nextX);
             }
         }
-//        if (nest) {
-//            for (int i = 0; i < 8; i++) {
-//                System.out.println("i:" + i + ", dist:" + closestNestDistances.get(i) + ", dir:" + nestDirections.get(i));
-//            }
-//            System.out.println("******************************************");
-//        }
     }
 
     void searchFood() {
@@ -413,8 +405,6 @@ public class Ant {
         if (countDir < changeDirection && chosenDir != null) {   // I don't believe is it possible to reach changeDirection
             translateDirInPos(chosenDir);    // updates nextY and nextX
             if (move(nextY, nextX)) {
-//                System.out.println("random?" + onARandomPath + " count:" + countDir + " changeDir:" + changeDirection);
-//                System.out.println("chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos);
                 return;
             }
         }
@@ -465,9 +455,6 @@ public class Ant {
                 this.sharedStomach += 1;
                 otherAnt.sharedStomach -= 1;
             }
-//            else {
-//                System.out.println("myD:" + myDelta + " yourD:" + yourDelta + ". MyMaxCapacity:" + this.maxStomachCapacity + ". Failed trophallaxis with a P:" + ((myDelta - yourDelta) / (double) this.maxStomachCapacity ));
-//            }
         }
         else if ((yourDelta > myDelta + 1) && (this.sharedStomach > 1)) {
             if (Math.random() < ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity)) {
@@ -475,47 +462,43 @@ public class Ant {
                 this.sharedStomach -= 1;
                 otherAnt.sharedStomach += 1;
             }
-//            else {
-//                System.out.println("yourD:" + yourDelta + " myD:" + myDelta + ". YoursMaxCapacity:" + otherAnt.maxStomachCapacity + ". Failed trophallaxis with a P:" + ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity));
-//            }
         }
     }
 
     void nestInteraction(AntsNest nest) {
         if (nestAlreadyEncountered) return;
         nestAlreadyEncountered = true;
-//        System.out.println("nest nearby");
+
         // you have found your nest
         // do action relative to the nest encounter
-//        leaveTrail = maxLeaveTrail;
         toTheNest = false;  // change state and objective
         countDir = changeDirection; // change direction
         roaming = 0;
 
-        // deposit eggs
+        /* V1
         if (life < 80 && life > 20) {   // if not too young and not too old
             nest.transmitGenetics(antAttributes);
             nest.triggerReproduction();
-//            System.out.println("child:" + child);
-        }
+        }*/
 
         // deposit food or eat its reserves
         // deposit an amount equal to a random value between this.sharedStomach - 1 and 0, with a continuous random variable that has exponential distribution
-        double threshold = maxStomachCapacity * 0.99;
+//V1        double threshold = maxStomachCapacity * 0.99;
+/*V2*/  double threshold = maxStomachCapacity * 0.9;
         if (stomachSum > threshold) {    // give
-//            double expDistributionQuantity = Math.min(1, 1 * (Math.log(1 - Math.random()) / (- sharedStomach)));
-//            System.out.println("expDistribution:" + expDistributionQuantity);
-//            System.out.println("sharedStomach before:" + sharedStomach + " after:" + (sharedStomach * expDistributionQuantity));
-//            double foodKept = sharedStomach * expDistributionQuantity;
 
             double howMuch = (stomachSum - threshold);
             nest.addReserves(howMuch);
             sharedStomach -= howMuch;
-//            System.out.println("nest reservoirs " + nest.getReservoir());
+
+            // deposit eggs
+/*V2*/      if (life < 90 && life > 10) {   // if not too young and not too old
+                nest.transmitGenetics(antAttributes);
+                nest.triggerReproduction();
+            }
         }
         else {  // take
             double howMuch = (threshold - stomachSum);
-//            System.out.println("howMuch:" + howMuch);
             if (nest.getFoodFromReserves(howMuch)) {
                 sharedStomach += howMuch;
             }
@@ -526,8 +509,7 @@ public class Ant {
 //        System.out.println("food nearby");
         // if you have already eaten the maximum food you can, AND you are carrying the maximum food you can ignore it
         // otherwise:
-//        System.out.println("sharedStomach:" + sharedStomach + "privateStomach:" + privateStomach);
-        double amount = maxStomachCapacity * 0.7;
+        double amount = maxStomachCapacity * 0.8;
         double available = food.gathering(amount);
 //        System.out.println("foodID:" + food + ", available: " + available);
         if (available > 0) {
@@ -599,10 +581,9 @@ public class Ant {
             // if I have just enough quantity of food to go exploring then I will prefer to go outside and explore the ambient for food
         boolean found = false;
         // remember that maxStomachCapacity it's the maximum capacity of a single stomach
-//        System.out.println("stomachSum:" + stomachSum + " max*0.4:" + (maxStomachCapacity * 0.4) + " max*1.6:" + (maxStomachCapacity * 1.6));
         // if I decided time ago to go to the nest don't change that decision until you come to the nest
-        if (roaming > maxRoaming && (toTheNest || ((stomachSum < maxStomachCapacity * 0.5)  || (stomachSum > maxStomachCapacity * 1.5)))) {    // little or much food condition
-//            System.out.println("stomachSum" + stomachSum + " MaxCapacity:" + maxStomachCapacity);
+//V1    if (roaming > maxRoaming && (toTheNest || ((stomachSum < maxStomachCapacity * 0.5)  || (stomachSum > maxStomachCapacity * 1.5)))) {    // little or much food condition
+/*V2*/  if (roaming > maxRoaming && (toTheNest || ((stomachSum < maxStomachCapacity * 0.4)  || (stomachSum > maxStomachCapacity * 1.2)))) {    // little or much food condition
             double p = random_seed.nextDouble();
             int start;
             if (p < 0.6) start = 0;
@@ -620,16 +601,15 @@ public class Ant {
                 }
             }
         }
-//            System.out.println("toTheNest:" + toTheNest + " chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos);
 
         // Second key AI logic of an ant:
             // if I found a strong pheromone trail around me go to the lightest one, hopefully in the opposite direction of the strongest one
             // this will lead me to a food' source or the nest
-        if (pheromoneCounter < 4) { // if there are too many pheromones around you, you'll get very confused, so ignore them
+//  V1      if (pheromoneCounter < 4) { // if there are too many pheromones around you, you'll get very confused, so ignore them
+/*V2*/  if (pheromoneCounter < 5) { // if there are too many pheromones around you, you'll get very confused, so ignore them
             if (leph != null) {
                 if (Math.random() < ((Pheromone.maxStrength - leph.getStrength()) / (double) Pheromone.maxStrength) * 1.2) { // with a P of the strength of the strongest pheromone found
                     Direction desirableDir = translatePosInDir(leph.yPos, leph.xPos);
-
                     if (toTheNest) {
                         for (int i = 0; i < 3; i++) {
                             if (nestDirections.get(i) == desirableDir) {
@@ -724,9 +704,6 @@ public class Ant {
                                 countDir = 0;
                                 onARandomPath = true;
                                 found = true;
-//                                System.out.println("Inside of the midway circle");
-//                                System.out.println("Within if blocks");
-//                                System.out.println("dir:" + chosenDir + " P:" + p);
                                 break;
                             }
                         }
@@ -743,9 +720,6 @@ public class Ant {
                             chosenDir = possibleDir;
                             countDir = 0;
                             onARandomPath = true;
-//                            System.out.println("Inside of the midway circle");
-//                            System.out.println("Without if blocks");
-//                            System.out.println("dir:" + chosenDir + " P:" + p);
                             break;
                         }
                     }
@@ -767,9 +741,6 @@ public class Ant {
                                 countDir = 0;
                                 onARandomPath = true;
                                 found = true;
-//                                System.out.println("Out of the midway circle");
-//                                System.out.println("Within if blocks");
-//                                System.out.println("dir:" + chosenDir + " P:" + p);
                                 break;
                             }
                         }
@@ -786,9 +757,6 @@ public class Ant {
                             chosenDir = possibleDir;
                             countDir = 0;
                             onARandomPath = true;
-//                            System.out.println("Out of the midway circle");
-//                            System.out.println("Without if blocks");
-//                            System.out.println("dir:" + chosenDir + " P:" + p);
                             break;
                         }
                     }
@@ -907,8 +875,6 @@ public class Ant {
     }
 
     private void computeNestDistance(int y, int x) {
-//        System.out.println("nestY:" + nestY + " nestX:" + nestX);
-//        System.out.println("y:" + y + " x:" + x);
         double d = Math.sqrt(Math.pow(y - nestY, 2) + Math.pow(x - nestX, 2));  // two point distance equation
         for (int i = 0; i < 8; i++) {
             if (d < closestNestDistances.get(i)) {

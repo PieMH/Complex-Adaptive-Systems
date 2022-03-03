@@ -10,7 +10,7 @@ public class FoodSource {
     /**
      * the color for every food source
      */
-    public final Color color = new Color(255, 210, 0);
+    public final Color color = new Color(255, 188, 17);
 
     /**
      * the row number in the grid of this Food Source
@@ -48,13 +48,9 @@ public class FoodSource {
           The logic is to ensure the growth of the minimal value is logarithmic proportional
           to that of the number of cells in the grid, that is GUI.DIMENSION.
          */
-        minimal = (int) Math.max(Math.floor(Math.sqrt(2.5 * GUI.DIMENSION)), 1);   // minimal number of quantity of food in this source
+        minimal = (int) Math.max(Math.floor(Math.sqrt(3 * GUI.DIMENSION)), 1);   // minimal number of quantity of food in this source
         maximal = minimal * 4;
         amountLeft = (double) random_seed.nextInt(minimal, maximal);
-    }
-
-    Double getAmountLeft() {
-        return amountLeft;
     }
 
     Color getColor() {

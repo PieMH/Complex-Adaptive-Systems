@@ -1,8 +1,6 @@
 package Ants;
 
-import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
-import com.opencsv.exceptions.CsvException;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -16,14 +14,8 @@ public class OutputManager {
 
     private final String logFileName;
 
-    private FileWriter outputFileWriter;
-
-    private FileWriter logFileWriter;
-
-    private FileReader outputFileReader;
-
     OutputManager() {
-        String cwd = System.getProperty("user.dir");  // Getting absolute path
+        String cwd = System.getProperty("user.dir");  // Getting absolute path of cwd
         outputFileName = cwd + "\\src\\Ants\\output.csv";
         logFileName = cwd + "\\src\\Ants\\output.log";
 
@@ -47,27 +39,11 @@ public class OutputManager {
         }
 
     }
-/*
-    void writeLog() {
-        try (CSVReader reader = new CSVReader(new FileReader(outputFileName));
-             FileWriter logWriter = new FileWriter(logFileName, true);
-             BufferedWriter b = new BufferedWriter(logWriter);
-             PrintWriter p = new PrintWriter(b);
-             ) {
-
-            for (String[] line : reader) {
-                if (Arrays.equals(line, new String[]{""})) p.println("\n");
-                else p.println(Arrays.toString(line));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
 
     void writeLog(List<String[]> data) {
         try ( FileWriter logWriter = new FileWriter(logFileName, true);
             BufferedWriter b = new BufferedWriter(logWriter);
-            PrintWriter p = new PrintWriter(b);
+            PrintWriter p = new PrintWriter(b)
              ) {
 
             for (String[] line : data) {
