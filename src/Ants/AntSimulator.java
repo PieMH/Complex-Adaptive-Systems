@@ -624,7 +624,7 @@ public class AntSimulator implements CASModel {
         double [] dna5 = doStats(currentAlive.values(), "maxStomachCapacity");
         double [] dna6 = doStats(currentAlive.values(), "foodToEatEveryDay");
         double [] dna7 = doStats(currentAlive.values(), "transferringSpeed");
-        double [] dna8 = doStats(currentAlive.values(), "maxRoaming");
+        double [] dna8 = doStats(currentAlive.values(), "minRoaming");
 
         String[] dayHeader = {"Day", String.valueOf(day)};
 
@@ -725,7 +725,7 @@ public class AntSimulator implements CASModel {
             if (dna7 != null) antDNARecords7[i] = String.valueOf(dna7[i]);
             else antDNARecords7[i] = "null";
         }
-        String[] antDNAHeader8 = {"min maxRoaming", "max maxRoaming", "mean maxRoaming", "median maxRoaming"};
+        String[] antDNAHeader8 = {"min minRoaming", "max minRoaming", "mean minRoaming", "median minRoaming"};
         String[] antDNARecords8 = new String[4];
         for (int i = 0; i < 4; i++) {
             if (dna8 != null) antDNARecords8[i] = String.valueOf(dna8[i]);

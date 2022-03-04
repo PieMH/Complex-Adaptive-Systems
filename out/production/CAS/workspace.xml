@@ -9,8 +9,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4a50146c-a566-48d9-a6cd-1712c4465f29" name="Changes" comment="gitignore update">
+    <list default="true" id="4a50146c-a566-48d9-a6cd-1712c4465f29" name="Changes" comment="Major update. Stats generating and printing on two different files, a csv and a log">
+      <change beforePath="$PROJECT_DIR$/out/artifacts/CAS_jar/CAS.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/CAS_jar/CAS.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ants/Ant.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/Ant.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Ants/AntSimulator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/AntSimulator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ants/FoodSource.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/FoodSource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ants/OutputManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/OutputManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -125,27 +129,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1643556854115</updated>
-    </task>
-    <task id="LOCAL-00007" summary="Creation of structure&#10;&#10;change access modifier to let methods call each other&#10;&#10;clean code">
-      <created>1644617478290</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1644617478291</updated>
-    </task>
-    <task id="LOCAL-00008" summary="code clean up">
-      <created>1644621550381</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1644621550381</updated>
-    </task>
-    <task id="LOCAL-00009" summary="clean up and warnings reduced at minimum">
-      <created>1644682086618</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1644682086618</updated>
     </task>
     <task id="LOCAL-00010" summary="Thesis update">
       <created>1644682107979</created>
@@ -469,7 +452,28 @@
       <option name="project" value="LOCAL" />
       <updated>1646178611584</updated>
     </task>
-    <option name="localTasksCounter" value="56" />
+    <task id="LOCAL-00056" summary="gitignore update">
+      <created>1646255797963</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1646255797964</updated>
+    </task>
+    <task id="LOCAL-00057" summary="minor bug fixes">
+      <created>1646255848740</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1646255848740</updated>
+    </task>
+    <task id="LOCAL-00058" summary="Major update. Stats generating and printing on two different files, a csv and a log">
+      <created>1646255980460</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1646255980460</updated>
+    </task>
+    <option name="localTasksCounter" value="59" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -484,8 +488,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="MEGA update, Ant AI v2.1&#10;now they have an objective to follow that depends on a state &quot;toTheNest&quot;" />
-    <MESSAGE value="little updates" />
     <MESSAGE value="thesis grammatical update" />
     <MESSAGE value="found nest agglomeration problem (poor reservoir quantities)&#10;started genetics code" />
     <MESSAGE value="complete model with genetics and reproduction&#10;The model doesn't sustain itself, it will die out after 1 single generation&#10;TOO MANY ants around the nest we need to fix this" />
@@ -509,7 +511,9 @@
     <MESSAGE value="more data to display to the csv, better log and a new working jar" />
     <MESSAGE value="better file organization" />
     <MESSAGE value="gitignore update" />
-    <option name="LAST_COMMIT_MESSAGE" value="gitignore update" />
+    <MESSAGE value="minor bug fixes" />
+    <MESSAGE value="Major update. Stats generating and printing on two different files, a csv and a log" />
+    <option name="LAST_COMMIT_MESSAGE" value="Major update. Stats generating and printing on two different files, a csv and a log" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

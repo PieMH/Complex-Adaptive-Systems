@@ -29,8 +29,14 @@ public class Ant {
      */
     private Double starvingMultiplier;
 
+    /**
+     * how much food you'll eat every day from your stomachs
+     */
     private final Double foodToEatEveryDay;
 
+    /**
+     * how fast you transfer the food from your shared stomach to the private one
+     */
     private final Double transferringSpeed;
 
     /**
@@ -45,6 +51,9 @@ public class Ant {
      */
     private Double privateStomach;
 
+    /**
+     * simply the sum of the food inside both of the stomachs
+     */
     private Double stomachSum;
 
     /**
@@ -122,6 +131,12 @@ public class Ant {
      */
     private boolean onARandomPath;
 
+    /**
+     * <p><b><i>THE MAIN STATE OF THE ANT</i></b></p>
+     * This is used to orchestrate the whole logic of an ant.
+     * Basically if true the ant will base its choice upon going fast as possible back to the nest,
+     * if false the ant wants to explore the world.
+     */
     private boolean toTheNest;
 
     /**
@@ -131,7 +146,7 @@ public class Ant {
     private Integer leaveTrail;
 
     /**
-     *
+     * the maximum value of consecutive days an ant can leave pheromone on its path
      */
     private final Integer maxLeaveTrail;
 
@@ -145,19 +160,44 @@ public class Ant {
      */
     private final AntsNest nest;
 
+    /**
+     * to avoid interacting with the nest two times a day
+     */
     private boolean nestAlreadyEncountered = false;
 
+    /**
+     * the y position on the grid of the first entrance of the nest
+     */
     private final int nestY;
+
+    /**
+     * the x position on the grid of the first entrance of the nest
+     */
     private final int nestX;
 
+    /**
+     * the array responsible for keeping the distances of the 8 squares around you sorted depending on the distances from them to the nest
+     */
     private final ArrayList<Double> closestNestDistances;
 
+    /**
+     * the support array to closestNestDistances specifying the actual directions in order
+     */
     private final ArrayList<Direction> nestDirections;
 
+    /**
+     * the maximum distance an ant can be from the nest
+     */
     private static double dMax;
 
-    private final int maxRoaming;
+    /**
+     * the minimum values of consecutive days an ant can be roaming on the external ambient of the model
+     */
+    private final int minRoaming;
 
+    /**
+     * counter for minRoaming
+     */
     private int roaming;
 
     /**
@@ -166,14 +206,24 @@ public class Ant {
      */
     private Pheromone leph;
 
+    /**
+     * keep tracking the amount of pheromones around you, if too many the ant will ignore them
+     */
     private int pheromoneCounter;
 
+    /**
+     * how many of the 8 traits, that make up an ant genetic code, an ant can transmit to its children
+     */
     private final Integer nTraitsToTransmit;
 
+    /**
+     * the DNA of an ant
+     */
     ArrayList<Double> antAttributes = new ArrayList<>(8);
 
     /**
-     * This constructor is called only by AntSimulator at the start of the simulation
+     * This constructor is called only by AntSimulator at the start of the simulation or when you click or click and drag the mouse on the screen.
+     * It creates an ant with random values at his attributes.
      * For newborn ants the next constructor is called instead.
      * @param y the column number in the grid
      * @param x the row number in the grid
@@ -224,7 +274,7 @@ public class Ant {
             closestNestDistances.add((double) GUI.WIDTH);
             nestDirections.add(null);
         }
-        maxRoaming = (int) random_seed.nextDouble(life * 0.3, life * 0.5);
+        minRoaming = (int) random_seed.nextDouble(life * 0.3, life * 0.5);
         roaming = 0;
 
         // reproduction related attributes
@@ -236,9 +286,16 @@ public class Ant {
         antAttributes.add(4, (double) maxStomachCapacity);
         antAttributes.add(5, foodToEatEveryDay);
         antAttributes.add(6, transferringSpeed);
-        antAttributes.add(7, (double) maxRoaming);
+        antAttributes.add(7, (double) minRoaming);
     }
 
+     /**
+     * This constructor is called only by AntSNest to generate an ant with the 8 main attributes given by the nest
+     * @param y the column number in the grid
+     * @param x the row number in the grid
+     * @param nest an instance of your nest
+     * @param attributes the array containing the DNA of you father and of the whole colony
+     */
     Ant (Integer y, Integer x, AntsNest nest, ArrayList<Double> attributes) {
         yPos = y;
         xPos = x;
@@ -279,7 +336,7 @@ public class Ant {
             closestNestDistances.add((double) GUI.WIDTH);
             nestDirections.add(null);
         }
-        maxRoaming = (int) Math.floor(attributes.get(7));
+        minRoaming = (int) Math.floor(attributes.get(7));
         roaming = 0;
 
         // reproduction related attributes
@@ -291,7 +348,7 @@ public class Ant {
         antAttributes.add(4, (double) maxStomachCapacity);
         antAttributes.add(5, foodToEatEveryDay);
         antAttributes.add(6, transferringSpeed);
-        antAttributes.add(7, (double) maxRoaming);
+        antAttributes.add(7, (double) minRoaming);
     }
 
     /**
@@ -331,8 +388,6 @@ public class Ant {
         movement();
 
         age();
-
-//        printStats(false);
     }
 
     /**
@@ -353,7 +408,6 @@ public class Ant {
             Direction dir = directionList.remove(index);
             if (interact) {
                 translateDirInPos(dir);     // updates nextY and nextX
-//                System.out.println("dir:" + dir + " nextY:" + nextY + " nextX:" + nextX);
                 interact(nextY, nextX);
             }
             else if (nest) {
@@ -363,6 +417,10 @@ public class Ant {
         }
     }
 
+    /**
+     * little method that aims to enhance the smell sense of an ant.
+     * With this an ant can smell food up to 3 squares from it, basically in a 7x7 square around it, in all 8 directions.
+     */
     void searchFood() {
         if ((sharedStomach + privateStomach) < (maxStomachCapacity * 1.5)) {    // search food only if you are not already full
             random_seed = new Random();
@@ -372,15 +430,16 @@ public class Ant {
                 index = random_seed.nextInt(directionList.size());
                 Direction dir = directionList.remove(index);
                 translateDirInPos(dir);     // updates nextY and nextX
-//                System.out.println("dir:" + dir + " nextY:" + nextY + " nextX:" + nextX);
                 int deltaY = nextY - yPos;
                 int deltaX = nextX - xPos;
                 boolean found = false;
+                // first try at distance 2
                 FoodSource food = AntSimulator.getCurrentFood().get(AntSimulator.key(nextY + deltaY, nextX + deltaX));
                 if (food != null && notOpposite(dir)) {
                     chosenDir = dir;
                     found = true;
                 }
+                // distance 3 only if not going to the nest
                 if (!found && !toTheNest && notOpposite(dir)) {
                     food = AntSimulator.getCurrentFood().get(AntSimulator.key(nextY + (2 * deltaY), nextX + (2 * deltaX)));
                     if (food != null) {
@@ -394,7 +453,7 @@ public class Ant {
     }
 
     /**
-     * the complete algorithm who controls the movement of an ant
+     * the algorithm that controls the movement of an ant
      */
     void movement() {
         if (onARandomPath) {
@@ -402,7 +461,7 @@ public class Ant {
         }
 
         // follow your path
-        if (countDir < changeDirection && chosenDir != null) {   // I don't believe is it possible to reach changeDirection
+        if (countDir < changeDirection && chosenDir != null) {
             translateDirInPos(chosenDir);    // updates nextY and nextX
             if (move(nextY, nextX)) {
                 return;
@@ -413,20 +472,22 @@ public class Ant {
         findRandomDirection();
 
         move(nextY, nextX);
-//        System.out.println("RandomDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos);
     }
 
     /**
-     *
+     * calls one of the method listed in "see also" depending on the object that is occupying the position (y, x).
      * @param y nextY
      * @param x nextX
-     * @param <E> a generic element. Can be ONLY an Ant (different from this), a FoodSource, an AntsNest or a Pheromone.
+     * @param <E> a generic element. Can ONLY be an Ant (different from this), a FoodSource, an AntsNest or a Pheromone.
+     * @see #antInteraction
+     * @see #nestInteraction
+     * @see #pheromoneInteraction
+     * @see #foodInteraction
      */
     <E> void interact(Integer y, Integer x) {
         E element = whoIsThere(y, x);   // called on nextY and nextX
 
         if (element == null) return;    // if there is no one
-//        System.out.println("elementClass:" + element.getClass());
 
         if (element.getClass() == Ant.class) {
             antInteraction((Ant) element);
@@ -442,29 +503,35 @@ public class Ant {
         }
     }
 
+    /**
+     * trigger trophallaxis if conditions are met
+     * @param otherAnt another ant you encountered
+     */
     void antInteraction(Ant otherAnt) {
-        // do action relative to meeting a new ant or a previously known ant
-        // mating and pheromones sniffing
 
         // Trophallaxis
         double myDelta = this.maxStomachCapacity - this.sharedStomach;     // how much our stomach is empty
         double yourDelta = otherAnt.maxStomachCapacity - otherAnt.sharedStomach;
         if ((myDelta > yourDelta + 1) && (otherAnt.sharedStomach > 1)) {    // mine in emptier, so you shall give some food to me
             if (Math.random() < ((myDelta - yourDelta) / (double) this.maxStomachCapacity )) {      // with a P of the difference of our deltas / mine maximum capacity (which is always greater than the difference)
-//                System.out.println("myD:" + myDelta + " yourD:" + yourDelta + ". MyMaxCapacity:" + this.maxStomachCapacity + ". P:" + ((myDelta - yourDelta) / (double) this.maxStomachCapacity ));
                 this.sharedStomach += 1;
                 otherAnt.sharedStomach -= 1;
             }
         }
         else if ((yourDelta > myDelta + 1) && (this.sharedStomach > 1)) {
             if (Math.random() < ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity)) {
-//                System.out.println("yourD:" + yourDelta + " myD:" + myDelta + ". YoursMaxCapacity:" + otherAnt.maxStomachCapacity + ". P:" + ((yourDelta - myDelta) / (double) otherAnt.maxStomachCapacity));
                 this.sharedStomach -= 1;
                 otherAnt.sharedStomach += 1;
             }
         }
     }
 
+    /**
+     * if you have plenty of food give some back to the nest, then lay two eggs with some of your genetics
+     * if you don't have enough food even for yourself get some from the nest
+     * either way toggle the key state "toTheNest"
+     * @param nest your nest
+     */
     void nestInteraction(AntsNest nest) {
         if (nestAlreadyEncountered) return;
         nestAlreadyEncountered = true;
@@ -475,16 +542,9 @@ public class Ant {
         countDir = changeDirection; // change direction
         roaming = 0;
 
-        /* V1
-        if (life < 80 && life > 20) {   // if not too young and not too old
-            nest.transmitGenetics(antAttributes);
-            nest.triggerReproduction();
-        }*/
-
         // deposit food or eat its reserves
         // deposit an amount equal to a random value between this.sharedStomach - 1 and 0, with a continuous random variable that has exponential distribution
-//V1        double threshold = maxStomachCapacity * 0.99;
-/*V2*/  double threshold = maxStomachCapacity * 0.9;
+        double threshold = maxStomachCapacity * 0.9;
         if (stomachSum > threshold) {    // give
 
             double howMuch = (stomachSum - threshold);
@@ -492,7 +552,7 @@ public class Ant {
             sharedStomach -= howMuch;
 
             // deposit eggs
-/*V2*/      if (life < 90 && life > 10) {   // if not too young and not too old
+            if (life < 90 && life > 10) {   // if not too young and not too old
                 nest.transmitGenetics(antAttributes);
                 nest.triggerReproduction();
             }
@@ -505,24 +565,29 @@ public class Ant {
         }
     }
 
+    /**
+     * get some food from the source you found, then start to release pheromone on your way from here
+     * @param food the food's source found
+     */
     void foodInteraction(FoodSource food) {
-//        System.out.println("food nearby");
         // if you have already eaten the maximum food you can, AND you are carrying the maximum food you can ignore it
         // otherwise:
         double amount = maxStomachCapacity * 0.8;
         double available = food.gathering(amount);
-//        System.out.println("foodID:" + food + ", available: " + available);
         if (available > 0) {
-//            System.out.println("there is food");
             // do action relative to gathering food and discovering a new food source
             double left = gatherFood(available);
             food.reverseGathering(left);
-//          System.out.println("sharedStomach:" + sharedStomach + "privateStomach:" + privateStomach);
             leaveTrail = maxLeaveTrail;
         }
         else AntSimulator.foodFinished(food);
     }
 
+    /**
+     * see if the pheromone found is the less strong around you (hopefully it leads to a food's source),
+     * but keep this information depending on "toTheNest"
+     * @param phe the trail pheromone found
+     */
     void pheromoneInteraction(Pheromone phe) {
         // you came across a pheromone trail
         if (phe.ant != this) {  // if it is yours ignore it
@@ -559,7 +624,9 @@ public class Ant {
     }
 
     /**
-     *
+     * initialize the two array responsible for keeping the 8 position around you sorted from the closer to the farthest to the nest
+     * then calls computeNestDistance
+     * @see #computeNestDistance
      */
     private void orientYourself() {
         // reinitialize the data structures for searching the nest
@@ -572,7 +639,7 @@ public class Ant {
     }
 
     /**
-     *
+     *  mainly decide the direction to follow based on the information gathered until now
      */
     private <E> void decide() {
         // First key AI logic of an ant:
@@ -582,8 +649,7 @@ public class Ant {
         boolean found = false;
         // remember that maxStomachCapacity it's the maximum capacity of a single stomach
         // if I decided time ago to go to the nest don't change that decision until you come to the nest
-//V1    if (roaming > maxRoaming && (toTheNest || ((stomachSum < maxStomachCapacity * 0.5)  || (stomachSum > maxStomachCapacity * 1.5)))) {    // little or much food condition
-/*V2*/  if (roaming > maxRoaming && (toTheNest || ((stomachSum < maxStomachCapacity * 0.4)  || (stomachSum > maxStomachCapacity * 1.2)))) {    // little or much food condition
+        if (roaming > minRoaming && (toTheNest || ((stomachSum < maxStomachCapacity * 0.4)  || (stomachSum > maxStomachCapacity * 1.2)))) {    // little or much food condition
             double p = random_seed.nextDouble();
             int start;
             if (p < 0.6) start = 0;
@@ -605,8 +671,7 @@ public class Ant {
         // Second key AI logic of an ant:
             // if I found a strong pheromone trail around me go to the lightest one, hopefully in the opposite direction of the strongest one
             // this will lead me to a food' source or the nest
-//  V1      if (pheromoneCounter < 4) { // if there are too many pheromones around you, you'll get very confused, so ignore them
-/*V2*/  if (pheromoneCounter < 5) { // if there are too many pheromones around you, you'll get very confused, so ignore them
+        if (pheromoneCounter < 5) { // if there are too many pheromones around you, you'll get very confused, so ignore them
             if (leph != null) {
                 if (Math.random() < ((Pheromone.maxStrength - leph.getStrength()) / (double) Pheromone.maxStrength) * 1.2) { // with a P of the strength of the strongest pheromone found
                     Direction desirableDir = translatePosInDir(leph.yPos, leph.xPos);
@@ -615,7 +680,6 @@ public class Ant {
                             if (nestDirections.get(i) == desirableDir) {
                                 chosenDir = desirableDir;
                                 found = true;
-//                            System.out.println("toTheNest:" + toTheNest + " chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos + " lephY:" + leph.yPos + " lephX:" + leph.xPos);
                                 break;
                             }
                         }
@@ -631,7 +695,6 @@ public class Ant {
                             chosenDir = desirableDir;
                             found = true;
                         }
-//                            System.out.println("toTheNest:" + toTheNest + " chosenDir:" + chosenDir + " yPos:" + this.yPos + " xPos:" + this.xPos + " lephY:" + leph.yPos + " lephX:" + leph.xPos);
                     }
 
                 }
@@ -641,19 +704,18 @@ public class Ant {
             onARandomPath = false;
             countDir = 0;
         }
-//        System.out.println("chosenDir:" + chosenDir + " onaRandomPath:" + onARandomPath + " countDir:" + countDir);
-
-        // else choose to follow it or not and in what direction
     }
 
     /**
      * Simply moves the ant to the positions given by parameters. They must be nearby but this is delegated to search(), movement() and translateDirInPos().
-     * If the position given is not free then changes countDir to trigger a recalculation of the path to follow by the ant
+     * If the position given is not free then returning false will trigger to choose a random direction to follow
      * @param y the column number in the grid
      * @param x the row number in the grid
      * @see #search
      * @see #movement
      * @see #translateDirInPos
+     * @param <E> an element of the model: an ant, a food's source, a nest, a pheromone
+     * @return true if you actually moved, false if the position given is already occupied
      */
     private <E> boolean move(Integer y, Integer x) {
         E element = whoIsThere(y, x);
@@ -662,7 +724,6 @@ public class Ant {
                 if (leaveTrail > 1) {
                     Pheromone pheHere = AntSimulator.getCurrentTrailPheromones().get(AntSimulator.key(y, x));
                     if (pheHere != null) {  // then leave a trail with a strength the sum of mine new pheromone plus the strength of the one already here
-//                        System.out.println("maxStrength" + Pheromone.maxStrength + " myStrength:" + strengthOfNewTrailPheromone + " pheHereStrength:" + pheHere.getStrength());
                         AntSimulator.addPheromone(new Pheromone(yPos, xPos, this, Pheromone.pheType.Trail, Math.min(Pheromone.maxStrength, strengthOfNewTrailPheromone + pheHere.getStrength())));
                     }
                     else {
@@ -679,15 +740,16 @@ public class Ant {
     }
 
     /**
-     * decide whether the direction given as a parameter can be a new direction to follow: it must be free.
+     * compute a random direction to follow.
+     * The logic is to give better chance to go to a direction depending on the distance of your position from the nest.
+     * That is greater the distance the more you would want to go towards the nest, closer the distance the more you would want to go away from it.
+     * @param <E> an element of the model: an ant, a food's source, a nest, a pheromone
      */
     private <E> void findRandomDirection() {
-//        System.out.println("FIND RANDOM DIRECTION");
         random_seed = new Random();
         E obstacle;
         double halfDMax = dMax / 2;
         boolean found = false;
-//        System.out.println("D:" + dMax + " D/2:" + halfDMax);
 
         // inside the halfway circle of ray = halfDMax
         if (closestNestDistances.get(4) < halfDMax) {
@@ -874,11 +936,16 @@ public class Ant {
         return (xPos >= 0 && yPos >= 0 && xPos < GUI.WIDTH && yPos < GUI.HEIGHT);
     }
 
+    /**
+     * compute for every of the 8 directions around you the distance from the nest.
+     * Then sort them in ascending order in the two ArrayLists: closestNestDistances and nestDirections
+     * @param y the column number
+     * @param x the row number
+     */
     private void computeNestDistance(int y, int x) {
         double d = Math.sqrt(Math.pow(y - nestY, 2) + Math.pow(x - nestX, 2));  // two point distance equation
         for (int i = 0; i < 8; i++) {
-            if (d < closestNestDistances.get(i)) {
-                // updates the data structures
+            if (d < closestNestDistances.get(i)) {  // updates the data structures
                 closestNestDistances.add(i, d);
                 closestNestDistances.remove(8);
                 nestDirections.add(i, translatePosInDir(y, x));
@@ -913,7 +980,7 @@ public class Ant {
      */
     void die() {
         life = 0.0;
-    }  // maybe a call to the Java Garbage Collector
+    }
 
     /**
      * decrease the value of life of the ant, simulates aging.
@@ -922,7 +989,6 @@ public class Ant {
      */
     void age() {
         life -= starvingMultiplier;
-//        System.out.println("life:" + life);
     }
 
     /**
@@ -942,7 +1008,6 @@ public class Ant {
         else {  // starve, increase the starvingMultiplier attribute
             starvingMultiplier += 0.5;
         }
-//        System.out.println("starvingMultiplier:" + starvingMultiplier + " food to eat everyday:" + foodToEatEveryDay);
     }
 
     /**
@@ -954,7 +1019,6 @@ public class Ant {
             privateStomach += transferringSpeed;
             sharedStomach -= transferringSpeed;
         }
-//        System.out.println("shared:" + sharedStomach + " private:" + privateStomach + " speed:" + transferringSpeed);
     }
 
     public Color getColor() {

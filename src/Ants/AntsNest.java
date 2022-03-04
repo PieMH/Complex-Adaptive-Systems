@@ -83,7 +83,7 @@ public class AntsNest {
         antAttributes.add(4, null); // maxStomachCapacity
         antAttributes.add(5, null); // foodToEatEveryDay
         antAttributes.add(6, null); // transferringSpeed
-        antAttributes.add(7, null); // MaxRoaming
+        antAttributes.add(7, null); // minRoaming
     }
 
     public Color getColor() {
