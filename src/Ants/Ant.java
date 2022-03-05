@@ -648,21 +648,21 @@ public class Ant {
             // if I have just enough quantity of food to go exploring then I will prefer to go outside and explore the ambient for food
         boolean found = false;
         // remember that maxStomachCapacity it's the maximum capacity of a single stomach
-        // if I decided time ago to go to the nest don't change that decision until you come to the nest
-        if (roaming > minRoaming && (toTheNest || ((stomachSum < maxStomachCapacity * 0.4)  || (stomachSum > maxStomachCapacity * 1.2)))) {    // little or much food condition
+        // if I decided time ago to go to the nest don't change that decision until you arrive to the nest
+        if (roaming > minRoaming && (toTheNest || ((stomachSum < maxStomachCapacity * 0.4)  || (stomachSum > maxStomachCapacity * 1.2)))) {
             double p = random_seed.nextDouble();
             int start;
-            if (p < 0.6) start = 0;
-            else if (p < 0.9) start = 1;
-            else start = 2;
-            for (int i = start; i < start + 3; i++) {
+            if (p < 0.6) start = 0;         // with a P of 60% choose to start to search a direction to follow from nestDirections[0] which correspond to the closest path to the nest
+            else if (p < 0.9) start = 1;    // else with a P of 30% choose nestDirections[1] which correspond to the second-closest path to the nest
+            else start = 2;                 // else with a P of 10% choose to start from nestDirections[2] which correspond to the third-closest path to the nest
+            for (int i = start; i < start + 3; i++) {  // iterate the 3 possible directions to find the first one free starting from the one chosen before as a starting point
                 if (!found) {
-                    translateDirInPos(nestDirections.get(i % 3));
+                    translateDirInPos(nestDirections.get(i % 3));  // updates nextY and nextX
                     E el = whoIsThere(nextY, nextX);
-                    if (el == null || el.getClass() == Pheromone.class) {
-                        chosenDir = nestDirections.get(i % 3);
+                    if (el == null || el.getClass() == Pheromone.class) {  // if the direction is already occupied then skip
+                        chosenDir = nestDirections.get(i % 3);  // change the direction to follow
                         found = true;
-                        toTheNest = true;
+                        toTheNest = true;  // change main state
                     }
                 }
             }
@@ -670,12 +670,12 @@ public class Ant {
 
         // Second key AI logic of an ant:
             // if I found a strong pheromone trail around me go to the lightest one, hopefully in the opposite direction of the strongest one
-            // this will lead me to a food' source or the nest
+            // this may lead me to a food's source
         if (pheromoneCounter < 5) { // if there are too many pheromones around you, you'll get very confused, so ignore them
-            if (leph != null) {
-                if (Math.random() < ((Pheromone.maxStrength - leph.getStrength()) / (double) Pheromone.maxStrength) * 1.2) { // with a P of the strength of the strongest pheromone found
+            if (leph != null) {  // if you have the Lightest Encountered PHeromone (see pheromoneIntercation())
+                if (Math.random() < ((Pheromone.maxStrength - leph.getStrength()) / (double) Pheromone.maxStrength) * 1.2) { // with a P proportional to the strength of leph
                     Direction desirableDir = translatePosInDir(leph.yPos, leph.xPos);
-                    if (toTheNest) {
+                    if (toTheNest) {  // follow it ONLY if it's in one of the three squares around you closest to the nest
                         for (int i = 0; i < 3; i++) {
                             if (nestDirections.get(i) == desirableDir) {
                                 chosenDir = desirableDir;
@@ -683,7 +683,7 @@ public class Ant {
                                 break;
                             }
                         }
-                    } else {
+                    } else {  // follow it ONLY if it's in one of the five squares around you farthest from the nest
                         boolean ok = true;
                         for (int i = 0; i < 3; i++) {
                             if (nestDirections.get(i) == desirableDir) {
@@ -700,7 +700,7 @@ public class Ant {
                 }
             }
         }
-        if (found) {
+        if (found) {  // reset some flags, see movement()
             onARandomPath = false;
             countDir = 0;
         }
