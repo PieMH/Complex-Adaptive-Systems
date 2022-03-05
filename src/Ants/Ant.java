@@ -672,7 +672,7 @@ public class Ant {
             // if I found a strong pheromone trail around me go to the lightest one, hopefully in the opposite direction of the strongest one
             // this may lead me to a food's source
         if (pheromoneCounter < 5) { // if there are too many pheromones around you, you'll get very confused, so ignore them
-            if (leph != null) {  // if you have the Lightest Encountered PHeromone (see pheromoneIntercation())
+            if (leph != null) {  // if you have the Lightest Encountered PHeromone (see pheromoneInteraction())
                 if (Math.random() < ((Pheromone.maxStrength - leph.getStrength()) / (double) Pheromone.maxStrength) * 1.2) { // with a P proportional to the strength of leph
                     Direction desirableDir = translatePosInDir(leph.yPos, leph.xPos);
                     if (toTheNest) {  // follow it ONLY if it's in one of the three squares around you closest to the nest
