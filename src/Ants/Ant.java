@@ -760,7 +760,6 @@ public class Ant {
                 // starting from i = 7 where closestNestDistances.get(7) correspond to the cell farthest from the nest
                 // this will have the greatest Probability of being chosen
                 double p = -((closestNestDistances.get(i) - halfDMax) / (2 * Math.log(GUI.DIMENSION) * (halfDMax) / (i + 1))) + 1 / 8.0;
-                System.out.println("pIN" + p);
                 Direction possibleDir = nestDirections.get(i);
                 translateDirInPos(possibleDir);  // updates nextY and nextX
                 obstacle = whoIsThere(nextY, nextX);
@@ -798,7 +797,6 @@ public class Ant {
         else { // closestNestDistances.get(4) >= halfDMax
             for (int i = 0; i < 8; i++) {
                 double p = ((closestNestDistances.get(i) - halfDMax) / (2 * Math.log(GUI.DIMENSION) * (halfDMax) / (8 - i))) + 1 / 8.0;
-                System.out.println("pOUT" + p);
                 Direction possibleDir = nestDirections.get(i);
                 translateDirInPos(possibleDir);
                 obstacle = whoIsThere(nextY, nextX);

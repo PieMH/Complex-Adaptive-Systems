@@ -9,12 +9,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4a50146c-a566-48d9-a6cd-1712c4465f29" name="Changes" comment="Major update. Stats generating and printing on two different files, a csv and a log">
-      <change beforePath="$PROJECT_DIR$/out/artifacts/CAS_jar/CAS.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/CAS_jar/CAS.jar" afterDir="false" />
+    <list default="true" id="4a50146c-a566-48d9-a6cd-1712c4465f29" name="Changes" comment="adding code comments">
       <change beforePath="$PROJECT_DIR$/src/Ants/Ant.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/Ant.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ants/AntSimulator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/AntSimulator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ants/FoodSource.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/FoodSource.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Ants/OutputManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/OutputManager.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,10 +74,7 @@
     <property name="project.structure.last.edited" value="Artifacts" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
-  </component>
-  <component name="ReaderModeSettings">
-    <option name="showRenderedDocs" value="false" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -129,34 +122,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1643556854115</updated>
-    </task>
-    <task id="LOCAL-00010" summary="Thesis update">
-      <created>1644682107979</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1644682107979</updated>
-    </task>
-    <task id="LOCAL-00011" summary="adding comments, javadoc and some code cleanup">
-      <created>1644702063675</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1644702063675</updated>
-    </task>
-    <task id="LOCAL-00012" summary="start of AntSimulator model">
-      <created>1644861413263</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1644861413263</updated>
-    </task>
-    <task id="LOCAL-00013" summary="start of AntSimulator model part 2&#10;there are some problems with the moving ants and an exit code 130">
-      <created>1644948748196</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1644948748196</updated>
     </task>
     <task id="LOCAL-00014" summary="fixed previous ant' bugs">
       <created>1644960196625</created>
@@ -473,7 +438,35 @@
       <option name="project" value="LOCAL" />
       <updated>1646255980460</updated>
     </task>
-    <option name="localTasksCounter" value="59" />
+    <task id="LOCAL-00059" summary="Better simulation behavior and better colors:&#10;now ONLY the ants bringing back food to the nest will depose eggs and transmit its genetic code but can have up to two child instead of 1,&#10;they come back to the nest a bit later but carrying less food, but giving it to the nest with more probability, also they get more food from food's sources.">
+      <created>1646325583564</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1646325583564</updated>
+    </task>
+    <task id="LOCAL-00060" summary="more javadocs and better namings">
+      <created>1646434473915</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1646434473916</updated>
+    </task>
+    <task id="LOCAL-00061" summary="adding code comments">
+      <created>1646478587482</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1646478587483</updated>
+    </task>
+    <task id="LOCAL-00062" summary="adding code comments">
+      <created>1646478610119</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1646478610119</updated>
+    </task>
+    <option name="localTasksCounter" value="63" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -488,9 +481,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="thesis grammatical update" />
-    <MESSAGE value="found nest agglomeration problem (poor reservoir quantities)&#10;started genetics code" />
-    <MESSAGE value="complete model with genetics and reproduction&#10;The model doesn't sustain itself, it will die out after 1 single generation&#10;TOO MANY ants around the nest we need to fix this" />
     <MESSAGE value="complete model some changes:&#10;no more pheromones from the nest&#10;the ants can now sense food in a 7*7 square&#10;values changes:&#10;+ 1% food's sources spawning speed&#10;+ little more food in every food's source&#10;- 50% ca. the expected value of &quot;maxLeaveTrail&quot; now it is double the amount of ChangeDirection" />
     <MESSAGE value="update on Ant AI v3.0&#10;now ants will choose the direction to go in random exploration based on its &quot;nest status&quot;, with progressive probability in function of the distance from the nest" />
     <MESSAGE value="gui default value changed" />
@@ -513,7 +503,10 @@
     <MESSAGE value="gitignore update" />
     <MESSAGE value="minor bug fixes" />
     <MESSAGE value="Major update. Stats generating and printing on two different files, a csv and a log" />
-    <option name="LAST_COMMIT_MESSAGE" value="Major update. Stats generating and printing on two different files, a csv and a log" />
+    <MESSAGE value="Better simulation behavior and better colors:&#10;now ONLY the ants bringing back food to the nest will depose eggs and transmit its genetic code but can have up to two child instead of 1,&#10;they come back to the nest a bit later but carrying less food, but giving it to the nest with more probability, also they get more food from food's sources." />
+    <MESSAGE value="more javadocs and better namings" />
+    <MESSAGE value="adding code comments" />
+    <option name="LAST_COMMIT_MESSAGE" value="adding code comments" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
