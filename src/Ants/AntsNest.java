@@ -126,13 +126,21 @@ public class AntsNest {
     }
 
 
+    /**
+     * The method that implements a version of a generic genetic algorithm.
+     * The method sets the genetic code to pass to newborn ants that is the fusion of two parts.
+     * The first part of the genetic code comes directly from the father ant.
+     * The second part is from the genetic code already present in the nest, which is a contribution of all
+     * the ants in the history that have transmitted its genetic code to the nest
+     * @param attributes the genetic code of the father ant, which is made of 8 attributes
+     */
     void transmitGenetics(ArrayList<Double> attributes) {
         // do some genetic algorithm code
         // with the crossover value "nTraitsToTransmit" and a random point to start copying
         Random r = new Random();
         int start = r.nextInt(0, 8);  // where to start copying genetics values
         for (int i = start; i < start + 8; i++) {
-            if (i - start < attributes.get(0)) {    // nTraitsToTransmit
+            if (i - start < attributes.get(0)) {    // nTraitsToTransmit between 1 and 8
                 antAttributes.set(i % 8, attributes.get(i % 8));
             }
             // if it's the first ant than get its whole genetic code
@@ -140,7 +148,6 @@ public class AntsNest {
                 antAttributes.set(i % 8, attributes.get(i % 8));
             }
         }
-
     }
 
     private boolean searchSpawnPoint() {

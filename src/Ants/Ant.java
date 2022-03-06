@@ -748,20 +748,26 @@ public class Ant {
     private <E> void findRandomDirection() {
         random_seed = new Random();
         E obstacle;
-        double halfDMax = dMax / 2;
+        double halfDMax = dMax / 2;  // dMax is the maximum distance an ant can be in the cell on the grid farthest from the nest
         boolean found = false;
 
         // inside the halfway circle of ray = halfDMax
         if (closestNestDistances.get(4) < halfDMax) {
-            for (int i = 7; i >= 0; i--) {
+            for (int i = 7; i >= 0; i--) {  // search through the 8 directions
+                // linear function that depends on the value of closestNestDistances.get(i)
+                // also depends on GUI.DIMENSION = the number fo cells on the grid
+                // and on halfDmax the maximum ray from the centre, halved
+                // starting from i = 7 where closestNestDistances.get(7) correspond to the cell farthest from the nest
+                // this will have the greatest Probability of being chosen
                 double p = -((closestNestDistances.get(i) - halfDMax) / (2 * Math.log(GUI.DIMENSION) * (halfDMax) / (i + 1))) + 1 / 8.0;
+                System.out.println("pIN" + p);
                 Direction possibleDir = nestDirections.get(i);
-                translateDirInPos(possibleDir);
+                translateDirInPos(possibleDir);  // updates nextY and nextX
                 obstacle = whoIsThere(nextY, nextX);
-                if (obstacle == null || obstacle.getClass() == Pheromone.class) {
-                    if (notOpposite(possibleDir)) {
-                        if (random_seed.nextDouble() < p) {
-                            if (inBounds(nextY, nextX)) {
+                if (obstacle == null || obstacle.getClass() == Pheromone.class) {  // cell is free
+                    if (notOpposite(possibleDir)) {  // it isn't the opposite direction to the current one
+                        if (random_seed.nextDouble() < p) {  // choose this direction with a Probability of p
+                            if (inBounds(nextY, nextX)) {    // if inside the grid
                                 chosenDir = possibleDir;
                                 countDir = 0;
                                 onARandomPath = true;
@@ -792,6 +798,7 @@ public class Ant {
         else { // closestNestDistances.get(4) >= halfDMax
             for (int i = 0; i < 8; i++) {
                 double p = ((closestNestDistances.get(i) - halfDMax) / (2 * Math.log(GUI.DIMENSION) * (halfDMax) / (8 - i))) + 1 / 8.0;
+                System.out.println("pOUT" + p);
                 Direction possibleDir = nestDirections.get(i);
                 translateDirInPos(possibleDir);
                 obstacle = whoIsThere(nextY, nextX);
