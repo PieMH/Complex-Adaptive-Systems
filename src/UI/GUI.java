@@ -352,12 +352,12 @@ public class GUI {
                 g.setColor(Color.BLACK);
 
                 // DRAW LINES TO CREATE A GRID
-                for(int i = 0; i <= GUI.HEIGHT; i++) {
+                for(int i = 0; i < GUI.HEIGHT; i++) {
                     int y = i * getHeight() / GUI.HEIGHT;
                     g.drawLine(0, y, getWidth(), y);
                 }
 
-                for( int j = 0; j <= GUI.WIDTH; j++) {
+                for( int j = 0; j < GUI.WIDTH; j++) {
                     int x = j * getWidth() / GUI.WIDTH;
                     g.drawLine(x, 0, x, getHeight() );
                 }
