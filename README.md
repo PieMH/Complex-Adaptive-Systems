@@ -50,13 +50,13 @@ If you run the Ants Simulator in the folder src/Ants/ you'll find two output fil
 
 ### Technologies used
 
-<img title="Java" alt="Java" src="F:\Pietro\University\Tesi\CAS\images\java.jpg" width="270" height="150">
+<img title="Java" alt="Java" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/java.jpg" width="270" height="150">
 
-<img title="IntelliJ" alt="" src="F:\Pietro\University\Tesi\CAS\images\IntelliJ.jpg" width="150" height="150">
+<img title="IntelliJ" alt="IntelliJ" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/IntelliJ.jpg" width="150" height="150">
 
-<img title="Desmos" alt="" src="F:\Pietro\University\Tesi\CAS\images\desmos.png" width="150" height="150">
+<img title="Desmos" alt="Desmos" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/desmos.png" width="150" height="150">
 
-<img title="gitHub" alt="" src="F:\Pietro\University\Tesi\CAS\images\github.png" width="150" height="150">
+<img title="GitHub" alt="GitHub" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/github.png" width="150" height="150">
 
-<img title="gitHub" alt="" src="F:\Pietro\University\Tesi\CAS\images\git.png" width="240" height="150">
+<img title="git" alt="git" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/git.png" width="240" height="150">
 
