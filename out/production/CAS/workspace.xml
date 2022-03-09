@@ -9,8 +9,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4a50146c-a566-48d9-a6cd-1712c4465f29" name="Changes" comment="adding code comments">
+    <list default="true" id="4a50146c-a566-48d9-a6cd-1712c4465f29" name="Changes" comment="minor code commenting">
+      <change beforePath="$PROJECT_DIR$/out/artifacts/CAS_jar/CAS.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/CAS_jar/CAS.jar" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Ants/Ant.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/Ant.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ants/AntSimulator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/AntSimulator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ants/AntsNest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/AntsNest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ants/FoodSource.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/FoodSource.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Ants/Pheromone.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Ants/Pheromone.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,6 +81,9 @@
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
+  <component name="ReaderModeSettings">
+    <option name="showRenderedDocs" value="false" />
+  </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="F:\Pietro\University\Tesi\CAS\src\Ants" />
@@ -122,27 +130,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1643556854115</updated>
-    </task>
-    <task id="LOCAL-00014" summary="fixed previous ant' bugs">
-      <created>1644960196625</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1644960196625</updated>
-    </task>
-    <task id="LOCAL-00015" summary="now really moving ants">
-      <created>1644964418948</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1644964418948</updated>
-    </task>
-    <task id="LOCAL-00016" summary="now there is an Ant's Nest">
-      <created>1645013023922</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1645013023922</updated>
     </task>
     <task id="LOCAL-00017" summary="added food and Pheromones&#10;need to add the choice of the action and the food interaction with the food">
       <created>1645034510381</created>
@@ -466,7 +453,28 @@
       <option name="project" value="LOCAL" />
       <updated>1646478610119</updated>
     </task>
-    <option name="localTasksCounter" value="63" />
+    <task id="LOCAL-00063" summary="adding code comments">
+      <created>1646530090437</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1646530090437</updated>
+    </task>
+    <task id="LOCAL-00064" summary="some screenshots of a simulation">
+      <created>1646530130712</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1646530130712</updated>
+    </task>
+    <task id="LOCAL-00065" summary="minor code commenting">
+      <created>1646530316180</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1646530316180</updated>
+    </task>
+    <option name="localTasksCounter" value="66" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -481,8 +489,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="complete model some changes:&#10;no more pheromones from the nest&#10;the ants can now sense food in a 7*7 square&#10;values changes:&#10;+ 1% food's sources spawning speed&#10;+ little more food in every food's source&#10;- 50% ca. the expected value of &quot;maxLeaveTrail&quot; now it is double the amount of ChangeDirection" />
-    <MESSAGE value="update on Ant AI v3.0&#10;now ants will choose the direction to go in random exploration based on its &quot;nest status&quot;, with progressive probability in function of the distance from the nest" />
     <MESSAGE value="gui default value changed" />
     <MESSAGE value="minor fixes" />
     <MESSAGE value="Ant AI upgrade v4.2, MEGA update:&#10;1 - now ant want to go away from the next if too close to it and viceversa when in exploring mode&#10;2- better food gathering&#10;3- now ants will ignore a zone full of pheromones because they get confused by them and don't know which trail to follow" />
@@ -506,7 +512,9 @@
     <MESSAGE value="Better simulation behavior and better colors:&#10;now ONLY the ants bringing back food to the nest will depose eggs and transmit its genetic code but can have up to two child instead of 1,&#10;they come back to the nest a bit later but carrying less food, but giving it to the nest with more probability, also they get more food from food's sources." />
     <MESSAGE value="more javadocs and better namings" />
     <MESSAGE value="adding code comments" />
-    <option name="LAST_COMMIT_MESSAGE" value="adding code comments" />
+    <MESSAGE value="some screenshots of a simulation" />
+    <MESSAGE value="minor code commenting" />
+    <option name="LAST_COMMIT_MESSAGE" value="minor code commenting" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
