@@ -8,6 +8,11 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * This class is responsible for creating two files, a .csv and a .log
+ * Where the data and the stats of the simulation will be printed
+ * @see AntSimulator
+ */
 public class OutputManager {
 
     private final String outputFileName;
@@ -28,6 +33,10 @@ public class OutputManager {
         }
     }
 
+    /**
+     * prints the data to the csv file,
+     * @param data the layout of the data to be printed as a list of arrays' string
+     */
     void writeCSV(List<String[]> data) {
         // default all fields are enclosed in double quotes
         // default separator is a comma
@@ -40,6 +49,10 @@ public class OutputManager {
 
     }
 
+    /**
+     * prints the data to the log file,
+     * @param data the layout of the data to be printed as a list of arrays' string
+     */
     void writeLog(List<String[]> data) {
         try ( FileWriter logWriter = new FileWriter(logFileName, true);
             BufferedWriter b = new BufferedWriter(logWriter);

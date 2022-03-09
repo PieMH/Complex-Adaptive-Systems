@@ -18,21 +18,29 @@ import java.util.List;
  * @see AntsNest
  * @see FoodSource
  * @see Pheromone
+ * @see OutputManager
  */
 public class AntSimulator implements CASModel {
 
     /**
      * HasMap of the ant currently alive.
      * The key is calculated always by calling {@code key(y,x)},
-     * the values are the objects Ants
+     * the values are the objects Ant.
      */
     private static Map<Integer, Ant> currentAlive;
 
     /**
-     *
+     * HasMap of the food's sources currently available.
+     * The key is calculated always by calling {@code key(y,x)},
+     * the values are the objects FoodSource.
      */
     private static Map<Integer, FoodSource> currentFood;
 
+    /**
+     * HasMap of the trail pheromones currently on the grid.
+     * The key is calculated always by calling {@code key(y,x)},
+     * the values are the objects Pheromone.
+     */
     private static Map<Integer, Pheromone> currentTrailPheromones;
 
     /**
@@ -89,14 +97,22 @@ public class AntSimulator implements CASModel {
     int minimal = 1;
 
     /**
-     *
+     * the maximal value of elements in the grid if generated randomly.
+     * It follows a logarithmic growth proportional to the GUI.DIMENSION value,
+     * that is the total number of cells in the grid.
      */
     int maximal;
 
-    //  Stats carrying variables to be passed to OutputManager
+    //  Attribute used for stats, carrying variables to be passed to OutputManager
 
+    /**
+     * the object responsible for printing the stats
+     */
     OutputManager outputManager;
 
+    /**
+     * number of day passed since day 0, every frame on the grid sets a day in the model
+     */
     static int day = 0;
 
     /**
@@ -109,26 +125,61 @@ public class AntSimulator implements CASModel {
      */
     static int totDead = 0;
 
+    /**
+     * ants born today
+     */
     static int newBorn = 0;
 
+    /**
+     * ants dead today
+     */
     static int newDead = 0;
 
+    /**
+     * total number of food's sources created since day 0
+     */
     static int totNewFood = 0;
 
+    /**
+     * total number of food's sources consumed since day 0
+     */
     static int totFinishedFood = 0;
 
+    /**
+     * food's sources spawned today
+     */
     static int newFood = 0;
 
+    /**
+     * food's sources consumed today
+     */
     static int finishedFood = 0;
 
+    /**
+     * total number of trail pheromones created since day 0
+     */
     static int totCreatedPheromones = 0;
 
+    /**
+     * total number of trail pheromones decayed in the ambient since day 0
+     */
     static int totDecayedPheromones = 0;
 
+    /**
+     * trail pheromones created today
+     */
     static int newPheromones = 0;
 
+    /**
+     * trail pheromones decayed today
+     */
     static int decayedPheromones = 0;
 
+    /**
+     * instantiate this class,
+     * creates the link with other classes, set the data structures, starts the variables holding stats
+     * @param gui the object that runs the UI.GUI
+     */
     public AntSimulator(GUI gui) {
         this.gui = gui;
         outputManager = new OutputManager();
@@ -137,7 +188,18 @@ public class AntSimulator implements CASModel {
     }
 
     /**
-     * called by UI.OptionsMenu on time = 0 or on a click of the button "Apply"
+     * called by UI.OptionsMenu on time = 0 or on a click of the button "Apply".
+     * Starts the simulation. This function creates the thread of the model behind the GUI
+     * Every frame (every day for the model):
+     * <ol>
+     *     <li>check if UI.OptionsMenu.checkBoxRandom was clicked, and do actions accordingly</li>
+     *     <li>evolve the model for 1 day</li>
+     *     <li>let the nest reproduce</li>
+     *     <li>balance the food in the ambient</li>
+     *     <li>age the pheromones in the ambient</li>
+     *     <li>updates next frame</li>
+     *     <li>send the stats to the OutputManager and then resets some new stats</li>
+     * </ol>
      */
     @Override
     public void startSimulation() {
@@ -203,6 +265,9 @@ public class AntSimulator implements CASModel {
         newDead += 1;
     }
 
+    /**
+     * lets the nest creates some new ants times the value of nest.newBorn
+     */
     private void nestReproduction() {
         int i = nest.newBorn;
         for (; i > 0; i--) {
@@ -244,6 +309,9 @@ public class AntSimulator implements CASModel {
         }
     }
 
+    /**
+     * decrease the strength of every pheromone currently on the grid
+     */
     private void agePheromones() {
         Map<Integer, Pheromone> nextTrailPheromones;
         synchronized (lock) {
@@ -254,12 +322,20 @@ public class AntSimulator implements CASModel {
         }
     }
 
+    /**
+     * erase a decayed pheromone from currentTrailPheromones
+     * @param trailPhe the pheromone decayed
+     */
     static void erasePheromone(Pheromone trailPhe) {
         currentTrailPheromones.remove(key(trailPhe.yPos, trailPhe.xPos));
         decayedPheromones += 1;
         totDecayedPheromones += 1;
     }
 
+    /**
+     * called by an ant creating a new trail pheromones while moving
+     * @param trailPhe the new trail pheromone to add to currentTrailPheromones
+     */
     static void addPheromone(Pheromone trailPhe) {
         currentTrailPheromones.put(key(trailPhe.yPos, trailPhe.xPos), trailPhe);
         newPheromones += 1;
@@ -275,7 +351,7 @@ public class AntSimulator implements CASModel {
      * non creano inconsistenze ma avvengono solo alla fine dell'evoluzione del ciclo di gioco.
      * <p>
      * Per un aspetto più realistico del gioco le chiavi del dizionario vengono accedute casualmente una per una, evitando
-     * che i giocatori alla fine del dizionario sfruttino il vantaggio di subire più raramente gli effetti ambientali (carenza di cibo)
+     * di dare un vantaggio diretto ad alcune formiche rispetto ad altre
      * @param choice choice di funzione di scorrimento del dizionario
      */
     private void iterateCurrentAlive(int choice) {
@@ -304,6 +380,7 @@ public class AntSimulator implements CASModel {
     }
 
     /**
+     * scorre la matrice del frame della GUI
      * @param scelta scelta di funzione di scorrimento della matrice del pannello della gui
      */
     private void iterateMatrix(int scelta) {
@@ -319,9 +396,10 @@ public class AntSimulator implements CASModel {
     }
 
     /**
-     * Aggiorna il nextFrame della gui rispetto alla situazione attuale della currentAlive
-     * @param y indice di riga
-     * @param x indice di colonna
+     * Updates the next frame on the GUI. Every cell on the grid is true IF AND ONLY IF there is an ant OR a food's source OR a nest
+     * if there is a pheromone or no one than it is false
+     * @param y row index
+     * @param x column index
      */
     private void updateFrame(int y, int x) {
         gui.nextFrame[y][x] = (currentAlive.containsKey(key(y, x)) ||
@@ -331,8 +409,7 @@ public class AntSimulator implements CASModel {
     }
 
     /**
-     * Imposta la currentAlive casualmente generando posizioni casuali nella matrice,
-     * tanti quanti dice n_starting_players
+     * Imposta la currentAlive casualmente generando posizioni casuali nella matrice, tanti quanti dice n_starting_players
      * anche questa è thread-safe per non andare in conflitto con setMap potenzialmente chiamata dal thread della gui
      * quando si clicca su pannello
      */
@@ -360,6 +437,7 @@ public class AntSimulator implements CASModel {
     /**
      * called by UI.GUI on a click or a click and drag of the mouse on the grid
      * It generates new ants in the squares clicked on or kill them if the square was already filled
+     * it is thread-safe
      * @param y row number
      * @param x column number
      */
@@ -386,10 +464,11 @@ public class AntSimulator implements CASModel {
     }
 
     /**
+     * calculates the unique key associated to the coordinates y, x on the grid.
+     * Actually it is the position on the grid seen as one dimensional
      * @param y row number
      * @param x column number
-     * @return the unique key associated to the coordinates y, x on the grid.
-     *          Actually it is the position on the grid seen as one dimensional
+     * @return y * GUI.WIDTH + x
      */
     public static Integer key(int y, int x) {
         return (y * GUI.WIDTH) + x;
@@ -409,7 +488,7 @@ public class AntSimulator implements CASModel {
     }
 
     /**
-     * called by UI.GUI paintLife and UI.GUI paintAnts
+     * called by UI.GUI.paintLife and UI.GUI.paintAnts
      * @param y the row number value
      * @param x the column number value
      * @return the correct color of the object in this position
@@ -427,6 +506,7 @@ public class AntSimulator implements CASModel {
         if (food != null) {
             return food.getColor();
         }
+        // should not reach here so red is for debugging issues
         return new Color(200,0,0);
     }
 
@@ -457,6 +537,7 @@ public class AntSimulator implements CASModel {
      * <ol>
      * <li>resets the three hashMaps
      * <li>creates a new nest
+     * <li>resets to zero all stats
      * <li>recalculates Pheromone.maxStrength (it depends on UI.GUI.DIMENSION changes)
      * <li>spawns new food on the grid
      * </ol>
@@ -506,6 +587,9 @@ public class AntSimulator implements CASModel {
         System.out.println("K:" + i + "," + j + " V:" + currentAlive.get(hashKey));
     }
 
+    /**
+     * use this for debugging
+     */
     private void printFood() {
         currentFood.forEach((key, value) -> System.out.println(key + " " + value));
         System.out.println("_________________________________________________________");
@@ -531,7 +615,7 @@ public class AntSimulator implements CASModel {
     }
 
     /**
-     * reset the stats of the simulation
+     * reset to zero ALL the stats of the simulation
      */
     private void resetAllStats() {
         day = 0;
@@ -552,6 +636,9 @@ public class AntSimulator implements CASModel {
         decayedPheromones = 0;
     }
 
+    /**
+     * resets to zero ONLY the stats of today
+     */
     private void resetNewStats() {
         newBorn = 0;
         newDead = 0;
@@ -563,6 +650,18 @@ public class AntSimulator implements CASModel {
         decayedPheromones = 0;
     }
 
+    /**
+     * A function working on a generic dataset of objects even of other classes, pass the name of the attribute of the objects by a string,
+     * On {@code objects.attribute} this method computes the min, max, mean and median value and upload them on an array as a return value
+     * @param dataset a dataset on which is it possible to do some stats {@code (someHashmap.values())}
+     * @param attribute the attribute of the objects contained on the dataset on which it's possible to compute the stats
+     * @return the array containing the statistics done:
+     *          <ol>
+     *          <li>array[0] is the min value of {@code objects.attribute}
+     *          <li>array[1] is the max value of {@code objects.attribute}
+     *          <li>array[2] is the mean value of {@code objects.attribute}
+     *          <li>array[3] is the median value of {@code objects.attribute}
+     */
     private double[] doStats(Collection<?> dataset, String attribute) {
         if (dataset.isEmpty()) return null;
 
@@ -570,8 +669,9 @@ public class AntSimulator implements CASModel {
         try {
             int i = 0;
             for (Object d : dataset) {
-                Field field = d.getClass().getDeclaredField(attribute);
+                Field field = d.getClass().getDeclaredField(attribute);  // also gets private attributes
                 field.setAccessible(true);
+                // turns them to string values and then parses them to double, this enables the conversion from Integer to Double values
                 double value = Double.parseDouble(field.get(d).toString());
                 values[i] = value;
                 i++;
@@ -598,16 +698,19 @@ public class AntSimulator implements CASModel {
         stats[2] = sum / values.length;
 
         // median
-        if (values.length % 2 == 0) {   // even
+        if (values.length % 2 == 0) {   // even: values.length
             int mid = values.length / 2;
             stats[3] = (values[mid - 1] + values[mid]) / 2;
         }
-        else {  // odd
+        else {  // odd: values.length
             stats[3] = values[((values.length + 1) / 2) - 1];
         }
         return stats;
     }
 
+    /**
+     * build the string to be printed by OutputManager
+     */
     private void callsOutputManager() {
 
         double [] lifeStats       = doStats(currentAlive.values(), "life");

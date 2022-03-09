@@ -6,6 +6,14 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * The class who sets the law on which an ant's nest operates.
+ * Most important method is transmitGenetics() which implements a genetic algorithm.
+ * @see AntSimulator
+ * @see FoodSource
+ * @see Ant
+ * @see Pheromone
+ */
 public class AntsNest {
 
     /**
@@ -13,6 +21,9 @@ public class AntsNest {
      */
     public final Color color = new Color(30, 30, 30);
 
+    /**
+     * the amount of food stored in this nest
+     */
     private Double reservoir;
 
     /**
@@ -39,22 +50,47 @@ public class AntsNest {
      */
     public Integer nestEntrance4;
 
+    /**
+     * the keys associated to the 12 positions around the nest
+     */
     private final ArrayList<Integer> spawnPositions;
 
+    /**
+     * the counter to keep track of how many ants shall be born in the next days
+     */
     int newBorn;
 
-    private Integer spawnX;
+    /**
+     * for every newborn ants this y pos will get updated
+     * it is the translation from a key to the y position
+     */
     private Integer spawnY;
 
+    /**
+     * for every newborn ants this x pos will get updated
+     * it is the translation from a key to the x position
+     */
+    private Integer spawnX;
+
+    /**
+     * the 8 attributes that make up for the genetic code of an ant
+     * This is actually the DNA of the nest, or of the colony.
+     * Every newborn ant will be born with this genetic code which is a mix of the father DNA
+     * and the DNA of all father-ants who previously came to the nest to deposit food and eggs.
+     */
     ArrayList<Double> antAttributes = new ArrayList<>(8);
 
+    /**
+     * creates and spawn the entrance to the nest in the environment.
+     * Sets the data structures to their starting values
+     */
     AntsNest() {
         nestEntrance1 = AntSimulator.key(Math.floorDiv(GUI.HEIGHT, 2), Math.floorDiv(GUI.WIDTH - 1, 2)); // the top left square in the centre of the grid
         nestEntrance2 = nestEntrance1 + 1;  // the square on the right has exactly the next value
         nestEntrance3 = nestEntrance1 + GUI.WIDTH; // the square on the left bottom corner, just add the width of the grid
         nestEntrance4 = nestEntrance3 + 1;
 
-        reservoir = 100000.0;
+        reservoir = 10000.0;
 
         newBorn = 0;
 
@@ -86,20 +122,28 @@ public class AntsNest {
         antAttributes.add(7, null); // minRoaming
     }
 
-    public Color getColor() {
-        return color;
-    }
-
-    Integer getNestEntrance1() {return nestEntrance1;}
-
+    /**
+     * check if the integer passed is associated to a position in the grid occupied by a nest entrance
+     * @param key the integer associated to a key in the grid
+     * @return true if the position passed is within the nest, false otherwise
+     */
     boolean inNest(Integer key) {
         return (key.equals(nestEntrance1) || key.equals(nestEntrance2) || key.equals(nestEntrance3) || key.equals(nestEntrance4));
     }
 
+    /**
+     * called by an ant when it wants to add some of its food to the nest's reservoir
+     * @param quantity how much food to add to the reservoir
+     */
     void addReserves(double quantity) {
         reservoir += quantity;
     }
 
+    /**
+     * called by a famished ant who interacts with the nest
+     * @param howMuch how much food the ant want to take for itself
+     * @return true if there is the required food in the reservoir
+     */
     boolean getFoodFromReserves(double howMuch) {
         if (reservoir - howMuch > 1) {
             reservoir -= howMuch;
@@ -108,30 +152,34 @@ public class AntsNest {
         return false;
     }
 
-    double getReservoir() {
-        return reservoir;
-    }
-
+    /**
+     * whenever an ant come tho the nest to drop some food to the reservoir,
+     * then it will lay two eggs
+     */
     void triggerReproduction() {
         newBorn += 2;
-    } // V1 ADDS 1, V2 ADDS 2
+    }
 
+    /**
+     * called by AntSimulator.
+     * Search for a free spawn point in the grid next to the nest,
+     * then creates a new ant there with the latest DNA memorized in the nest
+     * @return the newborn ant, can return null if conditions are not met
+     */
     Ant reproduction() {
-        if (searchSpawnPoint()) {   // this call updates spawnY and spawnY, to am available spot on the grid next to the nest
-//                System.out.println("reservoir left:" + reservoir + ". spawnY:" + spawnY + ", spawnX:" + spawnX);
+        if (searchSpawnPoint() && newBorn > 0) {   // this call updates spawnY and spawnY, to am available spot on the grid next to the nest
             newBorn -= 1;
             return new Ant(spawnY, spawnX, this, antAttributes);
         }
         return null;
     }
 
-
     /**
      * The method that implements a version of a generic genetic algorithm.
      * The method sets the genetic code to pass to newborn ants that is the fusion of two parts.
      * The first part of the genetic code comes directly from the father ant.
      * The second part is from the genetic code already present in the nest, which is a contribution of all
-     * the ants in the history that have transmitted its genetic code to the nest
+     * the ants in the history that have transmitted its genetic code to the nest.
      * @param attributes the genetic code of the father ant, which is made of 8 attributes
      */
     void transmitGenetics(ArrayList<Double> attributes) {
@@ -150,6 +198,10 @@ public class AntsNest {
         }
     }
 
+    /**
+     * search a free point, next to the nest, to create a baby ant
+     * @return true if a free point is found, ALSO updates spawnY and SpawnX as a collateral effect
+     */
     private boolean searchSpawnPoint() {
         Random r = new Random();
         ArrayList<Integer> spawnKeys = new ArrayList<>(spawnPositions);
@@ -187,4 +239,14 @@ public class AntsNest {
 
         return true;
     }
+
+    double getReservoir() {
+        return reservoir;
+    }
+
+    public Color getColor() {
+        return color;
+    }
+
+    Integer getNestEntrance1() {return nestEntrance1;}
 }

@@ -31,8 +31,6 @@ import javax.swing.JLabel;
  * <p>
  * There are two panel, inner and outer. The most important is the centre where there is a rectangular frame, where the simulation is shown.
  * The bottom holds many control buttons and a slider.
- * <p>
- * <b>Notes:</b> maintain the proportions of width and height as 2:1 respectively.
  */
 public class GUI {
 
@@ -51,8 +49,19 @@ public class GUI {
      */
     public static int DIMENSION = WIDTH * HEIGHT;
 
+    /**
+     * the frame for the GUI
+     */
     private JFrame frame;
+
+    /**
+     * the panel containing the grid
+     */
     private JPanel innerPanel;
+
+    /**
+     * the outer panel on the frame
+     */
     private JPanel outerPanel;
 
     /**
@@ -80,15 +89,28 @@ public class GUI {
      */
     private CASModel CASModel;
 
-    // The next three are used only for SGS
-
     /**
      * the square on the grid that has the mouse hovering on it
+     * USED ONLY WHEN THE MODEL DISPLAYED IS SGS
      */
     private Giocatore focusedPlayer;
 
+    /**
+     * shows the life value of the agents of the model
+     * USED ONLY WHEN THE MODEL DISPLAYED IS EITHER SGS OR ANTS
+     */
     private boolean showLife = false;
+
+    /**
+     * shows the wellness value of the agents of the model
+     * USED ONLY WHEN THE MODEL DISPLAYED IS SGS
+     */
     private boolean showWellness = false;
+
+    /**
+     * shows the trail pheromones on the grid
+     * USED ONLY WHEN THE MODEL DISPLAYED IS ANTS
+     */
     private boolean showPheromones = false;
 
     /**
@@ -240,7 +262,7 @@ public class GUI {
         });
 
         //************************************************************************************************************/
-        // Create layout
+        // Creates layout
         GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
         groupLayout.setHorizontalGroup(
         	groupLayout.createParallelGroup(Alignment.LEADING)
@@ -329,7 +351,7 @@ public class GUI {
 
                 g.setColor(Color.BLACK);
 
-                // DRAW LINES
+                // DRAW LINES TO CREATE A GRID
                 for(int i = 0; i <= GUI.HEIGHT; i++) {
                     int y = i * getHeight() / GUI.HEIGHT;
                     g.drawLine(0, y, getWidth(), y);

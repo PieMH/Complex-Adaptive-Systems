@@ -5,6 +5,14 @@ import UI.GUI;
 import java.awt.*;
 import java.util.Random;
 
+/**
+ * The class who sets minimal attributes and methods shared by every food' source
+ * <p>
+ * @see AntSimulator
+ * @see AntsNest
+ * @see Ant
+ * @see Pheromone
+ */
 public class FoodSource {
 
     /**
@@ -35,10 +43,18 @@ public class FoodSource {
     int minimal;
 
     /**
-     *
+     * the maximal value of elements in the grid if generated randomly.
+     * It follows a logarithmic growth proportional to the GUI.DIMENSION value,
+     * that is the total number of cells in the grid
      */
     int maximal;
 
+    /**
+     * spawn a new FoodSource object in position (y, x)
+     * then assign to it a starting value of food's resources in this source
+     * @param y row spawn index
+     * @param x column spawn index
+     */
     FoodSource(Integer y, Integer x) {
         this.yPos = y;
         this.xPos = x;
@@ -58,17 +74,21 @@ public class FoodSource {
     }
 
     /**
-     * called by an ant interacting with this food's source
+     * called by an ant interacting with this food's source.
+     * Returns to the ant the minimum quantity of resources between the one requested and the maximum currently available
      * @param amount the amount of food requested
      * @return the amount of food currently available in this source, if you request too much simply returns zero
      */
     double gathering(double amount) {
-//        System.out.println("amountLeft:" + amountLeft);
         double available = Math.min(amount, amountLeft);
         amountLeft -= available;
         return available;
     }
 
+    /**
+     * called by avery ant when it realizes it got too much food from this food's source
+     * @param amount the amount of food to put back to the source
+     */
     void reverseGathering(double amount) {
         amountLeft += amount;
     }

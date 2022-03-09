@@ -20,7 +20,15 @@ import java.util.Objects;
  */
 public class OptionsMenu {
 
+	/**
+	 * the frame of the options menu
+	 */
 	private JFrame frame;
+
+	/**
+	 * check if number of starting player is random or fixed from the above variable
+	 */
+	private JCheckBox checkBoxRandom;
 
 	/**
 	 * number of starting players iff checkBoxRandom is true
@@ -28,10 +36,13 @@ public class OptionsMenu {
 	private JTextField textNStartingPlayers;
 
 	/**
-	 * check if number of starting player is random or fixed from the above variable
+	 * width of the textField textNStartingPlayers
 	 */
-	private JCheckBox checkBoxRandom;
 	private JTextField textWidth;
+
+	/**
+	 * height of the textField textNStartingPlayers
+	 */
 	private JTextField textHeight;
 
 	/**
@@ -115,6 +126,7 @@ public class OptionsMenu {
 		JButton simulationType = new JButton("Social Game System");
 		simulationType.setBounds(100, 79, 198, 26);
 		simulationType.addMouseListener(new MouseAdapter() {
+			// toggle through the three different model you want to display
 			@Override
 			public void mouseClicked(MouseEvent e) {
                 if (Objects.equals(simulationType.getText(), "Ant Simulator")) {

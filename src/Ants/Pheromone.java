@@ -3,17 +3,18 @@ package Ants;
 import java.awt.*;
 
 /**
- * There are two types of Pheromones. The first one is the Personal one.
- * The personal pheromone is personal and unique to every ant, it is used when two ants meet.
- * It is not added to AntSimulator.currentTrailPheromone hence is not a trail pheromone.
- * The model knows its position because it is the one associated with the ant carrying it.
- * In fact if it is a personal pheromone this.yPos and this.xPos are useless, see Ant.xPos and Ant.yPos instead.
+ * There are many types of Pheromones in a real world ant colony.
+ * Giving the complexity of modelling every possible pheromone we decided to model only one type and the most used one the Trail Pheromone
  * <p>
- * The other type is the Trail one. Trail pheromones are very popular and widely used by ant to leave a trail of their passage in the natura.
- * They are secreted whenever an ant finds a FoodSource (or even an AntsNest ??) to let other ants know the trail to find the food' source.
+ * Trail pheromones are very popular and widely used by ant to leave a trail of their passage in the natura.
+ * They are secreted whenever an ant finds a FoodSource to let other ants know the trail to find the food's source.
  * They are added to AntSimulator.currentTrailPheromone whenever they are created and stay always in the same place.
  * After some type they vanish in the environment and no ant can no longer follow its scent.
  * The decay of Pheromone trails is control by AntsSimulator, every turn a trail lose value = 1 of its strength until it vanish into the air, and it's erased from the hashMap.
+ * @see AntSimulator
+ * @see AntsNest
+ * @see FoodSource
+ * @see Ant
  */
 public class Pheromone {
 
@@ -33,17 +34,17 @@ public class Pheromone {
     Integer xPos;
 
     /**
-     *
+     * all possible types of pheromones
      */
-    enum pheType {Trail}   // only Trail and Personal are used atm (18/02/22)
+    enum pheType {Trail}   // only one type currently modeled but the enum is left for scalability reasons
 
     /**
-     *
+     * the type of pheromone secreted
      */
     final pheType type;
 
     /**
-     *
+     * the strength of this pheromone, min 0, max maxStrength which AntSimulator is responsible for deciding its value
      */
     private Integer strength;
 
@@ -59,6 +60,14 @@ public class Pheromone {
      */
     public static int maxStrength;
 
+    /**
+     * creates a new pheromone in the pos (y, x)
+     * @param y column index
+     * @param x row index
+     * @param ant the ant who secreted this pheromone
+     * @param type the type of this pheromone
+     * @param strength the initial strength
+     */
     Pheromone(Integer y, Integer x, Ant ant, pheType type, Integer strength) {
         this.yPos = y;
         this.xPos = x;
@@ -67,14 +76,17 @@ public class Pheromone {
         this.strength = strength;
     }
 
+    /**
+     * called by AntSimulator.resetMap
+     * @param strength the starting strength of this pheromone
+     */
     public static void setMaxStrength(Integer strength) {
         maxStrength = strength;
     }
 
-    public Color getColor() {
-        return color;
-    }
-
+    /**
+     * decrease the strength of this pheromone by one, if it reaches zero then will be eliminated from the environment
+     */
     void decay() {
         strength -= 1;
         if (strength < 1) {
@@ -84,5 +96,9 @@ public class Pheromone {
 
     public Integer getStrength() {
         return strength;
+    }
+
+    public Color getColor() {
+        return color;
     }
 }

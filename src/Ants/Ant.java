@@ -10,7 +10,7 @@ import java.util.List;
  * The class who sets the laws under which every ant acts upon.
  * <p>
  * AntSimulator calls action() every turn, and it delegates every ant related law and logic to the current class.
- * Key methods are search(), whoIsThere(), interact(), movement() and translateDirInPos().
+ * Key methods are search(), interact(), decide(), movement() and findRandomDirection().
  * @see AntSimulator
  * @see AntsNest
  * @see FoodSource
@@ -1042,6 +1042,9 @@ public class Ant {
         dMax = value;
     }
 
+    /**
+     * for debugging only
+     */
     void printStats() {
         System.out.println("ANT ID: " + this);
         System.out.println("life:" + life + "  food in storage:" + (sharedStomach + privateStomach));
@@ -1050,6 +1053,10 @@ public class Ant {
         System.out.println("toTheNest:" + toTheNest + "  onARandomPath:" + onARandomPath);
     }
 
+    /**
+     * for debugging only
+     * @param verbose true if you want a verbose debugging print to stdout
+     */
     void printStats(boolean verbose) {
         printStats();
         if (verbose) {
