@@ -152,7 +152,8 @@ public class GUI {
         frame = new JFrame();
         frame.getContentPane().setBackground(Color.WHITE);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setMinimumSize(new Dimension(780, 522));
+//        frame.setMinimumSize(new Dimension(780, 522));
+        frame.setMinimumSize(new Dimension(850, 800));
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
@@ -174,7 +175,7 @@ public class GUI {
         btnPlay.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if(!play) {
+                if (!play) {
                     play = true;
                     btnPlay.setText("Pause");
                 }
@@ -199,7 +200,7 @@ public class GUI {
         btnOptions.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if(SwingUtilities.isLeftMouseButton(e)) {
+                if (SwingUtilities.isLeftMouseButton(e)) {
                     optionsMenu.getFrame().setVisible(!optionsMenu.getFrame().isVisible());
                 }
             }
@@ -256,7 +257,7 @@ public class GUI {
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
         slider.addChangeListener(e -> {
-            if(!slider.getValueIsAdjusting()) {
+            if (!slider.getValueIsAdjusting()) {
                 CASModel.getTimer().setDelay(slider.getValue() + 1);
             }
         });
@@ -352,21 +353,21 @@ public class GUI {
                 g.setColor(Color.BLACK);
 
                 // DRAW LINES TO CREATE A GRID
-                for(int i = 0; i <= GUI.HEIGHT; i++) {
+                for (int i = 0; i < GUI.HEIGHT; i++) {
                     int y = i * getHeight() / GUI.HEIGHT;
                     g.drawLine(0, y, getWidth(), y);
                 }
 
-                for( int j = 0; j <= GUI.WIDTH; j++) {
+                for (int j = 0; j < GUI.WIDTH; j++) {
                     int x = j * getWidth() / GUI.WIDTH;
-                    g.drawLine(x, 0, x, getHeight() );
+                    g.drawLine(x, 0, x, getHeight());
                 }
             }
 
             private void paintLife(Graphics g) {
-                for(int i = 0; i < GUI.HEIGHT; i++) {
-                    for(int j = 0; j < GUI.WIDTH; j++) {
-                        if(currentFrame[i][j]) {
+                for (int i = 0; i < GUI.HEIGHT; i++) {
+                    for (int j = 0; j < GUI.WIDTH; j++) {
+                        if (currentFrame[i][j]) {
                             if (OptionsMenu.CAS_type == OptionsMenu.CAS.AntSimulator) {
                                 if (AntSimulator.isAnt(i, j)) {
                                     g.setColor(new Color(0, 128, 0, (int) Math.floor((AntSimulator.getCurrentAlive().get(AntSimulator.key(i, j)).getLife()) * 255 / 100.0)));
@@ -374,25 +375,25 @@ public class GUI {
                                 else {
                                     g.setColor(AntSimulator.getColor(i, j));
                                 }
-                                g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                                g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH + 1, i * innerPanel.getHeight() / GUI.HEIGHT + 1, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                             }
                             else if (OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
                                 g.setColor(new Color(0, 128, 0, ((SocialGameSystem.getCurrentAlive().get(SocialGameSystem.key(i, j)).getLife()) * 255 / 100)));
-                                g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                                g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH + 1, i * innerPanel.getHeight() / GUI.HEIGHT + 1, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                             }
                         }
                         else {
                             g.setColor(innerPanel.getBackground());
-                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         }
                     }
                 }
             }
 
             private void paintPheromones(Graphics g) {
-                for(int i = 0; i < GUI.HEIGHT; i++) {
-                    for(int j = 0; j < GUI.WIDTH; j++) {
-                        if(currentFrame[i][j]) {
+                for (int i = 0; i < GUI.HEIGHT; i++) {
+                    for (int j = 0; j < GUI.WIDTH; j++) {
+                        if (currentFrame[i][j]) {
                             g.setColor(AntSimulator.getColor(i, j));
                             g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         }
@@ -403,16 +404,16 @@ public class GUI {
                                 g.setColor(new Color(pheColor.getRed(), pheColor.getGreen(), pheColor.getBlue(), phe.getStrength() * 255 / Pheromone.maxStrength));
                             }
                             else g.setColor(innerPanel.getBackground());
-                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH + 1, i * innerPanel.getHeight() / GUI.HEIGHT + 1, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         }
                     }
                 }
             }
 
             private void paintAnts(Graphics g) {
-                for(int i = 0; i < GUI.HEIGHT; i++) {
+                for (int i = 0; i < GUI.HEIGHT; i++) {
                     for (int j = 0; j < GUI.WIDTH; j++) {
-                        if(currentFrame[i][j]) {
+                        if (currentFrame[i][j]) {
                             g.setColor(AntSimulator.getColor(i, j));
                             g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         }
@@ -429,7 +430,7 @@ public class GUI {
                     for (int j = 0; j < GUI.WIDTH; j++) {
                         if (currentFrame[i][j]) {
                             g.setColor(new Color(160, 0, 200, ((int) (Double.min(Double.max(((SocialGameSystem.getCurrentAlive().get(SocialGameSystem.key(i, j)).getWellness())), 0), 100))) * 255 / 100));
-                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
+                            g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH + 1, i * innerPanel.getHeight() / GUI.HEIGHT + 1, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         } else {
                             g.setColor(innerPanel.getBackground());
                             g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH, i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
@@ -439,9 +440,9 @@ public class GUI {
             }
 
             private void paintPersonalityBasedPixel(Graphics g) {
-                for(int i = 0; i < GUI.HEIGHT; i++) {
-                    for(int j = 0; j < GUI.WIDTH; j++) {
-                        if(currentFrame[i][j]) {
+                for (int i = 0; i < GUI.HEIGHT; i++) {
+                    for (int j = 0; j < GUI.WIDTH; j++) {
+                        if (currentFrame[i][j]) {
                             g.setColor(SocialGameSystem.getCurrentAlive().get(SocialGameSystem.key(i, j)).carattere.getMyColor());
                             g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         }
@@ -454,9 +455,9 @@ public class GUI {
             }
 
             private void paintAcquaintanceBasedPixels(Graphics g) {
-                for(int i = 0; i < GUI.HEIGHT; i++) {
-                    for(int j = 0; j < GUI.WIDTH; j++) {
-                        if(currentFrame[i][j]) {
+                for (int i = 0; i < GUI.HEIGHT; i++) {
+                    for (int j = 0; j < GUI.WIDTH; j++) {
+                        if (currentFrame[i][j]) {
                             g.setColor(Color.GRAY);
                             g.fillRect(j * innerPanel.getWidth() / GUI.WIDTH , i * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         }
@@ -466,12 +467,12 @@ public class GUI {
                         }
                     }
                 }
-                for(int i = 0; i < focusedPlayer.acquaintances.length; i++) {
-                    if(focusedPlayer.acquaintances[i] != null) {
+                for (int i = 0; i < focusedPlayer.acquaintances.length; i++) {
+                    if (focusedPlayer.acquaintances[i] != null) {
                         int x = focusedPlayer.acquaintances[i].x_position;
                         int y = focusedPlayer.acquaintances[i].y_position;
 
-                        if(currentFrame[y][x]) {
+                        if (currentFrame[y][x]) {
                             g.setColor(SocialGameSystem.getCurrentAlive().get(SocialGameSystem.key(y, x)).carattere.getMyColor());
                             g.fillRect(x * innerPanel.getWidth() / GUI.WIDTH , y * innerPanel.getHeight() / GUI.HEIGHT, innerPanel.getWidth() / GUI.WIDTH, innerPanel.getHeight() / GUI.HEIGHT);
                         }
@@ -484,7 +485,7 @@ public class GUI {
             }
 
             private void paintGOL(Graphics g) {
-                for(int i = 0; i < GUI.HEIGHT; i++) {
+                for (int i = 0; i < GUI.HEIGHT; i++) {
                     for (int j = 0; j < GUI.WIDTH; j++) {
                         if (currentFrame[i][j]) {
                             g.setColor(Color.BLUE);
@@ -509,7 +510,7 @@ public class GUI {
         innerPanel.addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if(SwingUtilities.isLeftMouseButton(e)) {
+                if (SwingUtilities.isLeftMouseButton(e)) {
                     int x = e.getX() * WIDTH / innerPanel.getWidth();
                     int y = e.getY() * HEIGHT / innerPanel.getHeight();
                     if(!currentFrame[y][x]) {   // for painting the square in any model mode
@@ -528,7 +529,7 @@ public class GUI {
              */
             @Override
             public void mouseMoved(MouseEvent e) {
-                if(!play && OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
+                if (!play && OptionsMenu.CAS_type == OptionsMenu.CAS.SocialGameSystem) {
                     int x = e.getX() * WIDTH / innerPanel.getWidth();
                     int y = e.getY() * HEIGHT / innerPanel.getHeight();
                     focusedPlayer = SocialGameSystem.getCurrentAlive().get(SocialGameSystem.key(y, x));
@@ -544,7 +545,7 @@ public class GUI {
                 int x = e.getX() * WIDTH / innerPanel.getWidth();
                 int y = e.getY() * HEIGHT / innerPanel.getHeight();
                 currentFrame[y][x] = !currentFrame[y][x];   // for painting the square in any simulation mode
-                if(!currentFrame[y][x])
+                if (!currentFrame[y][x])
                     focusedPlayer = null;
                 CASModel.setMap(y, x);
                 innerPanel.repaint();
