@@ -65,7 +65,7 @@ public class Ant {
     /**
      * the color used by UI.GUI to paint the GUI.innerPanel correctly
      */
-    public final Color color = new Color(0, 93, 0);
+    public final Color color = new Color(0, 160, 0);
 
     /**
      * the column number in the grid of this ant
