@@ -54,7 +54,7 @@ If you run the Ants Simulator you'll find two output files inside the folder src
 
 <img title="IntelliJ" alt="IntelliJ" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/IntelliJ.jpg" width="150" height="150">
 
-<img title="Desmos" alt="Desmos" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/desmos.png" width="200" height="170">
+<img title="Desmos" alt="Desmos" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/desmos.png" width="210" height="150">
 
 <img title="GitHub" alt="GitHub" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/github.png" width="150" height="150">
 
