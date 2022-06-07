@@ -27,7 +27,7 @@ Note the non-linearity of the system. A single newborn or a new death can destab
 
 
 ### Build and Run
-If you have java installed you can simply download the .jar found in run/artifacts/CAS.jar, or on the root of the project and run it.
+If you have java installed you can simply download the .jar found in out/artifacts/CAS.jar, or on the root of the project and run it.
 
 Else if you want to import this in an ide:
 build the src folder with a jdk from java 8 onward. Works best if imported in IntelliJ or Eclipse. Run the simulation by running "Launcher.Launcher.java".
