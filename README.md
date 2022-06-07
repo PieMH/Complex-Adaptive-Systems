@@ -27,7 +27,7 @@ Note the non-linearity of the system. A single newborn or a new death can destab
 
 
 ### Build and Run
-If you have java installed you can simply download the .jar found in run/artifacts/CAS.jar and run it.
+If you have java installed you can simply download the .jar found in run/artifacts/CAS.jar, or on the root of the project and run it.
 
 Else if you want to import this in an ide:
 build the src folder with a jdk from java 8 onward. Works best if imported in IntelliJ or Eclipse. Run the simulation by running "Launcher.Launcher.java".
@@ -54,7 +54,7 @@ If you run the Ants Simulator you'll find two output files inside the folder src
 
 <img title="IntelliJ" alt="IntelliJ" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/IntelliJ.jpg" width="150" height="150">
 
-<img title="Desmos" alt="Desmos" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/desmos.png" width="180" height="180">
+<img title="Desmos" alt="Desmos" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/desmos.png" width="200" height="170">
 
 <img title="GitHub" alt="GitHub" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/github.png" width="150" height="150">
 
