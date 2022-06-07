@@ -41,12 +41,12 @@ Select which model you want to simulate than <b>REMEMBER</b> to click on Apply t
 
 Run the simulation with the Play button, change the speed by moving the slider to the bottom-right corner.
 
-Every square on the grid is either full or empty. Every agent of te system at a given time occupies only one square. 
+Every square on the grid is either full or empty. Every agent of the system at a given time occupies only one square. 
 You can create new agents with a click on an empty square on the grid or kill one if you click on a full square.
 
-Different models behave differently and have different buttons and actions. For example if you run "Social Game System" and click on Pause you can hover on a square on the grid to see the acquaintances of the agent associated with that square.
+Different models behave differently and have different buttons and actions. For example if you run "Social Game System" and click on pause you can hover on a square on the grid to see the acquaintances of the agent associated with that square.
 
-If you run the Ants Simulator in the folder src/Ants/ you'll find two output files containing data and stats of the model simulated at run time.
+If you run the Ants Simulator you'll find two output files inside the folder src/Ants containing data and stats of the model simulated at run time.
 
 ### Technologies used
 
@@ -54,7 +54,7 @@ If you run the Ants Simulator in the folder src/Ants/ you'll find two output fil
 
 <img title="IntelliJ" alt="IntelliJ" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/IntelliJ.jpg" width="150" height="150">
 
-<img title="Desmos" alt="Desmos" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/desmos.png" width="200" height="150">
+<img title="Desmos" alt="Desmos" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/desmos.png" width="180" height="180">
 
 <img title="GitHub" alt="GitHub" src="https://github.com/PieMH/Complex-Adaptive-Systems/blob/main/images/github.png" width="150" height="150">
 
